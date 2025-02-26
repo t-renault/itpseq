@@ -1,0 +1,84 @@
+/* General Document Styles */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    background: #f9f9f9;
+}
+
+/* Container */
+.container {
+    width: 80%;
+    margin: 0 auto;
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Styling */
+h1, h2, h3 {
+    color: #0b75c9;
+    margin-bottom: 10px;
+}
+
+h1 {
+    text-align: center;
+    margin-top: 0;
+}
+
+h2, h3 {
+    margin-top: 20px;
+}
+
+/* Style Tables */
+table {
+    width: 100%; /* Tables take full width */
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+table th {
+    background-color: #f2f2f2;
+}
+
+/* Images */
+img {
+    max-width: 100%; /* Responsive images */
+    height: auto;
+    display: block;
+    margin: 10px 0; /* Add some margin around images */
+}
+
+.plots-flex {
+    display: flex; /* Flexbox for horizontal alignment */
+    justify-content: flex-start;    /* Align plots to the left */
+    gap: 10px; /* Optional: Fine-tune spacing */
+    align-items: flex-start; /* Align plots at the top (if they are different heights) */
+    flex-wrap: nowrap; /* Prevent wrapping */
+}
+
+.plots-flex > * {
+    display: inline-block; /* Force SVGs to take only necessary width */
+    flex: 1 1; /* Allow plots to take equal width */
+    max-width: 45%; /* Prevent plots from exceeding half of the container width */
+}
+
+/* Additional Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        width: 95%; /* Smaller screens, full width */
+    }
+
+    table th, table td {
+        font-size: 14px; /* Smaller font for tables */
+    }
+}

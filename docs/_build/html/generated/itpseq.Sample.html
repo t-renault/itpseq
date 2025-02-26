@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>itpseq.Sample &#8212; iTP-Seq 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=686e5160" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <script src="../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="itpseq.Replicate" href="itpseq.Replicate.html" />
+    <link rel="prev" title="itpseq.DataSet" href="itpseq.DataSet.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="itpseq-sample">
+<h1>itpseq.Sample<a class="headerlink" href="#itpseq-sample" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="itpseq.Sample">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">itpseq.</span></span><span class="sig-name descname"><span class="pre">Sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('sample',)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#itpseq.Sample" title="Link to this definition">¶</a></dt>
+<dd><p>Represents a sample in a dataset, its replicates, reference, and associated metadata.</p>
+<p>The <cite>Sample</cite> class is used to encapsulate information and behavior related to samples in a dataset.
+It manages details like labels, references, replicates, and metadata, and provides methods for analyzing
+replicates, performing differential enrichment analysis, and creating visualizations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>name_ref</strong></dt><dd></dd>
+<dt><strong>name_vs_ref</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_counts_ratio</span></code>([pos, factor, exclude_empty])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#itpseq.Sample.get_counts_ratio_pos" title="itpseq.Sample.get_counts_ratio_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_counts_ratio_pos</span></code></a>([pos])</p></td>
+<td><p>Computes a DataFrame with the enrichment ratios for each ribosome position.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#itpseq.Sample.hmap" title="itpseq.Sample.hmap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmap</span></code></a>([r, c, pos, col, transform, cmap, ...])</p></td>
+<td><p>Generates a heatmap of enrichment for combinations of 2 positions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#itpseq.Sample.hmap_grid" title="itpseq.Sample.hmap_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmap_grid</span></code></a>([pos, col, transform, cmap, vmax, ...])</p></td>
+<td><p>Creates a grid of heatmaps for all combinations of ribosome positions passed in <cite>pos</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#itpseq.Sample.hmap_pos" title="itpseq.Sample.hmap_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmap_pos</span></code></a>([pos, cmap, vmax, center, ax])</p></td>
+<td><p>Generates a heatmap of enrichment ratios for amino acid positions across ribosome sites.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#itpseq.Sample.itp_len_plot" title="itpseq.Sample.itp_len_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">itp_len_plot</span></code></a>([ax, min_codon, max_codon, ...])</p></td>
+<td><p>Generates a line plot of inverse-toeprint (ITP) counts per length.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>DE</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>all_logos</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>get_counts</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>infos</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>itoeprint</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>load_replicates</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>logo</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>volcano</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="itpseq.Sample.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('sample',)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#itpseq.Sample.__init__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DE</span></code>([pos, join, quiet, filter_size, multi, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#itpseq.Sample.__init__" title="itpseq.Sample.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*, labels[, reference, dataset, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">all_logos</span></code>([logo_kwargs])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_counts</span></code>([pos])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_counts_ratio</span></code>([pos, factor, exclude_empty])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#itpseq.Sample.get_counts_ratio_pos" title="itpseq.Sample.get_counts_ratio_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_counts_ratio_pos</span></code></a>([pos])</p></td>
+<td><p>Computes a DataFrame with the enrichment ratios for each ribosome position.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#itpseq.Sample.hmap" title="itpseq.Sample.hmap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmap</span></code></a>([r, c, pos, col, transform, cmap, ...])</p></td>
+<td><p>Generates a heatmap of enrichment for combinations of 2 positions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#itpseq.Sample.hmap_grid" title="itpseq.Sample.hmap_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmap_grid</span></code></a>([pos, col, transform, cmap, vmax, ...])</p></td>
+<td><p>Creates a grid of heatmaps for all combinations of ribosome positions passed in <cite>pos</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#itpseq.Sample.hmap_pos" title="itpseq.Sample.hmap_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmap_pos</span></code></a>([pos, cmap, vmax, center, ax])</p></td>
+<td><p>Generates a heatmap of enrichment ratios for amino acid positions across ribosome sites.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">infos</span></code>([html])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">itoeprint</span></code>([plot, norm, norm_range, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../api.html#itpseq.Sample.itp_len_plot" title="itpseq.Sample.itp_len_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">itp_len_plot</span></code></a>([ax, min_codon, max_codon, ...])</p></td>
+<td><p>Generates a line plot of inverse-toeprint (ITP) counts per length.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_replicates</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">logo</span></code>([pos, logo_kwargs, ax])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">volcano</span></code>([pos, query, motif, ax, x, y, ...])</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api.html#itpseq.Sample.itp_len" title="itpseq.Sample.itp_len"><code class="xref py py-obj docutils literal notranslate"><span class="pre">itp_len</span></code></a></p></td>
+<td><p>Combines the counts of inverse-toeprints (ITPs) for each length across all replicates.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name_ref</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name_vs_ref</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toeprint_df</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">iTP-Seq</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../gallery.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#dataset-objects">Dataset objects</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="itpseq.DataSet.html">itpseq.DataSet</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">itpseq.Sample</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Sample"><code class="docutils literal notranslate"><span class="pre">Sample</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="itpseq.Replicate.html">itpseq.Replicate</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#detailed-api">Detailed API</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../api.html">API</a><ul>
+      <li>Previous: <a href="itpseq.DataSet.html" title="previous chapter">itpseq.DataSet</a></li>
+      <li>Next: <a href="itpseq.Replicate.html" title="next chapter">itpseq.Replicate</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Thibaud Renault.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/generated/itpseq.Sample.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Creating graphs and tables &#8212; iTP-Seq 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=686e5160" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <script src="../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Interactive virtual inverse toeprint" href="itoeprint_tutorial.html" />
+    <link rel="prev" title="Manually creating custom graphs" href="manual_graph_tutorial.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="Creating-graphs-and-tables">
+<h1>Creating graphs and tables<a class="headerlink" href="#Creating-graphs-and-tables" title="Link to this heading">¶</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">itpseq</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSet</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="s1">&#39;tetracenomycin/&#39;</span><span class="p">)</span>
+<span class="n">data</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+DataSet(data_path=PosixPath(&#39;tetracenomycin&#39;),
+        reference=Sample(noa:[1, 2, 3]),
+        samples=[Sample(noa:[1, 2, 3]),
+                 Sample(tcx:[1, 2, 3], ref: noa)],
+        )
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">itoeprint</span><span class="p">(</span><span class="s1">&#39;shades&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: ylabel=&#39;Inverse-toeprint length&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_itpseq_tutorial_3_1.png" src="../_images/notebooks_itpseq_tutorial_3_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">itp_len_plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: xlabel=&#39;Distance from the start site [nt]&#39;, ylabel=&#39;Number of reads (per million)&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_itpseq_tutorial_4_1.png" src="../_images/notebooks_itpseq_tutorial_4_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">itp_len_plot</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="s1">&#39;sample&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;seaborn.axisgrid.FacetGrid at 0x7fba3413ad20&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_itpseq_tutorial_5_1.png" src="../_images/notebooks_itpseq_tutorial_5_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tcx</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">samples</span><span class="p">[</span><span class="s1">&#39;tcx&#39;</span><span class="p">]</span>
+<span class="n">tcx</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Sample(tcx:[1, 2, 3], ref: noa)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tcx</span><span class="o">.</span><span class="n">hmap_grid</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_itpseq_tutorial_7_0.png" src="../_images/notebooks_itpseq_tutorial_7_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tcx</span><span class="o">.</span><span class="n">DE</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="s1">&#39;E:P&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>baseMean</th>
+      <th>log2FoldChange</th>
+      <th>lfcSE</th>
+      <th>stat</th>
+      <th>pvalue</th>
+      <th>padj</th>
+      <th>log10pvalue</th>
+      <th>log10padj</th>
+      <th>rank</th>
+      <th>qrank</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>QK</th>
+      <td>2388.608072</td>
+      <td>0.778417</td>
+      <td>0.072558</td>
+      <td>10.728162</td>
+      <td>7.507494e-27</td>
+      <td>3.153148e-24</td>
+      <td>26.124505</td>
+      <td>23.501256</td>
+      <td>20.335762</td>
+      <td>1.000000</td>
+    </tr>
+    <tr>
+      <th>PP</th>
+      <td>10164.907418</td>
+      <td>-0.411741</td>
+      <td>0.068681</td>
+      <td>-5.995011</td>
+      <td>2.034721e-09</td>
+      <td>4.272914e-07</td>
+      <td>8.691495</td>
+      <td>6.369276</td>
+      <td>3.578649</td>
+      <td>0.997619</td>
+    </tr>
+    <tr>
+      <th>KK</th>
+      <td>1925.860181</td>
+      <td>-0.408997</td>
+      <td>0.069592</td>
+      <td>-5.877081</td>
+      <td>4.175644e-09</td>
+      <td>5.845902e-07</td>
+      <td>8.379277</td>
+      <td>6.233149</td>
+      <td>3.427097</td>
+      <td>0.995238</td>
+    </tr>
+    <tr>
+      <th>TP</th>
+      <td>7266.661404</td>
+      <td>-0.278591</td>
+      <td>0.052503</td>
+      <td>-5.306210</td>
+      <td>1.119279e-07</td>
+      <td>1.175243e-05</td>
+      <td>6.951061</td>
+      <td>4.929872</td>
+      <td>1.936501</td>
+      <td>0.992857</td>
+    </tr>
+    <tr>
+      <th>EP</th>
+      <td>4319.078286</td>
+      <td>-0.305248</td>
+      <td>0.062449</td>
+      <td>-4.887962</td>
+      <td>1.018851e-06</td>
+      <td>7.131956e-05</td>
+      <td>5.991889</td>
+      <td>4.146791</td>
+      <td>1.829012</td>
+      <td>0.990476</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>SR</th>
+      <td>5592.632930</td>
+      <td>0.001314</td>
+      <td>0.049817</td>
+      <td>0.026377</td>
+      <td>9.789566e-01</td>
+      <td>9.883697e-01</td>
+      <td>0.009237</td>
+      <td>0.005081</td>
+      <td>0.000012</td>
+      <td>0.011905</td>
+    </tr>
+    <tr>
+      <th>IS</th>
+      <td>2505.613096</td>
+      <td>0.001021</td>
+      <td>0.051881</td>
+      <td>0.019688</td>
+      <td>9.842921e-01</td>
+      <td>9.913733e-01</td>
+      <td>0.006876</td>
+      <td>0.003763</td>
+      <td>0.000007</td>
+      <td>0.009524</td>
+    </tr>
+    <tr>
+      <th>HE</th>
+      <td>1255.730106</td>
+      <td>0.001114</td>
+      <td>0.070616</td>
+      <td>0.015768</td>
+      <td>9.874192e-01</td>
+      <td>9.921437e-01</td>
+      <td>0.005498</td>
+      <td>0.003425</td>
+      <td>0.000006</td>
+      <td>0.007143</td>
+    </tr>
+    <tr>
+      <th>TD</th>
+      <td>2411.075474</td>
+      <td>-0.000446</td>
+      <td>0.056517</td>
+      <td>-0.007890</td>
+      <td>9.937051e-01</td>
+      <td>9.940898e-01</td>
+      <td>0.002742</td>
+      <td>0.002574</td>
+      <td>0.000001</td>
+      <td>0.004762</td>
+    </tr>
+    <tr>
+      <th>DR</th>
+      <td>2082.675944</td>
+      <td>0.000412</td>
+      <td>0.055557</td>
+      <td>0.007407</td>
+      <td>9.940898e-01</td>
+      <td>9.940898e-01</td>
+      <td>0.002574</td>
+      <td>0.002574</td>
+      <td>0.000001</td>
+      <td>0.002381</td>
+    </tr>
+  </tbody>
+</table>
+<p>420 rows × 10 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tcx</span><span class="o">.</span><span class="n">get_counts_ratio</span><span class="p">(</span><span class="s1">&#39;E:P&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>noa.1</th>
+      <th>noa.2</th>
+      <th>noa.3</th>
+      <th>tcx.1</th>
+      <th>tcx.2</th>
+      <th>tcx.3</th>
+      <th>noa</th>
+      <th>tcx</th>
+      <th>ratio</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>QK</th>
+      <td>2014</td>
+      <td>1521</td>
+      <td>2079</td>
+      <td>3136</td>
+      <td>2888</td>
+      <td>2542</td>
+      <td>842.488457</td>
+      <td>1611.717538</td>
+      <td>1.913044</td>
+    </tr>
+    <tr>
+      <th>WM</th>
+      <td>90</td>
+      <td>57</td>
+      <td>77</td>
+      <td>113</td>
+      <td>89</td>
+      <td>58</td>
+      <td>33.060815</td>
+      <td>48.453429</td>
+      <td>1.465585</td>
+    </tr>
+    <tr>
+      <th>MF</th>
+      <td>190</td>
+      <td>135</td>
+      <td>165</td>
+      <td>221</td>
+      <td>163</td>
+      <td>173</td>
+      <td>72.748074</td>
+      <td>102.287249</td>
+      <td>1.406048</td>
+    </tr>
+    <tr>
+      <th>YY</th>
+      <td>1186</td>
+      <td>820</td>
+      <td>954</td>
+      <td>1284</td>
+      <td>976</td>
+      <td>1051</td>
+      <td>437.336974</td>
+      <td>609.545873</td>
+      <td>1.393767</td>
+    </tr>
+    <tr>
+      <th>MY</th>
+      <td>301</td>
+      <td>207</td>
+      <td>261</td>
+      <td>321</td>
+      <td>241</td>
+      <td>267</td>
+      <td>113.992118</td>
+      <td>152.365211</td>
+      <td>1.336629</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>TP</th>
+      <td>9366</td>
+      <td>6710</td>
+      <td>9416</td>
+      <td>7210</td>
+      <td>5702</td>
+      <td>5833</td>
+      <td>3812.390930</td>
+      <td>3466.791459</td>
+      <td>0.909348</td>
+    </tr>
+    <tr>
+      <th>EP</th>
+      <td>5583</td>
+      <td>4044</td>
+      <td>5639</td>
+      <td>3961</td>
+      <td>3528</td>
+      <td>3480</td>
+      <td>2284.621888</td>
+      <td>2052.122386</td>
+      <td>0.898233</td>
+    </tr>
+    <tr>
+      <th>m</th>
+      <td>1226086</td>
+      <td>770986</td>
+      <td>450057</td>
+      <td>740503</td>
+      <td>282179</td>
+      <td>690250</td>
+      <td>348210.205720</td>
+      <td>295241.808969</td>
+      <td>0.847884</td>
+    </tr>
+    <tr>
+      <th>KK</th>
+      <td>2747</td>
+      <td>1764</td>
+      <td>2555</td>
+      <td>1914</td>
+      <td>1282</td>
+      <td>1554</td>
+      <td>1047.897432</td>
+      <td>862.782356</td>
+      <td>0.823346</td>
+    </tr>
+    <tr>
+      <th>PP</th>
+      <td>12927</td>
+      <td>9580</td>
+      <td>14639</td>
+      <td>9281</td>
+      <td>7575</td>
+      <td>7989</td>
+      <td>5594.774388</td>
+      <td>4605.187585</td>
+      <td>0.823123</td>
+    </tr>
+  </tbody>
+</table>
+<p>422 rows × 9 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tcx</span><span class="o">.</span><span class="n">volcano</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="s1">&#39;E:P&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: xlabel=&#39;log2FoldChange&#39;, ylabel=&#39;log10pvalue&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_itpseq_tutorial_10_1.png" src="../_images/notebooks_itpseq_tutorial_10_1.png" />
+</div>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">iTP-Seq</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gallery.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../gallery.html">Tutorials</a><ul>
+      <li>Previous: <a href="manual_graph_tutorial.html" title="previous chapter">Manually creating custom graphs</a></li>
+      <li>Next: <a href="itoeprint_tutorial.html" title="next chapter">Interactive virtual inverse toeprint</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Thibaud Renault.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/notebooks/itpseq_tutorial.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

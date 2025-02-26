@@ -1,0 +1,50 @@
+[build-system]
+requires = ['hatchling']
+build-backend = 'hatchling.build'
+
+[tool.hatch.version]
+path = 'itpseq/__init__.py'
+
+[project]
+name = 'itpseq'
+authors = [
+  { name='Thibaud Renault', email='thibaud.renault@u-bordeaux.fr' },
+]
+description = 'A tool to process and analyze iTP-Seq datasets'
+readme = 'README.md'
+requires-python = '>=3.8'
+classifiers = [
+    'Programming Language :: Python :: 3',
+    'Operating System :: OS Independent',
+]
+license = 'GPL-3.0-only'
+license-files = ['LICEN[CS]E*']
+dependencies = [
+    'regex',
+    'numpy',
+    'pandas',
+    'pydeseq2',
+    'matplotlib',
+    'seaborn',
+    'logomaker',
+    'Jinja2',
+    'weasyprint',
+    'click',
+]
+dynamic = ['version']
+
+[project.urls]
+Homepage = 'https://github.com/t-renault/itpseq'
+Issues = 'https://github.com/t-renault/itpseq/issues'
+
+[project.scripts]
+itpseq = 'itpseq.__main__:main'
+
+[tool.hatch.build]
+include = [
+    'itpseq/**',
+    'docs/**',
+    'LICENSE',
+    'pyproject.toml',
+    'README.md',
+]

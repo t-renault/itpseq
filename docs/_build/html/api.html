@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>API &#8212; iTP-Seq 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=686e5160" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <script src="_static/documentation_options.js?v=2709fde1"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Interactive virtual inverse toeprint" href="notebooks/itoeprint_tutorial.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="api">
+<h1>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h1>
+<section id="dataset-objects">
+<h2>Dataset objects<a class="headerlink" href="#dataset-objects" title="Link to this heading">¶</a></h2>
+</section>
+<section id="detailed-api">
+<h2>Detailed API<a class="headerlink" href="#detailed-api" title="Link to this heading">¶</a></h2>
+<span class="target" id="module-itpseq"></span><dl class="py class">
+<dt class="sig sig-object py" id="itpseq.DataSet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">itpseq.</span></span><span class="sig-name descname"><span class="pre">DataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'noa'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aafile_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#itpseq.DataSet" title="Link to this definition">¶</a></dt>
+<dd><p>Loads an iTP-Seq dataset and provides methods for analyzing and visualizing the data.</p>
+<p>A DataSet object is constructed to handle iTP-Seq Samples with their respective Replicates.
+By default, it infers the files to uses in the provided directory by looking for “<a href="#id1"><span class="problematic" id="id2">*</span></a>.processed.json” files produced
+during the initial step of pre-processing and filtering the fastq files.
+It uses the pattern of the file names to group the Replicates into a Sample, and to define which condition
+is the reference in the DataSet (the Sample with name “noa” by default).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.DataSet.data_path">
+<span class="sig-name descname"><span class="pre">data_path</span></span><a class="headerlink" href="#itpseq.DataSet.data_path" title="Link to this definition">¶</a></dt>
+<dd><p>Path to the data directory containing the output files from the fastq pre-processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str or Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.DataSet.result_path">
+<span class="sig-name descname"><span class="pre">result_path</span></span><a class="headerlink" href="#itpseq.DataSet.result_path" title="Link to this definition">¶</a></dt>
+<dd><p>Path to the directory where the results of the analysis will be saved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str or Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.DataSet.samples">
+<span class="sig-name descname"><span class="pre">samples</span></span><a class="headerlink" href="#itpseq.DataSet.samples" title="Link to this definition">¶</a></dt>
+<dd><p>Dictionary of Samples in the DataSet. By default, it is None and will be populated automatically.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.DataSet.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><a class="headerlink" href="#itpseq.DataSet.keys" title="Link to this definition">¶</a></dt>
+<dd><p>Properties in the file name to use for identifying the reference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.DataSet.ref_labels">
+<span class="sig-name descname"><span class="pre">ref_labels</span></span><a class="headerlink" href="#itpseq.DataSet.ref_labels" title="Link to this definition">¶</a></dt>
+<dd><p>Specifies the reference: e.g. ‘noa’ or ((‘sample’, ‘noa’),)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str or tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.DataSet.cache_path">
+<span class="sig-name descname"><span class="pre">cache_path</span></span><a class="headerlink" href="#itpseq.DataSet.cache_path" title="Link to this definition">¶</a></dt>
+<dd><p>Path used to cache intermediate results. By default, this creates a subdirectory called “cache” in the result_path directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str or Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.DataSet.file_pattern">
+<span class="sig-name descname"><span class="pre">file_pattern</span></span><a class="headerlink" href="#itpseq.DataSet.file_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Regex pattern used to identify the sample files in the data_path directory.
+If None, defaults to <cite>r’(?P&lt;lib_type&gt;[^_]+)_(?P&lt;sample&gt;[^_d]+)(?P&lt;replicate&gt;d+).processed.json’</cite>
+which matches files like nnn15_noa1.processed.json, nnn15_tcx2.processed.json, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.DataSet.aafile_pattern">
+<span class="sig-name descname"><span class="pre">aafile_pattern</span></span><a class="headerlink" href="#itpseq.DataSet.aafile_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Pattern used to identify the amino acid files in the data_path directory.
+It will use the values captured in the <cite>file_pattern</cite> regex to construct the file names.
+If None, defaults to <cite>‘{lib_type}_{sample}{replicate}_aa.processed.txt’</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Examples</p>
+<p>Creating a DataSet from a simple antibiotic treatment (tcx) vs no treatement (noa) with 3 replicates each (1, 2, 3).</p>
+<dl>
+<dt>Load a dataset from the current directory, inferring the samples automatically</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">itpseq</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSet</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="n">data_path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span>
+<span class="go">DataSet(data_path=PosixPath(&#39;.&#39;),</span>
+<span class="go">   reference=Sample(noa:[1, 2, 3]),</span>
+<span class="go">   samples=[Sample(noa:[1, 2, 3]),</span>
+<span class="go">            Sample(tcx:[1, 2, 3], ref: noa)],</span>
+<span class="go">   )</span>
+</pre></div>
+</div>
+</dd>
+<dt>Compute a standard report and export it as PDF</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="s1">&#39;my_experiment.pdf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt>Display a graph of the inverse-toeprints lengths for each sample</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">itp_len_plot</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="s1">&#39;sample&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>samples_with_ref</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#itpseq.DataSet.DE" title="itpseq.DataSet.DE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DE</span></code></a>([pos])</p></td>
+<td><p>Computes the log2-FoldChange for each motif described by <cite>pos</cite> for each sample in the DataSet relative to their reference</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#itpseq.DataSet.infos" title="itpseq.DataSet.infos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">infos</span></code></a>([html])</p></td>
+<td><p>Displays summary information about the dataset sequences.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>itoeprint</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>itp_len_plot</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>reorder_samples</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>report</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="itpseq.DataSet.DE">
+<span class="sig-name descname"><span class="pre">DE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'E:A'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#itpseq.DataSet.DE" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the log2-FoldChange for each motif described by <cite>pos</cite> for each sample in the DataSet relative to their reference</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="itpseq.DataSet.infos">
+<span class="sig-name descname"><span class="pre">infos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#itpseq.DataSet.infos" title="Link to this definition">¶</a></dt>
+<dd><p>Displays summary information about the dataset sequences.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="itpseq.Replicate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">itpseq.</span></span><span class="sig-name descname"><span class="pre">Replicate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replicate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#itpseq.Sample" title="itpseq.core.Sample"><span class="pre">Sample</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#itpseq.Replicate" title="Link to this definition">¶</a></dt>
+<dd><p>Replicate instances represent a specific biological or experimental replicate of a Sample.</p>
+<p>The purpose of the class is to handle, process, and analyze data corresponding to a replicate.
+Replicate objects provide methods to load associated data, compute statistical measures,
+and generate graphical representations such as sequence logos.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.Replicate.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><a class="headerlink" href="#itpseq.Replicate.filename" title="Link to this definition">¶</a></dt>
+<dd><p>Path to the file associated with the replicate. This file is expected to
+contain raw data relevant to the replicate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[Path]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.Replicate.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><a class="headerlink" href="#itpseq.Replicate.sample" title="Link to this definition">¶</a></dt>
+<dd><p>The sample object this replicate belongs to.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[<a class="reference internal" href="#itpseq.Sample" title="itpseq.Sample">Sample</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.Replicate.replicate">
+<span class="sig-name descname"><span class="pre">replicate</span></span><a class="headerlink" href="#itpseq.Replicate.replicate" title="Link to this definition">¶</a></dt>
+<dd><p>Identifier or label for the replicate (e.g., “1”).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.Replicate.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#itpseq.Replicate.labels" title="Link to this definition">¶</a></dt>
+<dd><p>Dictionary of labels or metadata associated with the replicate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.Replicate.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#itpseq.Replicate.name" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the sample, derived from <cite>sample.name</cite> if provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.Replicate.dataset">
+<span class="sig-name descname"><span class="pre">dataset</span></span><a class="headerlink" href="#itpseq.Replicate.dataset" title="Link to this definition">¶</a></dt>
+<dd><p>The DataSet the Sample belongs to, derived from <cite>sample.dataset</cite> if provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="itpseq.Replicate.kwargs">
+<span class="sig-name descname"><span class="pre">kwargs</span></span><a class="headerlink" href="#itpseq.Replicate.kwargs" title="Link to this definition">¶</a></dt>
+<dd><p>Additional keyword arguments and metadata stored as “meta” during initialization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#itpseq.Replicate.logo" title="itpseq.Replicate.logo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logo</span></code></a>([logo_kwargs, ax, fMet, type])</p></td>
+<td><p>Generates a sequence logo based on the aligned inverse-toeprints, using the <cite>logomaker</cite> library.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>get_counts</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>load_data</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="itpseq.Replicate.logo">
+<span class="sig-name descname"><span class="pre">logo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logo_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fMet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'information'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#itpseq.Replicate.logo" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a sequence logo based on the aligned inverse-toeprints, using the <cite>logomaker</cite> library.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logo_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional keyword arguments passed to <cite>logomaker.Logo</cite> for customizing
+the sequence logo. Defaults to <cite>{‘color_scheme’: ‘NajafabadiEtAl2017’}</cite>.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em>) – Pre-existing matplotlib Axes to draw the logo on. A new Axes is created if not provided.</p></li>
+<li><p><strong>fMet</strong> (<em>bool</em><em>, </em><em>optional</em>) – If False, removes <cite>m</cite> (formyl-methionine / start codon) from the alignment when building the logo. Defaults to False.</p></li>
+<li><p><strong>type</strong> (<em>str</em><em>, </em><em>optional</em>) – The transformation type applied to the counts matrix. Possible values include:
+- <cite>‘information’</cite> for information content.
+- <cite>‘probability’</cite> for probabilities.
+Defaults to <cite>‘information’</cite>.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments passed to filter the input data (e.g., <cite>pos</cite>, <cite>min_peptide</cite>, <cite>max_peptide</cite>…).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <cite>logomaker.Logo</cite> object representing the sequence logo.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>logomaker.Logo</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Sequence alignment data is first converted to a counts matrix via the <cite>logomaker.alignment_to_matrix</cite> method.</p></li>
+<li><p>The ribosomal site corresponding to each position is annotated on the x-axis.</p></li>
+<li><p>Transformation of the counts matrix (e.g., <cite>counts</cite> to <cite>information</cite>) is performed using <cite>logomaker.transform_matrix</cite>.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<p># Simple logo plot with default settings
+logo = obj.logo()</p>
+<p># Logo plot with min_peptide filtering
+logo = obj.logo(min_peptide=3)</p>
+<p># Logo plot with custom transformation type and filtering
+logo = obj.logo(type=’probability’, min_peptides=2, fMet=True)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="itpseq.Sample">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">itpseq.</span></span><span class="sig-name descname"><span class="pre">Sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('sample',)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#itpseq.Sample" title="Link to this definition">¶</a></dt>
+<dd><p>Represents a sample in a dataset, its replicates, reference, and associated metadata.</p>
+<p>The <cite>Sample</cite> class is used to encapsulate information and behavior related to samples in a dataset.
+It manages details like labels, references, replicates, and metadata, and provides methods for analyzing
+replicates, performing differential enrichment analysis, and creating visualizations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>name_ref</strong></dt><dd></dd>
+<dt><strong>name_vs_ref</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_counts_ratio</span></code>([pos, factor, exclude_empty])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#itpseq.Sample.get_counts_ratio_pos" title="itpseq.Sample.get_counts_ratio_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_counts_ratio_pos</span></code></a>([pos])</p></td>
+<td><p>Computes a DataFrame with the enrichment ratios for each ribosome position.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#itpseq.Sample.hmap" title="itpseq.Sample.hmap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmap</span></code></a>([r, c, pos, col, transform, cmap, ...])</p></td>
+<td><p>Generates a heatmap of enrichment for combinations of 2 positions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#itpseq.Sample.hmap_grid" title="itpseq.Sample.hmap_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmap_grid</span></code></a>([pos, col, transform, cmap, vmax, ...])</p></td>
+<td><p>Creates a grid of heatmaps for all combinations of ribosome positions passed in <cite>pos</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#itpseq.Sample.hmap_pos" title="itpseq.Sample.hmap_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmap_pos</span></code></a>([pos, cmap, vmax, center, ax])</p></td>
+<td><p>Generates a heatmap of enrichment ratios for amino acid positions across ribosome sites.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#itpseq.Sample.itp_len_plot" title="itpseq.Sample.itp_len_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">itp_len_plot</span></code></a>([ax, min_codon, max_codon, ...])</p></td>
+<td><p>Generates a line plot of inverse-toeprint (ITP) counts per length.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>DE</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>all_logos</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>get_counts</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>infos</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>itoeprint</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>load_replicates</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>logo</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>volcano</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="itpseq.Sample.get_counts_ratio_pos">
+<span class="sig-name descname"><span class="pre">get_counts_ratio_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#itpseq.Sample.get_counts_ratio_pos" title="Link to this definition">¶</a></dt>
+<dd><p>Computes a DataFrame with the enrichment ratios for each ribosome position.</p>
+<p>This method calculates the enrichment for amino acids at the specified positions
+on the ribosome and organizes the results into a DataFrame. Each row of the DataFrame
+corresponds to a ribosome position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos</strong> (<em>iterable</em><em>, </em><em>optional</em>) – An iterable of ribosome positions for which to compute enrichment ratios (e.g., (‘-2’, ‘E’, ‘P’, ‘A’)).
+If not provided, defaults to (‘-2’, ‘E’, ‘P’, ‘A’).</p></li>
+<li><p><strong>how</strong> (<em>str</em><em>, </em><em>optional</em>) – If ‘aax’ is provided, sequences with stop codons in the peptide are excluded.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters to filter the data or customize the ratio computations.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A DataFrame where rows correspond to ribosome positions and columns correspond to amino acids
+(ordered by a predefined amino acid sequence). The values in the DataFrame represent
+the enrichment ratios for each position and amino acid.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="itpseq.Sample.hmap">
+<span class="sig-name descname"><span class="pre">hmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col='auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform=&lt;ufunc</span> <span class="pre">'log2'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap='vlag'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heatmap_kwargs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#itpseq.Sample.hmap" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a heatmap of enrichment for combinations of 2 positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> (<em>str</em>) – The row position on the ribosome for the heatmap.</p></li>
+<li><p><strong>c</strong> (<em>str</em>) – The column position on the ribosome for the heatmap.</p></li>
+<li><p><strong>pos</strong> (<em>str</em><em> or </em><em>list</em>) – Either a specific position in the form “r:c” or a list of positions to analyze.</p></li>
+<li><p><strong>how</strong> (<em>str</em>) – Defines the method to compute the counts (e.g., ‘mean’, ‘sum’, ‘count’).
+If ‘aax’ is provided, sequences with stop codons in the peptide are excluded.</p></li>
+<li><p><strong>col</strong> (<em>str</em>) – The dataset column used for computations.</p></li>
+<li><p><strong>transform</strong> (<em>callable</em><em>, </em><em>optional</em>) – A function or callable to apply to the dataset before generating the heatmap.</p></li>
+<li><p><strong>cmap</strong> (<em>str</em><em> or </em><em>matplotlib.colors.Colormap</em>) – The colormap to use for the heatmap visualization.</p></li>
+<li><p><strong>vmax</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum value for color scaling in the heatmap.</p></li>
+<li><p><strong>center</strong> (<em>float</em><em>, </em><em>optional</em>) – The midpoint value for centering the colormap.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em>) – Pre-existing axes for the plot. If not provided, a new figure and axes are created.</p></li>
+<li><p><strong>heatmap_kwargs</strong> (<em>dict</em>) – Parameters passed to the sns.heatmap method</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – Additional parameters used to filter the dataset. This allows for fine-tuning
+of the data before generating the heatmap.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The heatmap axes object containing the visualization.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.axes.Axes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="itpseq.Sample.hmap_grid">
+<span class="sig-name descname"><span class="pre">hmap_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col='auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform=&lt;ufunc</span> <span class="pre">'log2'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap='vlag'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#itpseq.Sample.hmap_grid" title="Link to this definition">¶</a></dt>
+<dd><p>Creates a grid of heatmaps for all combinations of ribosome positions passed in <cite>pos</cite>.</p>
+<p>Each cell in the upper triangle of the grid represents a heatmap of enrichment between two positions,
+with the visualization parameters inherited from the <cite>hmap</cite> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos</strong> (<em>iterable</em><em>, </em><em>optional</em>) – An iterable of ribosome positions for generating combinations (e.g., [‘-2’, ‘E’, ‘P’, ‘A’]).
+If not provided, defaults to the set of positions [‘-2’, ‘E’, ‘P’, ‘A’].</p></li>
+<li><p><strong>how</strong> (<em>str</em><em>, </em><em>optional</em>) – If ‘aax’ is provided, sequences with stop codons in the peptide are excluded.</p></li>
+<li><p><strong>col</strong> (<em>str</em><em>, </em><em>optional</em>) – The dataset column used for computations. Displays the enrichment by default.</p></li>
+<li><p><strong>transform</strong> (<em>callable</em><em>, </em><em>optional</em>) – A function or callable to apply to the dataset before generating the heatmaps.
+Defaults to <cite>numpy.log2</cite>.</p></li>
+<li><p><strong>cmap</strong> (<em>str</em><em> or </em><em>matplotlib.colors.Colormap</em><em>, </em><em>optional</em>) – The colormap to use for the heatmap visualizations. Defaults to ‘vlag’.</p></li>
+<li><p><strong>vmax</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum value for color scaling in the heatmaps.</p></li>
+<li><p><strong>center</strong> (<em>float</em><em>, </em><em>optional</em>) – The midpoint value for centering the colormap.</p></li>
+<li><p><strong>kwargs</strong> (<em>key</em><em>, </em><em>value pairings</em>) – Additional parameters used to filter the dataset or control heatmap generation via the <cite>hmap</cite> method.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The figure object containing the grid of heatmaps.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.figure.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="itpseq.Sample.hmap_pos">
+<span class="sig-name descname"><span class="pre">hmap_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vlag'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#itpseq.Sample.hmap_pos" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a heatmap of enrichment ratios for amino acid positions across ribosome sites.</p>
+<p>This method visualizes the enrichment ratios as a heatmap, where the rows correspond
+to different ribosome positions and the columns represent amino acids.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Ribosome positions for which to compute and visualize enrichment ratios (e.g., <cite>(‘-2’, ‘E’, ‘P’, ‘A’)</cite>).</p></li>
+<li><p><strong>how</strong> (<em>str</em><em>, </em><em>optional</em>) – If ‘aax’ is provided, sequences with stop codons in the peptide are excluded. Default is ‘aax’.</p></li>
+<li><p><strong>col</strong> (<em>str</em><em>, </em><em>optional</em>) – The DataFrame column to utilize for enrichment visualization. Defaults to ‘auto’.</p></li>
+<li><p><strong>transform</strong> (<em>callable</em><em>, </em><em>optional</em>) – A function or callable to apply to the enrichment matrix before plotting. Defaults to <cite>numpy.log2</cite>.</p></li>
+<li><p><strong>cmap</strong> (<em>str</em><em> or </em><em>matplotlib.colors.Colormap</em><em>, </em><em>optional</em>) – The colormap to use for the heatmap visualization. Defaults to ‘vlag’.</p></li>
+<li><p><strong>vmax</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum value for color scaling in the heatmap. If not provided, it defaults to the
+maximum absolute value in the enrichment matrix.</p></li>
+<li><p><strong>center</strong> (<em>float</em><em>, </em><em>optional</em>) – The midpoint of the colormap. Defaults to 0.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em>) – Pre-existing axes for the plot. A new figure and axes are created if not provided.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters to customize the enrichment computation or filtering.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The axes object containing the heatmap visualization.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.axes.Axes</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The rows of the heatmap correspond to ribosome positions, while the columns represent amino acids.</p></li>
+<li><p>Tick labels are styled using the <cite>aa_colors</cite> dictionary to match the biochemical categories of amino acids.</p></li>
+<li><p>Enrichment ratios are automatically log2-transformed by default.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="itpseq.Sample.itp_len_plot">
+<span class="sig-name descname"><span class="pre">itp_len_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_codon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_codon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#itpseq.Sample.itp_len_plot" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a line plot of inverse-toeprint (ITP) counts per length.</p>
+<p>This method uses the output of <cite>itp_len</cite> to create a line plot showing the counts of
+inverse-toeprints across lengths for each replicate. Optionally, counts can be normalized
+(per million reads), and the plotted lengths can be limited.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em>) – Pre-existing axes to draw the plot on. A new figure and axes are created if not provided.</p></li>
+<li><p><strong>min_codon</strong> (<em>int</em><em>, </em><em>optional</em>) – The minimum codon position to annotate on the plot. Defaults to 0.</p></li>
+<li><p><strong>max_codon</strong> (<em>int</em><em>, </em><em>optional</em>) – The maximum codon position to annotate on the plot. Defaults to 10.</p></li>
+<li><p><strong>limit</strong> (<em>int</em><em>, </em><em>optional</em>) – The maximum length to include in the plot. Defaults to 100.</p></li>
+<li><p><strong>norm</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to normalize counts to reads per million. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The axes object containing the plotted lineplot.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.axes.Axes</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The x-axis represents the distance from the 3’ end of the inverse-toeprint in nucleotides.</p></li>
+<li><p>The y-axis shows the counts of inverse-toeprints, either absolute or normalized per million reads.</p></li>
+<li><p>Each replicate is plotted independently and distinguished by the <cite>hue</cite> attribute in the plot.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="itpseq.Sample.itp_len">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">itp_len</span></span><a class="headerlink" href="#itpseq.Sample.itp_len" title="Link to this definition">¶</a></dt>
+<dd><p>Combines the counts of inverse-toeprints (ITPs) for each length across all replicates.</p>
+<p>This method extracts the counts of inverse-toeprints for each length from the metadata of each
+replicate and combines them into a single DataFrame, keeping the data for each replicate independent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>A DataFrame with the following columns:
+- <cite>length</cite> : int</p>
+<blockquote>
+<div><p>The length of the inverse-toeprints.</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>replicate</cite><span class="classifier">str</span></dt><dd><p>The replicate identifier.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>count</cite><span class="classifier">int</span></dt><dd><p>The count of inverse-toeprints of the given length for the replicate.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>sample</cite><span class="classifier">str</span></dt><dd><p>The name of the sample this data belongs to.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">iTP-Seq</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dataset-objects">Dataset objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#detailed-api">Detailed API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#itpseq.DataSet"><code class="docutils literal notranslate"><span class="pre">DataSet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.DataSet.data_path"><code class="docutils literal notranslate"><span class="pre">DataSet.data_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.DataSet.result_path"><code class="docutils literal notranslate"><span class="pre">DataSet.result_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.DataSet.samples"><code class="docutils literal notranslate"><span class="pre">DataSet.samples</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.DataSet.keys"><code class="docutils literal notranslate"><span class="pre">DataSet.keys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.DataSet.ref_labels"><code class="docutils literal notranslate"><span class="pre">DataSet.ref_labels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.DataSet.cache_path"><code class="docutils literal notranslate"><span class="pre">DataSet.cache_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.DataSet.file_pattern"><code class="docutils literal notranslate"><span class="pre">DataSet.file_pattern</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.DataSet.aafile_pattern"><code class="docutils literal notranslate"><span class="pre">DataSet.aafile_pattern</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.DataSet.DE"><code class="docutils literal notranslate"><span class="pre">DataSet.DE()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.DataSet.infos"><code class="docutils literal notranslate"><span class="pre">DataSet.infos()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#itpseq.Replicate"><code class="docutils literal notranslate"><span class="pre">Replicate</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Replicate.filename"><code class="docutils literal notranslate"><span class="pre">Replicate.filename</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Replicate.sample"><code class="docutils literal notranslate"><span class="pre">Replicate.sample</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Replicate.replicate"><code class="docutils literal notranslate"><span class="pre">Replicate.replicate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Replicate.labels"><code class="docutils literal notranslate"><span class="pre">Replicate.labels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Replicate.name"><code class="docutils literal notranslate"><span class="pre">Replicate.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Replicate.dataset"><code class="docutils literal notranslate"><span class="pre">Replicate.dataset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Replicate.kwargs"><code class="docutils literal notranslate"><span class="pre">Replicate.kwargs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Replicate.logo"><code class="docutils literal notranslate"><span class="pre">Replicate.logo()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#itpseq.Sample"><code class="docutils literal notranslate"><span class="pre">Sample</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Sample.get_counts_ratio_pos"><code class="docutils literal notranslate"><span class="pre">Sample.get_counts_ratio_pos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Sample.hmap"><code class="docutils literal notranslate"><span class="pre">Sample.hmap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Sample.hmap_grid"><code class="docutils literal notranslate"><span class="pre">Sample.hmap_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Sample.hmap_pos"><code class="docutils literal notranslate"><span class="pre">Sample.hmap_pos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Sample.itp_len_plot"><code class="docutils literal notranslate"><span class="pre">Sample.itp_len_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#itpseq.Sample.itp_len"><code class="docutils literal notranslate"><span class="pre">Sample.itp_len</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="notebooks/itoeprint_tutorial.html" title="previous chapter">Interactive virtual inverse toeprint</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Thibaud Renault.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Welcome to iTP-Seq’s documentation! &#8212; iTP-Seq 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=686e5160" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <script src="_static/documentation_options.js?v=2709fde1"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorials" href="gallery.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="welcome-to-itp-seq-s-documentation">
+<h1>Welcome to iTP-Seq’s documentation!<a class="headerlink" href="#welcome-to-itp-seq-s-documentation" title="Link to this heading">¶</a></h1>
+<section id="installation">
+<span id="id1"></span><h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
+<p>The code for <cite>itpseq</cite> is available on <a class="reference external" href="https://github.com/t-renault/itpseq">GitHub</a> under an GPL-3.0 open source license.</p>
+<p>The <cite>itpseq</cite> module and its command line tools can be installed from <a class="reference external" href="https://pypi.org/project/itpseq/">PyPI</a> using the <code class="docutils literal notranslate"><span class="pre">pip</span></code> package manager by running the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">itpseq</span>
+</pre></div>
+</div>
+</section>
+<section id="resources">
+<h2>Resources<a class="headerlink" href="#resources" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/report_tutorial.html">Generating a report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/manual_graph_tutorial.html">Manually creating custom graphs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/itpseq_tutorial.html">Creating graphs and tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/itoeprint_tutorial.html">Interactive virtual inverse toeprint</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#dataset-objects">Dataset objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#detailed-api">Detailed API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#itpseq.DataSet"><code class="docutils literal notranslate"><span class="pre">DataSet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.DataSet.data_path"><code class="docutils literal notranslate"><span class="pre">DataSet.data_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.DataSet.result_path"><code class="docutils literal notranslate"><span class="pre">DataSet.result_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.DataSet.samples"><code class="docutils literal notranslate"><span class="pre">DataSet.samples</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.DataSet.keys"><code class="docutils literal notranslate"><span class="pre">DataSet.keys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.DataSet.ref_labels"><code class="docutils literal notranslate"><span class="pre">DataSet.ref_labels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.DataSet.cache_path"><code class="docutils literal notranslate"><span class="pre">DataSet.cache_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.DataSet.file_pattern"><code class="docutils literal notranslate"><span class="pre">DataSet.file_pattern</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.DataSet.aafile_pattern"><code class="docutils literal notranslate"><span class="pre">DataSet.aafile_pattern</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.DataSet.DE"><code class="docutils literal notranslate"><span class="pre">DataSet.DE()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.DataSet.infos"><code class="docutils literal notranslate"><span class="pre">DataSet.infos()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#itpseq.Replicate"><code class="docutils literal notranslate"><span class="pre">Replicate</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Replicate.filename"><code class="docutils literal notranslate"><span class="pre">Replicate.filename</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Replicate.sample"><code class="docutils literal notranslate"><span class="pre">Replicate.sample</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Replicate.replicate"><code class="docutils literal notranslate"><span class="pre">Replicate.replicate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Replicate.labels"><code class="docutils literal notranslate"><span class="pre">Replicate.labels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Replicate.name"><code class="docutils literal notranslate"><span class="pre">Replicate.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Replicate.dataset"><code class="docutils literal notranslate"><span class="pre">Replicate.dataset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Replicate.kwargs"><code class="docutils literal notranslate"><span class="pre">Replicate.kwargs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Replicate.logo"><code class="docutils literal notranslate"><span class="pre">Replicate.logo()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#itpseq.Sample"><code class="docutils literal notranslate"><span class="pre">Sample</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Sample.get_counts_ratio_pos"><code class="docutils literal notranslate"><span class="pre">Sample.get_counts_ratio_pos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Sample.hmap"><code class="docutils literal notranslate"><span class="pre">Sample.hmap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Sample.hmap_grid"><code class="docutils literal notranslate"><span class="pre">Sample.hmap_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Sample.hmap_pos"><code class="docutils literal notranslate"><span class="pre">Sample.hmap_pos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Sample.itp_len_plot"><code class="docutils literal notranslate"><span class="pre">Sample.itp_len_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#itpseq.Sample.itp_len"><code class="docutils literal notranslate"><span class="pre">Sample.itp_len</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div></blockquote>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">iTP-Seq</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="gallery.html" title="next chapter">Tutorials</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Thibaud Renault.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title> Inverse toe-printing report for {{ ','.join(dataset.samples_with_ref) }}</title>
+    <meta name="description" content="iTP-seq report">
+
+</head>
+<body>
+    {% if output == 'pdf' %}
+    <article id="cover">
+        <h1>iTP-Seq Report</h1>
+        <h2>{{  ", ".join(dataset.samples_with_ref)  }}</h2>
+        <h3><time>{{ today }}</time><br/>{{ dataset.data_path }}</h3>
+        <div class="citation">iTP-Seq: A scalable profiling method to study context-dependent translation events in vitro.
+Mélanie Gillard, Thibaud Renault, Axel Innis.</div>
+    </article>
+
+    <article id="contents">
+        <h2>Table of contents</h2>
+
+        <h3>iTP-seq dataset</h3>
+        <ul>
+            <li><a href="#dataset-statistics"></a></li>
+            <li><a href="#virtual-itp"></a></li>
+            <li><a href="#itp-lengths"></a></li>
+            <li><a href="#itp-lengths-sample"></a></li>
+        </ul>
+
+        <h3>Amino-acid enrichment per position</h3>
+        <ul>
+        {% for sample_name in dataset.samples_with_ref %}
+            <li><a href="#single-positions-{{ sample_name }}"></a></li>
+        {% endfor %}
+        </ul>
+
+        <h3>Amino-acid enrichment per combination of positions</h3>
+        <ul>
+        {% for sample_name in dataset.samples_with_ref %}
+            <li><a href="#hmap-grid-{{ sample_name }}"></a></li>
+        {% endfor %}
+        </ul>
+
+        {% for motif in ['-2:A', 'E:A', 'E:P'] %}
+        <h3>Motif: {{ motif }}</h3>
+        <ul>
+        {%for sample_name in dataset.samples_with_ref %}
+            <li><a href="#motif-{{ motif }}-{{ sample_name }}"></a></li>
+        {% endfor %}
+        </ul>
+        {% endfor %}
+    </article>
+    {% endif %}
+
+    <article id="dataset">
+        <h2>iTP-seq dataset</h2>
+        <section>
+            <h3 id="dataset-statistics">Statistics of the iTP reads</h3>
+                <section>
+                {{ dataset.infos(html=True) }}
+                </section>
+            <h3 id="virtual-itp">Virtual inverse toeprint gel</h3>
+                {{ plot_to_html(dataset.itoeprint(exposure=5, plot='shades')) }}
+            <h3 id="itp-lengths">Distribution of iTP lengths</h3>
+                {{ plot_to_html(dataset.itp_len_plot()) }}
+            <h3 id="itp-lengths-sample">Distribution of iTP lengths per sample</h3>
+                {% for sample_name, sample in dataset.samples.items() %}
+                <h4>{{ sample_name }}</h4>
+                <div class="itp-len-plot">
+                  {{ plot_to_html(sample.itp_len_plot(), figsize=(10, 3)) }}
+                </div>
+                {% endfor %}
+        </section>
+    </article>
+
+
+    <article id="sample-{{ sample_name }}">
+        <h2 id="single-positions">Amino-acid enrichment per position</h2>
+        <section>
+            {% for sample_name, sample in dataset.samples_with_ref.items() %}
+            <h3 id="single-positions-{{ sample_name }}">{{ sample.name_vs_ref  }}</h3>
+                <div class="hmap-pos">
+                    {{ plot_to_html(sample.hmap_pos()) }}
+                </div>
+            {% endfor %}
+        </section>
+        <h2 id="hmap-grid">Amino-acid enrichment per combination of positions</h2>
+        <section>
+            {% for sample_name, sample in dataset.samples_with_ref.items() %}
+            <h3 id="hmap-grid-{{ sample_name }}">{{ sample.name_vs_ref  }}</h3>
+            {{ plot_to_html(sample.hmap_grid()) }}
+            {% endfor %}
+        </section>
+        <section>
+        {% for motif in ['-2:A', 'E:A', 'E:P'] %}
+        <h2 id="motif-{{ motif }}">Motif: {{ motif }}</h2>
+           {% for sample_name, sample in dataset.samples_with_ref.items() %}
+            <h3 id="motif-{{ motif }}-{{ sample_name }}">{{ sample.name_vs_ref  }}</h3>
+                <h4>p-value</h4>
+                <div class="volcano">
+                {{ plot_to_html(sample.volcano(motif, query='head:100', query_color='k'), format='png') }}
+                </div>
+                <h4>adjusted p-value</h4>
+                <div class="volcano">
+                {{ plot_to_html(sample.volcano(motif, y='log10padj', query='head:100', query_color='k'), format='png') }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+        </section>
+    </article>
+
+</body>
+</html>
