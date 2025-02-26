@@ -19,6 +19,7 @@ Installation requires [regex](https://pypi.org/project/regex/),
 [Jinja2](https://jinja.palletsprojects.com/en/stable/),
 [weasyprint](https://pypi.org/project/weasyprint/),
 [ipython](https://ipython.org/),
+[click](https://click.palletsprojects.com/),
 and [ipywidgets](https://ipywidgets.readthedocs.io/en/stable/).
 
 
