@@ -7,13 +7,14 @@
 import sys, os
 sys.path.insert(0, os.path.abspath('..'))
 
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'iTP-Seq'
 copyright = '2025, Thibaud Renault'
 author = 'Thibaud Renault'
-release = '0.0.1a1'
+release = '0.0.1a2'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

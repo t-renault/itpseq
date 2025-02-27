@@ -1,0 +1,15 @@
+sphinx
+numpydoc
+nbsphinx
+sphinx-gallery
+
+regex
+numpy
+pandas
+pydeseq2
+matplotlib
+seaborn
+logomaker
+Jinja2
+weasyprint
+click
