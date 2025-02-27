@@ -3,7 +3,7 @@ itpseq: iTP-Seq data analysis tool
 
 Installation
 ------------
-The latest documentation is available at [xxx](xxx).
+The latest documentation is available at [itpseq.readthedocs.io](https://itpseq.readthedocs.io).
 
 Dependencies
 ------------
