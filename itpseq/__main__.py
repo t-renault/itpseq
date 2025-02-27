@@ -17,12 +17,12 @@ def main():
     """itpseq - A command-line tool for the analysis of iTP-Seq data."""
     print(
         """
- ▄ ▗▄▄▄▖▗▄▄▖    ▗▄▄▖▗▞▀▚▖ ▄▄▄▄ 
- ▄   █  ▐▌ ▐▌  ▐▌   ▐▛▀▀▘█   █ 
- █   █  ▐▛▀▘ ▄▄ ▝▀▚▖▝▚▄▄▖▀▄▄▄█ 
- █   █  ▐▌     ▗▄▄▞▘         █ 
-                             ▀ 
- Thank you for using itpseq.
+      ▄ ▗▄▄▄▖▗▄▄▖    ▗▄▄▖▗▞▀▚▖ ▄▄▄▄             ▄▄▄▄
+      ▄   █  ▐▌ ▐▌  ▐▌   ▐▛▀▀▘█   █            ▀█████▄
+    ▄ █   █  ▐▛▀▘ ▄▄ ▝▀▚▖▝▚▄▄▖▀▄▄▄█ ▄▀▀▄    ▄▀▀ ▄█████
+▀▄▄▀  █   █  ▐▌     ▗▄▄▞▘         █     ▀▄▄▀   ▀████▀
+                                  ▀
+             Thank you for using itpseq!
 
 """
     )
