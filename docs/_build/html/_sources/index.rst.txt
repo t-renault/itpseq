@@ -21,9 +21,9 @@ Resources
 ---------
 
  .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
 
-   Tutorials <gallery>
+   Tutorials <tutorials>
    API <api>
    Citing <citing>
    FAQ <faq>

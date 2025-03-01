@@ -7,14 +7,13 @@
 import sys, os
 sys.path.insert(0, os.path.abspath('..'))
 
-
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'iTP-Seq'
 copyright = '2025, Thibaud Renault'
 author = 'Thibaud Renault'
-release = '0.0.1a2'
+release = '0.0.1a3'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -36,6 +35,12 @@ nbsphinx_execute = 'never'
 
 autosummary_generate = True
 autodoc_member_order = 'groupwise'
+
+nbsphinx_thumbnails = {
+    'notebooks/itoeprint_tutorial': '_static/itoeprint_tutorial.png',
+    #'notebooks/report_tutorial': '_static/report_tutorial.png',
+    'notebooks/report_tutorial': '_static/report_page.png',
+}
 
 
 # -- Options for HTML output -------------------------------------------------
