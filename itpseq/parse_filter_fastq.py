@@ -542,14 +542,12 @@ def main(out=False):
     args_dic = vars(args)
     from pprint import pprint
 
-    print(pprint(args_dic))
+    pprint(args_dic)
     kwargs = args_dic.copy()
 
     kwargs['min_seq_len'] = args_dic['range'][0] * 3
     MAX = args_dic['range'][1]
-    print(f'---> {MAX}, {bool(MAX)}')
     kwargs['max_seq_len'] = MAX * 3 if MAX else None
-    print(kwargs['max_seq_len'])
 
     del kwargs['files']
     del kwargs['outdir']
