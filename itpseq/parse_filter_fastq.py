@@ -64,7 +64,6 @@ def parse_trim_filter_fastq(
     limit=None,  # max sequences to read
     min_seq_len=3 * 1,
     max_seq_len=3 * 10,
-    round_codons=True,
     quality=30,
     start='ATG',
     contaminants=CONTAMINANTS,
@@ -106,8 +105,12 @@ def parse_trim_filter_fastq(
     if not min_seq_len:
         min_seq_len = 0
 
-    if not max_seq_len:
-        max_seq_len = float('inf')
+    min_seq_len_overhang = min_seq_len + untranslated_overhang + 2
+
+    if max_seq_len:
+        max_seq_len_overhang = max_seq_len + untranslated_overhang + 2
+    else:
+        max_seq_len_overhang = float('inf')
 
     seqs = []
     MAX_LEN = 0
@@ -123,7 +126,7 @@ def parse_trim_filter_fastq(
         if m:
             subseq = m.group()
             subqual = qual[slice(*m.span())]
-            if max_seq_len > 0:   # limit quality filter to first x codons
+            if max_seq_len:   # limit quality filter to first x codons
                 subqual = subqual[:max_seq_len]
             minqual = ord(min(subqual)) - 33
 
@@ -156,10 +159,10 @@ def parse_trim_filter_fastq(
                 stats['subseq_N'] += 1
                 keep = False
 
-            if L < min_seq_len:
+            if L < min_seq_len_overhang:
                 stats['tooshort'] += 1
                 keep = False
-            elif L > max_seq_len:
+            elif L > max_seq_len_overhang:
                 stats['toolong'] += 1
                 keep = False
 
@@ -217,7 +220,7 @@ def parse_all(files=None, pattern=None, save=False, outdir=None, **kwargs):
 
     global f
 
-    def f(filename, *args, **kwargs):
+    def f(filename, *args):
         seqs, stats, extras = parse_trim_filter_fastq(
             filename, *args, **kwargs
         )
@@ -325,7 +328,7 @@ def export_data(
     stats=None,
     extras=None,
     outdir=None,
-    MAX=30,
+    MAX=None,
     untranslated_overhang=12,
 ):
 
@@ -385,22 +388,33 @@ def export_data(
     if extras:
         np.array(extras, dtype=np.int8).tofile(f'{path}/{f_extra}')
     if seqs:
+        # <----------- MAX ------------>
+        # [1][2][3][4][5][6][7][8][9][X] # MAX_PROT
+        #                               xxxxxxxxxxxx    # untranslated_overhang
+        # .....................[E][P][A]............
+        # .....................[E][P][A].............
+        # .....................[E][P][A]..............
+        #                               xxxxxxxxxxxxxx  # max_untranslated_overhang
+
         with open(f'{path}/{f_seq}', 'w') as f, open(
             f'{path}/{f_seq_aa}', 'w'
         ) as f_aa:
             if not MAX:
-                MAX = max(
-                    untranslated_overhang,
-                    stats['MAX_LEN'] if stats else max(map(len, seqs)),
-                )   # ensure at least 4 aa columns
-            MAX_PROT = (MAX - max_untranslated_overhang) // 3
-            #print(MAX, MAX_PROT)
+                MAX = 12
+            MAX = max(
+                12,
+                MAX,
+                (stats['MAX_LEN'] if stats else max(map(len, seqs)))
+                - max_untranslated_overhang,
+            )   # ensure at least 4 aa columns
+            MAX_PROT = MAX // 3
+            # print(MAX, MAX_PROT)
             f.write(
-                f'#{" "*(MAX-max_untranslated_overhang-10)}[E][P][A]{" "*max_untranslated_overhang}\n'
+                f'#{" "*(MAX-10)}[E][P][A]{" "*max_untranslated_overhang}\n'
             )
-            f_aa.write(f'#{" "*(MAX_PROT-untranslated_overhang//3)}EPA\n')
+            f_aa.write(f'#{" "*(MAX_PROT-4)}EPA\n')
             for seq in seqs:
-                f.write(f'{seq: >{MAX}}\n')
+                f.write(f'{seq: >{MAX+max_untranslated_overhang}}\n')
                 f_aa.write(
                     f'{seq2aa(seq[:3]).lower()+seq2aa(seq[3:-max_untranslated_overhang]): >{MAX_PROT}}\n'
                 )   # 14 nuc after A-site
@@ -458,6 +472,9 @@ def main(out=False):
     def ArgRange(string):
         from argparse import ArgumentTypeError
         import re
+
+        if string.isdigit():
+            return (int(string),) * 2
 
         m = re.match(r'^(?:(\d+)?-)?(\d+)?$', string)
         if not m:
@@ -529,7 +546,10 @@ def main(out=False):
     kwargs = args_dic.copy()
 
     kwargs['min_seq_len'] = args_dic['range'][0] * 3
-    kwargs['max_seq_len'] = (args_dic['range'][1] + 1) * 3
+    MAX = args_dic['range'][1]
+    print(f'---> {MAX}, {bool(MAX)}')
+    kwargs['max_seq_len'] = MAX * 3 if MAX else None
+    print(kwargs['max_seq_len'])
 
     del kwargs['files']
     del kwargs['outdir']
