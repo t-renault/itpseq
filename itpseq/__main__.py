@@ -16,14 +16,14 @@ from . import __version__
 def main():
     """itpseq - A command-line tool for the analysis of iTP-Seq data."""
     print(
-        """
+        f"""
       ▄ ▗▄▄▄▖▗▄▄▖    ▗▄▄▖▗▞▀▚▖ ▄▄▄▄             ▄▄▄▄
       ▄   █  ▐▌ ▐▌  ▐▌   ▐▛▀▀▘█   █            ▀█████▄
     ▄ █   █  ▐▛▀▘ ▄▄ ▝▀▚▖▝▚▄▄▖▀▄▄▄█ ▄▀▀▄    ▄▀▀ ▄█████
 ▀▄▄▀  █   █  ▐▌     ▗▄▄▞▘         █     ▀▄▄▀   ▀████▀
                                   ▀
              Thank you for using itpseq!
-
+               version: {__version__}
 """
     )
     pass

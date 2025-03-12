@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Optional, Union
 from collections import defaultdict
 
-from functools import total_ordering, lru_cache, cached_property
+from functools import total_ordering, lru_cache, cached_property, wraps
 
 import re
 import datetime
@@ -112,11 +112,11 @@ class Replicate:
 
         Examples
         --------
-        # rename the replicate with a parameter
-        rep.rename(name='new_name')
+        Rename the replicate with a parameter
+         >>> rep.rename(name='new_name')
 
-        # rename the replicate automatically from its parent sample data
-        rep.rename()
+        Rename the replicate automatically from its parent sample data
+         >>> rep.rename()
         """
         if name is None:
             self.name = (
@@ -127,6 +127,7 @@ class Replicate:
         else:
             self.name = name
 
+    @wraps(read_aafile_as_series)
     def load_data(self, **kwargs):
         return read_aafile_as_series(
             self.filename,
@@ -137,6 +138,40 @@ class Replicate:
 
     @lru_cache
     def get_counts(self, pos=None, **kwargs):
+        """
+        Counts the number of reads for each motif or combination of amino-acid/position.
+
+        Parameters
+        ----------
+        pos : str, optional
+            Position to consider when counting the reads.
+            If None is passed, then this returns a DataFrame with the counts of each amino-acid per position.
+
+        kwargs : optional
+            Optional parameters to pass to load_data (min_peptide, max_peptide, how, limit, sample)
+
+        Returns
+        -------
+        Series or DataFrame
+            Returns a DataFrame is pos is None, otherwise a Series.
+
+        Examples
+        --------
+        Count the number of reads for each amino-acid/position combination
+         >>> replicate.get_counts()
+                    -8         -7         -6  ...        -1         0         1
+             2879961.0  2658485.0  2449526.0  ...  793143.0   52640.0       NaN
+         *         NaN        NaN        NaN  ...       NaN       NaN  910137.0
+         A         NaN    12240.0    25225.0  ...  111369.0  134995.0  107591.0
+         ..        ...        ...        ...  ...       ...       ...       ...
+         W         NaN     2686.0     5059.0  ...   17643.0   28095.0   21577.0
+         Y         NaN     9522.0    19296.0  ...   69671.0   81462.0   93099.0
+         m    197624.0   221476.0   208959.0  ...  409289.0  740503.0   52640.0
+         [23 rows x 10 columns]
+
+        Count the number of reads for each motif in the E-P-A sites
+         >>> replicate.get_counts(pos='E:A')
+        """
         prefix = (
             '_' + '_'.join(f'{k}={v}' for k, v in sorted(kwargs.items()))
             if kwargs
@@ -190,14 +225,14 @@ class Replicate:
 
         Examples
         --------
-        # Simple logo plot with default settings
-        logo = obj.logo()
+        Simple logo plot with default settings
+         >>> logo = obj.logo()
 
-        # Logo plot with min_peptide filtering
-        logo = obj.logo(min_peptide=3)
+        Logo plot with min_peptide filtering
+         >>> logo = obj.logo(min_peptide=3)
 
-        # Logo plot with custom transformation type and filtering
-        logo = obj.logo(type='probability', min_peptides=2, fMet=True)
+        Logo plot with custom transformation type and filtering
+         >>> logo = obj.logo(type='probability', min_peptides=2, fMet=True)
         """
 
         if logo_kwargs is None:
@@ -307,7 +342,7 @@ class Sample:
         )
 
     def rename(self, name, rename_replicates=True):
-        """
+        r"""
         Changes the name of the sample.
 
         Parameters
@@ -319,8 +354,8 @@ class Sample:
 
         Examples
         --------
-        # rename the sample to "new_name".
-        sample.rename(name='new_name')
+        Rename the sample to "new_name".
+         >>> sample.rename(name='new_name')
         """
         self.name = name
         if rename_replicates:
@@ -345,11 +380,13 @@ class Sample:
 
         Examples
         --------
-        # Create a copy of "sample" and change its name to "new_name".
-        new_sample = sample.copy(name='new_name')
+        Create a copy of "sample" and change its name to "new_name".
+         >>> new_sample = sample.copy(name='new_name')
+         Sample(new_name:[1, 2, 3], ref: ref_name)
 
-        # Create a copy of "sample" with "sample2" as reference.
-        new_sample = sample.copy(reference=sample2)
+        Create a copy of "sample" with "sample2" as reference.
+         >>> new_sample = sample.copy(reference=sample2)
+         Sample(new_name:[1, 2, 3], ref: sample2)
         """
         new = deepcopy(self)
         if name:
@@ -367,6 +404,22 @@ class Sample:
             replicate.load_data()
 
     def infos(self, html=False):
+        """
+        Returns a table with information on the NGS reads per replicate.
+
+        Parameters
+        ----------
+        html : bool
+            if True, returns the table as HTML, otherwise as DataFrame (default).
+
+        Example
+        -------
+         >>> sample.infos()
+                   total_sequences  noadaptor  contaminant  lowqual  tooshort  toolong   extra0   extra1   extra2  MAX_LEN
+         sample.1          8384889     714414         1192   685017    385537  3341987  2308291  2528638  2833546       44
+         sample.2          9120203     498202         1659   513308    104071  5664107  2673062  2972850  2976089       44
+         sample.3          8490958    1043590         1328   409697    187746  4004073  2243720  2555783  2647865       44
+        """
         order = [
             'total_sequences',
             'noadaptor',
@@ -393,6 +446,50 @@ class Sample:
 
     @lru_cache
     def get_counts(self, pos=None, **kwargs):
+        """
+        Counts the number of reads for each motif or combination of amino-acid/position for each replicate in the sample.
+
+        Parameters
+        ----------
+        pos : str, optional
+            Position to consider when counting the reads.
+            If None is passed, then this returns a DataFrame with the counts of each amino-acid per position.
+
+        kwargs : optional
+            Optional parameters to pass to load_data (min_peptide, max_peptide, how, limit, sample)
+
+        Returns
+        -------
+        DataFrame
+            Returns a DataFrame. If pos is None the columns will be a MultiIndex.
+
+        Examples
+        --------
+        Count the number of reads for each amino-acid/position combination
+         >>> sample.get_counts()
+              sample.1                        ...  sample.3
+                    -8         -7         -6  ...        -1         0         1
+             2879961.0  2658485.0  2449526.0  ...  724998.0   34748.0       NaN
+         *         NaN        NaN        NaN  ...       NaN       NaN  880568.0
+         A         NaN    12240.0    25225.0  ...   92225.0  115164.0   85132.0
+         ..        ...        ...        ...  ...       ...       ...       ...
+         W         NaN     2686.0     5059.0  ...   14313.0   23730.0   17656.0
+         Y         NaN     9522.0    19296.0  ...   57431.0   69162.0   81430.0
+         m    197624.0   221476.0   208959.0  ...  375644.0  690250.0   34748.0
+         [23 rows x 30 columns]
+
+        Count the number of reads for each motif in the E-P-A sites
+         >>> sample.get_counts(pos='E:A')
+              sample.1  sample.2  sample.3
+          m*  254850.0  107060.0  258338.0
+          mS   54993.0   20419.0   50959.0
+           m   52640.0   17860.0   34748.0
+          ..        ...       ...       ...
+         WFW       NaN       2.0       NaN
+         WWW       NaN       1.0       NaN
+         MMW       NaN       NaN       1.0
+         [8842 rows x 3 columns]
+        """
         # print(locals())
         return pd.concat(
             {str(r): r.get_counts(pos, **kwargs) for r in self.replicates},
@@ -548,6 +645,11 @@ class Sample:
         -------
         matplotlib.axes.Axes
             The heatmap axes object containing the visualization.
+
+        Examples
+        --------
+        Create a heatmap for positions E-P-A
+         >>> sample.hmap('E:A')
         """
 
         if not r and not c:
@@ -716,6 +818,15 @@ class Sample:
         -------
         matplotlib.figure.Figure
             The figure object containing the grid of heatmaps.
+
+
+        Examples
+        --------
+        Create the default heatmap grid for all combinations of -2/E/P/A
+         >>> sample.hmap_grid()
+
+        Create a heatmap grid for combinations of E/P/A
+         >>> sample.hmap_grid(['E', 'P', 'A'])
         """
 
         if not pos:
@@ -773,6 +884,19 @@ class Sample:
             A DataFrame where rows correspond to ribosome positions and columns correspond to amino acids
             (ordered by a predefined amino acid sequence). The values in the DataFrame represent
             the enrichment ratios for each position and amino acid.
+
+        Examples
+        --------
+
+        Calculate the enrichement relative to the reference for the default -2/E/P/A positions
+         >>> sample.get_counts_ratio_pos()
+         amino-acid         H         R         K  ...         W         *         m
+         site                                      ...
+         -2          1.062831  1.066174  1.012982  ...  1.046303       NaN  0.907140
+         E           1.037079  1.018643  0.941939  ...  1.041217       NaN  0.933880
+         P           1.093492  1.100380  1.045145  ...  1.107238       NaN  0.793043
+         A           0.831129  1.005783  0.967491  ...  0.995833  1.143702  0.757118
+         [4 rows x 22 columns]
         """
 
         if not pos:
@@ -1071,7 +1195,7 @@ class Sample:
         logo.ax.set_xticks(range(df.shape[0]), df.index)
         return logo
 
-    @cached_property
+    @cached_property #FIXME consider not using a property if we want to be able to modify replicates
     def itp_len(self):
         """
         Combines the counts of inverse-toeprints (ITPs) for each length across all replicates.
@@ -1091,6 +1215,23 @@ class Sample:
                 The count of inverse-toeprints of the given length for the replicate.
             - `sample` : str
                 The name of the sample this data belongs to.
+
+        Examples
+        --------
+         >>> sample.itp_len
+              length replicate     count sample
+         0        51         1  115732.0    spl
+         1        20         1  444506.0    spl
+         2        41         1  130495.0    spl
+         3        23         1  198257.0    spl
+         4        17         1   55786.0    spl
+         ..      ...       ...       ...    ...
+         328     106         3       NaN    spl
+         329     143         3       NaN    spl
+         330     102         3       NaN    spl
+         331     104         3       NaN    spl
+         332     221         3       NaN    spl
+         [333 rows x 4 columns]
         """
 
         return (
@@ -1275,15 +1416,24 @@ class DataSet:
     --------
     Creating a DataSet from a simple antibiotic treatment (tcx) vs no treatement (noa) with 3 replicates each (1, 2, 3).
 
-    Load a dataset from the current directory, inferring the samples automatically
+    Load a dataset from the current directory, inferring the samples automatically.
      >>> from itpseq import DataSet
      >>> data = DataSet(data_path='.')
      >>> data
      DataSet(data_path=PosixPath('.'),
-        reference=Sample(noa:[1, 2, 3]),
-        samples=[Sample(noa:[1, 2, 3]),
-                 Sample(tcx:[1, 2, 3], ref: noa)],
-        )
+             file_pattern='(?P<lib_type>[^_]+)_(?P<sample>[^_\\d]+)(?P<replicate>\\d+)\\.processed\\.json',
+             samples=[Sample(nnn15.noa:[1, 2, 3]),
+                      Sample(nnn15.tcx:[1, 2, 3], ref: nnn15.noa)],
+             )
+
+    Same as above, but only use "sample" as key.
+     >>> data = DataSet(data_path='.', keys=['sample'])
+     >>> data
+     DataSet(data_path=PosixPath('.'),
+             file_pattern='(?P<lib_type>[^_]+)_(?P<sample>[^_\\d]+)(?P<replicate>\\d+)\\.processed\\.json',
+             samples=[Sample(noa:[1, 2, 3]),
+                      Sample(tcx:[1, 2, 3], ref: noa)],
+             )
 
     Compute a standard report and export it as PDF
      >>> data.report('my_experiment.pdf')
@@ -1453,13 +1603,31 @@ class DataSet:
         # self.__dict__.pop('toeprint_df')
 
     def infos(self, html=False):
-        """Displays summary information about the dataset sequences.
+        """Displays summary information about the dataset NGS reads per replicate.
 
-        Atttributes
-        -----------
-        html: bool
-            if True, returns the table as HTML, otherwise as DataFrame (default)
+        This information is computed during the parsing step and includes:
+         - the total number of reads,
+         - the number of reads without adaptors,
+         - the number of reads that are contaminants,
+         - the number of reads with a low quality,
+         - the number of reads that are too short or too long,
+         - the number of extra nucleotides at the 3'-end of the inverse-toeprints,
 
+        Parameters
+        ----------
+        html : bool
+            if True, returns the table as HTML, otherwise as DataFrame (default).
+
+        Example
+        -------
+         >>> dataset.infos()
+                   total_sequences  noadaptor  contaminant  lowqual  tooshort  toolong   extra0   extra1   extra2  MAX_LEN
+         noa.1             9036255     799955         1219   700374    299502  3376581  2434092  2709762  3092446       44
+         noa.2             8154560     407750         1318   680813    154587  4158921  2329190  2582052  2835568       44
+         noa.3             7725561     623037         1065   353401    279104  3505909  2216460  2402957  2483107       44
+         sample.1          8384889     714414         1192   685017    385537  3341987  2308291  2528638  2833546       44
+         sample.2          9120203     498202         1659   513308    104071  5664107  2673062  2972850  2976089       44
+         sample.3          8490958    1043590         1328   409697    187746  4004073  2243720  2555783  2647865       44
         """
         order = [
             'total_sequences',

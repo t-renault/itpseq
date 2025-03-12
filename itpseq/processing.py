@@ -50,7 +50,24 @@ def read_aafile_as_series(
     Returns
     -------
     Series
-        _description_
+        Series of inverse-toeprints for the replicate.
+
+    Examples
+    --------
+    Load the inverse-toeprints with a minimum peptide length of 3 and keep the internal stops.
+     >>> replicate.load_data(min_peptide=3, how='aa')
+     0           mFIVRGWQV
+     1                 mWQ
+     2                 m*T
+     3          mEVHATTSGQ
+     4          mHPNYTS*PV
+                   ...
+     2828877          mTGA
+     2828878     mRSATINLQ
+     2828879    mSLMPHHRGN
+     2828880          mHWH
+     2828881     mSSTRSSRS
+     Length: 2828882, dtype: object
     """
     with open(filename) as f:
         if min_peptide or max_peptide or how == 'aax':
