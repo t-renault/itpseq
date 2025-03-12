@@ -345,7 +345,7 @@ def export_data(
 
     import re
 
-    base_fname = re.sub(r'(\.assembled)?\.fastq$', '', fname)
+    base_fname = re.sub(r'(\.assembled)?\.f(ast)?q$', '', fname)
     f_log = base_fname + '.processed.log'
     f_json = base_fname + '.processed.json'
     f_extra = base_fname + '.processed.extra'
