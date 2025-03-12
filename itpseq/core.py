@@ -6,12 +6,16 @@ from functools import total_ordering, lru_cache, cached_property
 
 import re
 import datetime
-from copy import copy
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+from pandas.api.extensions import no_default
+from types import NoneType
+import warnings
 
 from .utils import *
 from .processing import *
@@ -73,13 +77,7 @@ class Replicate:
         self.sample = sample
         self.replicate = replicate
         self.labels = labels
-        self.sample_name = self.sample.name if sample else ''
-        self.name = (
-            f'{self.sample_name}.{self.replicate}'
-            if self.sample
-            else self.replicate
-        )
-        self.dataset = self.sample.dataset if sample else None
+        self.rename() # automatically set replicate name
         self._cache_dir = self.dataset.cache_path if self.dataset else None
         self.meta = kwargs
         #self._raw_data = None
@@ -94,6 +92,40 @@ class Replicate:
         if not isinstance(other, self.__class__):
             return NotImplemented
         return (self.sample, self.replicate) > (other.sample, other.replicate)
+
+    @property
+    def sample_name(self):
+        return self.sample.name if self.sample else ''
+
+    @property
+    def dataset(self):
+        return self.sample.dataset if self.sample else None
+
+    def rename(self, name=None):
+        """
+        Sets the name of the replicate from a parameter or automatically.
+
+        Parameters
+        ----------
+        name : str, optional
+            name to use as the new name for the replicate.
+
+        Examples
+        --------
+        # rename the replicate with a parameter
+        rep.rename(name='new_name')
+
+        # rename the replicate automatically from its parent sample data
+        rep.rename()
+        """
+        if name is None:
+            self.name = (
+            f'{self.sample.name}.{self.replicate}'
+            if self.sample
+            else self.replicate
+        )
+        else:
+            self.name = name
 
     def load_data(self, **kwargs):
         return read_aafile_as_series(
@@ -273,6 +305,62 @@ class Sample:
             if self.reference
             else self.name
         )
+
+    def rename(self, name, rename_replicates=True):
+        """
+        Changes the name of the sample.
+
+        Parameters
+        ----------
+        name : str
+            name to use as the new name for the sample.
+        rename_replicates : bool
+            If True (default), also rename the replicates based on the new sample name.
+
+        Examples
+        --------
+        # rename the sample to "new_name".
+        sample.rename(name='new_name')
+        """
+        self.name = name
+        if rename_replicates:
+            for replicate in self.replicates:
+                replicate.rename()
+
+    def copy(self, name=None, reference=no_default):
+        """
+        Creates a copy of the sample.
+
+        Parameters
+        ----------
+        name : str, optional
+            New name for the sample.
+        reference : Sample or None, optional
+            If a parameter is used, this will set it as the reference sample.
+
+        Returns
+        -------
+        Sample
+            A new Sample object with the same data as the original sample and optionally an updated name and reference.
+
+        Examples
+        --------
+        # Create a copy of "sample" and change its name to "new_name".
+        new_sample = sample.copy(name='new_name')
+
+        # Create a copy of "sample" with "sample2" as reference.
+        new_sample = sample.copy(reference=sample2)
+        """
+        new = deepcopy(self)
+        if name:
+            new.rename(name)
+        if reference is not no_default:
+            if isinstance(reference, (Sample, NoneType)):
+                new.reference = reference
+            else:
+                warnings.warn(f'reference must be a Sample or None, received: {type(reference)}. '
+                              f'Keeping the original reference {self.reference.name if self.reference else None}.')
+        return new
 
     def load_replicates(self): ## FIXME is this useful to keep?
         for replicate in self.replicates:
