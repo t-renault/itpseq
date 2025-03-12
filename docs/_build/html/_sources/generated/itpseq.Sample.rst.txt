@@ -16,6 +16,7 @@
       ~Sample.DE
       ~Sample.__init__
       ~Sample.all_logos
+      ~Sample.copy
       ~Sample.get_counts
       ~Sample.get_counts_ratio
       ~Sample.get_counts_ratio_pos
@@ -27,6 +28,7 @@
       ~Sample.itp_len_plot
       ~Sample.load_replicates
       ~Sample.logo
+      ~Sample.rename
       ~Sample.volcano
    
    

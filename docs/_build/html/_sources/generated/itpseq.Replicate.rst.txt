@@ -17,9 +17,17 @@
       ~Replicate.get_counts
       ~Replicate.load_data
       ~Replicate.logo
+      ~Replicate.rename
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Replicate.dataset
+      ~Replicate.sample_name
    
    
