@@ -266,6 +266,14 @@ class Sample:
     The `Sample` class is used to encapsulate information and behavior related to samples in a dataset.
     It manages details like labels, references, replicates, and metadata, and provides methods for analyzing
     replicates, performing differential enrichment analysis, and creating visualizations.
+
+    Examples
+    --------
+    Get a Sample from a DataSet
+     >>> sample = dataset['sample_name']
+
+    Compute the differential expression for positions E-P-A.
+     >>> sample.DE('E:A')
     """
 
     def __init__(
@@ -355,7 +363,13 @@ class Sample:
         Examples
         --------
         Rename the sample to "new_name".
+         >>> print(sample)
+         Sample(sample:[1, 2, 3], ref: noa)
          >>> sample.rename(name='new_name')
+         >>> print(sample)
+         Sample(new_name:[1, 2, 3], ref: noa)
+         >>> print(sample.replicates)
+         [Replicate(new_name.1), Replicate(new_name.2), Replicate(new_name.3)]
         """
         self.name = name
         if rename_replicates:
@@ -382,10 +396,12 @@ class Sample:
         --------
         Create a copy of "sample" and change its name to "new_name".
          >>> new_sample = sample.copy(name='new_name')
+         >>> print(new_sample)
          Sample(new_name:[1, 2, 3], ref: ref_name)
 
         Create a copy of "sample" with "sample2" as reference.
          >>> new_sample = sample.copy(reference=sample2)
+         >>> print(new_sample)
          Sample(new_name:[1, 2, 3], ref: sample2)
         """
         new = deepcopy(self)
@@ -412,8 +428,8 @@ class Sample:
         html : bool
             if True, returns the table as HTML, otherwise as DataFrame (default).
 
-        Example
-        -------
+        Examples
+        --------
          >>> sample.infos()
                    total_sequences  noadaptor  contaminant  lowqual  tooshort  toolong   extra0   extra1   extra2  MAX_LEN
          sample.1          8384889     714414         1192   685017    385537  3341987  2308291  2528638  2833546       44
@@ -456,7 +472,7 @@ class Sample:
             If None is passed, then this returns a DataFrame with the counts of each amino-acid per position.
 
         kwargs : optional
-            Optional parameters to pass to load_data (min_peptide, max_peptide, how, limit, sample)
+            Optional parameters to pass to load_data (min_peptide, max_peptide, how, limit, sample).
 
         Returns
         -------
@@ -500,6 +516,43 @@ class Sample:
     def get_counts_ratio(
         self, pos=None, factor=1_000_000, exclude_empty=True, **kwargs
     ):
+        """
+        Outputs the result of `get_counts` for the sample and its reference and add extra columns:
+        the normalized averages and the sample/reference ratio.
+
+        The average is normalized for a fixed number of counts (1 million by default).
+
+        If the sample does not have a reference, this will not compute a ratio.
+
+        Parameters
+        ----------
+        pos : str, optional
+            Position to consider when counting the reads (see `get_counts`).
+        factor : float, optional
+            The number of reads used to normalize the counts.
+        exclude_empty : bool, optional
+            Exclude the rows with incomplete peptides.
+        kwargs : optional
+            Optional parameters to pass to load_data (min_peptide, max_peptide, how, limit, sample).
+
+        Returns
+        -------
+        DataFrame
+
+        Examples
+        --------
+        Get the counts, average counts and ratio for each motif in the E-P-A sites
+         >>> sample.get_counts_ratio(pos='E:A')
+                 noa.1     noa.2     noa.3  sample.1  sample.2  sample.3           noa        sample     ratio
+          m*  445141.0  256474.0  142811.0  254850.0  107060.0  258338.0  89401.143052  75644.325430  0.846123
+          mS   91268.0   62794.0   35692.0   54993.0   20419.0   50959.0  20378.661544  15329.317262  0.752224
+           m   72454.0   49090.0   33596.0   52640.0   17860.0   34748.0  16741.602393  12675.370806  0.757118
+         ..        ...       ...       ...       ...       ...       ...           ...           ...       ...
+         WMM       NaN       2.0       2.0       1.0       NaN       8.0      0.741297      1.658007  2.236630
+         WMW       NaN       1.0       2.0       2.0       NaN       2.0      0.557864      0.698816  1.252663
+         MWW       NaN       NaN       2.0       NaN       4.0       2.0      0.748862      1.261906  1.685098
+         [8842 rows x 9 columns]
+        """
         counts = self.get_counts(pos=pos, **kwargs)  # compute position counts
         if exclude_empty:
             counts = counts[~counts.index.str.fullmatch(' *')]
@@ -542,6 +595,48 @@ class Sample:
         _nocache=False,
         **kwargs,
     ):
+        """
+        Computes the differential expression between the sample and its reference.
+
+        Parameters
+        ----------
+        pos : str
+            Ribosome positions to consider to compute the differential expression.
+        join : bool, optional
+            If True, joins the DE results back to the original `df`. Defaults to False.
+        quiet : bool, optional
+            If True, suppresses the console output of the `pydeseq2` library. Defaults to True.
+        multi : bool, optional
+            Whether to compute DE with a specific contrast (`cond` vs. `ref`). Defaults to True.
+        n_cpus : int, optional
+            The number of CPUs to utilize for parallel processing. Defaults to the total number of available CPUs.
+        filter_size: bool
+            Only considers reads for which an amino acid is present in all target positions.
+
+        Returns
+        -------
+        DataFrame
+            DataFrame of the differential expression statistics with a row per motif.
+
+        Examples
+        --------
+
+        Compute the differential expression for positions E-P
+         >>> sample.DE('E:P')
+                 baseMean  log2FoldChange     lfcSE       stat        pvalue          padj  log10pvalue  log10padj
+         QK   5537.704183        0.778031  0.073280  10.617238  2.477833e-26  7.582170e-24    25.605928  23.120206
+         VI   6874.891363        0.295160  0.371018   0.795542  4.262985e-01  7.718778e-01     0.370286   0.112451
+         MY    747.538317        0.263705  0.074294   3.549477  3.859965e-04           NaN     3.413417        NaN
+         YY   2216.501684        0.259860  0.068213   3.809545  1.392226e-04  6.086018e-03     3.856290   2.215667
+         WM    200.446070        0.226720  0.111555   2.032371  4.211614e-02           NaN     1.375551        NaN
+         ..           ...             ...       ...        ...           ...           ...          ...        ...
+         TP  15256.234795       -0.255940  0.061793  -4.141886  3.444618e-05  2.635133e-03     4.462859   2.579197
+         mK  10824.395771       -0.308538  0.210353  -1.466765  1.424400e-01  4.737680e-01     0.846368   0.324434
+         EP   8950.363473       -0.321266  0.068514  -4.689045  2.744828e-06  2.799725e-04     5.561485   3.552885
+         PP  20880.530910       -0.372203  0.078851  -4.720365  2.354220e-06  2.799725e-04     5.628153   3.552885
+         KK   7645.111411       -0.390365  0.096140  -4.060381  4.899280e-05  2.998359e-03     4.309868   2.523116
+         [420 rows x 8 columns]
+        """
         print(f'DE: {self.name}, {pos=}')
 
         if not self.reference:
@@ -649,7 +744,8 @@ class Sample:
         Examples
         --------
         Create a heatmap for positions E-P-A
-         >>> sample.hmap('E:A')
+         >>> sample.hmap('E', 'A')
+        .. image:: /_static/sample_hmap.png
         """
 
         if not r and not c:
@@ -824,9 +920,11 @@ class Sample:
         --------
         Create the default heatmap grid for all combinations of -2/E/P/A
          >>> sample.hmap_grid()
+        .. image:: /_static/sample_hmap_grid.png
 
         Create a heatmap grid for combinations of E/P/A
          >>> sample.hmap_grid(['E', 'P', 'A'])
+        .. image:: /_static/sample_hmap_grid_EPA.png
         """
 
         if not pos:
@@ -888,7 +986,7 @@ class Sample:
         Examples
         --------
 
-        Calculate the enrichement relative to the reference for the default -2/E/P/A positions
+        Calculate the enrichement relative to the reference for the default -2/E/P/A positions.
          >>> sample.get_counts_ratio_pos()
          amino-acid         H         R         K  ...         W         *         m
          site                                      ...
@@ -897,6 +995,17 @@ class Sample:
          P           1.093492  1.100380  1.045145  ...  1.107238       NaN  0.793043
          A           0.831129  1.005783  0.967491  ...  0.995833  1.143702  0.757118
          [4 rows x 22 columns]
+
+        Calculate the enrichement relative to the reference for custom positions.
+         >>> sample.get_counts_ratio_pos(('-3', '-2', 'E', 'P', 'A'))
+         amino-acid         H         R         K  ...         W         *         m
+         site                                      ...
+         -3          1.032528  1.014771  0.987577  ...  1.045751       NaN  0.903142
+         -2          1.062861  1.064912  1.013528  ...  1.048815       NaN  0.907531
+         E           1.036543  1.018309  0.940488  ...  1.043321       NaN  0.934014
+         P           1.092992  1.101174  1.045651  ...  1.106943       NaN  0.792341
+         A           0.830804  1.005100  0.968136  ...  0.993697  1.143881  0.753449
+         [5 rows x 22 columns]
         """
 
         if not pos:
@@ -1050,7 +1159,63 @@ class Sample:
         density_thresh=0,
         **kwargs,
     ):
+        """
+        Draws a volcano plot from the Differential Expression data.
 
+        Parameters
+        ----------
+        pos : str, optional
+            Positions used to compute the :meth:`~itpseq.Sample.DE`.
+        query : str, optional
+            Query used to select points to highlight and annotate by data.
+        motif : str, optional
+            Query used to select points to highlight by motif.
+        ax : matplotlib.axes.Axes, optional
+            ax to use for plotting, otherwise create a new figure.
+        x : str, optional
+            Column from the :meth:`~itpseq.Sample.DE` output to use as the x-axis.
+        y : str, optional
+            Column from the :meth:`~itpseq.Sample.DE` output to use as the y-axis.
+        query_color : str, optional
+            Color of the points in the query.
+        motif_color : str, optional
+            Color of the points in the motif.
+        color : str, optional
+            Color of the background points.
+        params : dict, optional
+            Optional parameters passed to scatter.
+        annotate : bool, optional
+            If True, annotate the points from the query.
+        text_stroke : bool, optional
+
+        outfile : str, optional
+            If specified, save the figure to a file.
+        density_thresh : int, optional
+
+        kwargs : optional
+            Optional parameters passed to :meth:`~itpseq.Sample.DE`.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+
+        Examples
+        --------
+        Create a volcano plot for positions E-A.
+         >>> sample.volcano('E:A')
+        .. image:: /_static/sample_volcano.png
+
+        Create a volcano plot for positions -2/E/P/A
+        Highlight and annotate the points above a threshold abs(L2FC) and log10(p-value).
+         >>> sample.volcano('-2:A', query='(abs(log2FoldChange) > 2) & (log10pvalue > 10)')
+        .. image:: /_static/sample_volcano_query.png
+
+        Create a volcano plot for positions -2/E/P/A
+        Highlight the points for motifs containing a central QK motif.
+         >>> sample.volcano('-2:A', motif='.QK.', motif_color='#FFAC1E',
+                            query='', annotate=False)
+        .. image:: /_static/sample_volcano_motif.png
+        """
         df = self.DE(pos=pos, **kwargs)
         if df is None:
             print(f'Skipping volcano plot for {self}')
@@ -1169,13 +1334,46 @@ class Sample:
         return ax
 
     def all_logos(self, logo_kwargs=None, **kwargs):
+        """
+        Creates a logo for all positions for each replicate in the sample.
+
+        Parameters
+        ----------
+        logo_kwargs : dict, optional
+            Optional parameters to pass to logomaker.Logo.
+        kwargs : optional
+            Optional parameters to pass to :meth:`~itpseq.Sample.logo`.
+
+        Examples
+        --------
+         >>> tcx2.all_logos()
+        .. image:: /_static/sample_all_logos.png
+        """
         f, axes = plt.subplots(nrows=len(self.replicates), sharex=True)
         for r, ax in zip(self.replicates, axes.flat):
             r.logo(logo_kwargs=logo_kwargs, ax=ax, **kwargs)
             ax.set_title(r)
 
     def logo(self, pos=None, logo_kwargs=None, ax=None, **kwargs):
+        """
+        Creates a logo for the selected positions.
 
+        Parameters
+        ----------
+        pos : tuple
+            Positions to use in the logo (see :meth:`~itpseq.Sample.get_counts_ratio_pos`)
+        logo_kwargs : dict, optional
+            Optional parameters to pass to logomaker.Logo.
+        ax : matplotlib.axes.Axes, optional
+            ax to use for plotting, otherwise create a new figure.
+        kwargs : optional
+            Optional parameters to pass to :meth:`~itpseq.Sample.get_counts_ratio_pos`.
+
+        Examples
+        --------
+         >>> tcx2.logo()
+        .. image:: /_static/sample_logo.png
+        """
         df = np.log2(
             self.get_counts_ratio_pos(pos=pos, **kwargs)
         ).fillna(0)
@@ -1183,7 +1381,9 @@ class Sample:
         import logomaker
 
         if logo_kwargs is None:
-            logo_kwargs = {'color_scheme': 'NajafabadiEtAl2017'}
+            logo_kwargs = {'color_scheme': 'NajafabadiEtAl2017',
+                           'flip_below': False,
+                           }
 
         # df = logomaker.transform_matrix(df, from_type='counts', to_type=type)
         # print(df)
@@ -1282,6 +1482,11 @@ class Sample:
         - The x-axis represents the distance from the 3' end of the inverse-toeprint in nucleotides.
         - The y-axis shows the counts of inverse-toeprints, either absolute or normalized per million reads.
         - Each replicate is plotted independently and distinguished by the `hue` attribute in the plot.
+
+        Examples
+        --------
+         >>> sample.itp_len_plot()
+        .. image:: /_static/sample_itp_len_plot.png
         """
 
         df_len = self.itp_len.copy()
@@ -1344,6 +1549,49 @@ class Sample:
         ax=None,
         interactive=False,
     ):
+        """
+        Plots a virtual inverse-toeprint gel.
+
+        Parameters
+        ----------
+        plot : str, optional
+            Type of representation. "bands" will display lines with a width proportional to the number of reads.
+            "shades" will display
+        norm : str, optional
+            Type of normalization for each lane (possible values are None, 'mean', 'median', 'max', 'std')
+        norm_range : tuple, optional
+            Range of lengths considered to perform the normalization.
+            Defaults to 21-51, which corresponds to the first 10 codons after the start.
+        exposure : int, optional
+            Modulates the global intensity of the bands in the "bands" type of plot.
+        limit: tuple, optional
+            Limits the visible range of lengths.
+        show_range : bool, optional
+            Shows the regions excluded from the normalization in light red.
+        ax : matplotlib.axes.Axes, optional
+             ax to use for plotting, otherwise create a new figure.
+        interactive : bool, optional
+            If True, creates an interactive display to test all parameters.
+            Requires to run in a notebook with ipywidgets.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+
+        Examples
+        --------
+        Create a virtual inverse-toeprint with bands.
+         >>> sample.itoeprint(exposure=3)
+        .. image:: /_static/sample_itoeprint.png
+
+        Create a virtual inverse-toeprint with shades.
+         >>> sample.itoeprint(plot='shades')
+        .. image:: /_static/sample_itoeprint_shades.png
+
+        Create an interactive visualization (requires running in a notebook with ipywidgets).
+         >>> sample.itoeprint(interactive=True)
+        .. image:: /_static/sample_itoeprint_interactive.png
+        """
         if interactive:
             from ipywidgets import interact, fixed
             import ipywidgets as widgets
@@ -1384,7 +1632,7 @@ class DataSet:
     Loads an iTP-Seq dataset and provides methods for analyzing and visualizing the data.
 
     A DataSet object is constructed to handle iTP-Seq Samples with their respective Replicates.
-    By default, it infers the files to uses in the provided directory by looking for "*.processed.json" files produced
+    By default, it infers the files to uses in the provided directory by looking for "\*.processed.json" files produced
     during the initial step of pre-processing and filtering the fastq files.
     It uses the pattern of the file names to group the Replicates into a Sample, and to define which condition
     is the reference in the DataSet (the Sample with name "noa" by default).
@@ -1583,6 +1831,25 @@ class DataSet:
         return {k: samples[k] for k in sorted(samples)}
 
     def reorder_samples(self, order, validate=True, reorder_replicates=True):
+        """
+        Reorders the samples in the DataSet.
+
+        This method is useful to specify a custom order to use in the different graphs
+        (e.g. in :meth:`~itpseq.DataSet.itoeprint`).
+
+        Parameters
+        ----------
+        order : list
+            New order of the samples
+        validate : bool
+            Ensure the new order contains all samples.
+        reorder_replicates : bool
+            Also reorder the replicates.
+
+        Examples
+        --------
+         >>> data.reorder_samples(['sampleY', 'sampleX', 'reference'])
+        """
         if validate:
             assert set(order) == set(self.samples.keys())
         self.samples = {k: self.samples[k] for k in order}
@@ -1618,8 +1885,8 @@ class DataSet:
         html : bool
             if True, returns the table as HTML, otherwise as DataFrame (default).
 
-        Example
-        -------
+        Examples
+        --------
          >>> dataset.infos()
                    total_sequences  noadaptor  contaminant  lowqual  tooshort  toolong   extra0   extra1   extra2  MAX_LEN
          noa.1             9036255     799955         1219   700374    299502  3376581  2434092  2709762  3092446       44
@@ -1656,17 +1923,16 @@ class DataSet:
     def DE(self, pos='E:A', **kwargs):
         """Computes the log2-FoldChange for each motif described by `pos` for each sample in the DataSet relative to their reference
 
-        Atttributes
+        Attributes
         -----------
         pos: str
             position of the motif to consider.
             This ca be a range of positions (e.g. '-2:A' for -2/E/P/A sites)
             or a combination of disjoint positions (e.g. 'E,A' for the combination of E and A sites).
-        **kwargs: dict
+        kwargs:
             parameters passed to `Sample.get_counts` computes the counts for the given motif.
             for example `min_peptide=3` to consider only peptides of at least 3 amino acids.
-
-        ."""
+        """
         out = {}
         for sample in self.samples_with_ref.values():
             # out[(sample.name, pos)] = sample.DE(pos=pos, **kwargs)
@@ -1680,12 +1946,60 @@ class DataSet:
         row=None,
         min_codon=0,
         max_codon=10,
-        agg=False,
         limit=100,
         norm=True,
         hue='auto',
         plt_kwargs=dict(kind='line', height=2, aspect=3),
     ):
+        """
+        Generates a line plot of inverse-toeprint (ITP) counts per length.
+
+        This method uses the output of `itp_len` to create a line plot showing the counts of
+        inverse-toeprints across lengths for each replicate. Optionally, counts can be normalized
+        (per million reads), and the plotted lengths can be limited.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes, optional
+            Pre-existing axes to draw the plot on. A new figure and axes are created if not provided.
+        col: string, optional
+            attribute to use as columns in the FacetGrid
+        row: string, optional
+            attribute to use as rows in the FacetGrid
+        min_codon : int, optional
+            The minimum codon position to annotate on the plot. Defaults to 0.
+        max_codon : int, optional
+            The maximum codon position to annotate on the plot. Defaults to 10.
+        limit : int, optional
+            The maximum length to include in the plot. Defaults to 100.
+        norm : bool, optional
+            Whether to normalize counts to reads per million. Defaults to False.
+        hue: str, optional
+            Parameter to use a hue in the FacetGrid (by default 'replicate').
+        plt_kwargs: dict, optional
+            parameters used in the FacetGrid if col/row is used.
+
+        Returns
+        -------
+        matplotlib.axes.Axes or seaborn.axisgrid.FacetGrid
+
+        Notes
+        -----
+        - The x-axis represents the distance from the 3' end of the inverse-toeprint in nucleotides.
+        - The y-axis shows the counts of inverse-toeprints, either absolute or normalized per million reads.
+        - Each replicate is plotted independently and distinguished by the `hue` attribute in the plot.
+
+        Examples
+        --------
+        Plot a line with error band for each sample.
+         >>> dataset.itp_len_plot()
+        .. image:: /_static/dataset_itp_len_plot.png
+
+        Create a figure with a subplot per sample and a line per replicate.
+         >>> dataset.itp_len_plot(row='sample')
+        .. image:: /_static/dataset_itp_len_plot_row.png
+        """
+
         df_len = pd.concat(
             (s.itp_len for s in self.samples.values()), ignore_index=True
         )
@@ -1756,6 +2070,32 @@ class DataSet:
     itoeprint = Sample.itoeprint
 
     def report(self, template='report', output=None):
+        """
+        Create a report for the DataSet.
+
+        Parameters
+        ----------
+        template : str, optional
+            Which template to use for the report.
+            There is currently only one template, but you can add custom ones in `itpseq/templates/`.
+        output : str, optional
+            Name of the output file in which to write the report.
+            The type of the file in inferred from the extention.
+            Only PDF (`.pdf)` and HTML (`.html`) are supported.
+
+        Examples
+        --------
+        Create a PDF report
+         >>> dataset.report(output='my_report.pdf')
+
+        Create an HTML report
+         >>> dataset.report(output='my_report.html')
+
+        Create an HTML report in the notebook
+         >>> dataset.report()
+        """
+
+
         from jinja2 import Environment, FileSystemLoader, PackageLoader
 
         template_dir = Path(__file__).resolve().parent / 'templates'
