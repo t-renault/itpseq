@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'iTP-Seq'
 copyright = '2025, Thibaud Renault'
 author = 'Thibaud Renault'
-release = '0.0.1a6'
+release = '0.0.1a7'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
