@@ -673,12 +673,11 @@ class Sample:
         if kwargs:
             _cache_prefix += f'_{"_".join([f"{key}={value}" for key, value in kwargs.items()])}'
 
-        return DE(
+        res = DE(
             df,
             sample_df,
             cond=cond,
             ref=ref,
-            join=join,
             quiet=quiet,
             multi=multi,
             n_cpus=n_cpus,
@@ -687,6 +686,9 @@ class Sample:
             _cache_dir=self._cache_dir,
             _cache_prefix=_cache_prefix,
         )
+        if join:
+            return df.join(res, how='right')
+        return res
 
     def hmap(
         self,
