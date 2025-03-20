@@ -136,6 +136,32 @@ class Replicate:
             **kwargs,
         )
 
+    def copy(self, name=None):
+        """
+        Creates a copy of the replicate.
+
+        Parameters
+        ----------
+        name : str, optional
+            New name for the sample.
+
+        Returns
+        -------
+        Replicate
+            A new Replicate object with the same data as the original Replicate and optionally an updated name.
+
+        Examples
+        --------
+        Create a copy of "replicate" and change its name to "new_name".
+         >>> new_rep = replicate.copy(name='new_name')
+         >>> print(new_rep)
+         Replicate(new_name:[1, 2, 3], ref: ref_name)
+        """
+        new = deepcopy(self)
+        if name:
+            new.rename(name)
+        return new
+
     @lru_cache
     def get_counts(self, pos=None, **kwargs):
         """
