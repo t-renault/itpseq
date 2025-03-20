@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
+from .config import *
+
 DEFAULTS = dict(
     a1='GTATAAGGAGGAAAAAAT',
     a2='GGTATCTCGGTGTGACTG',
@@ -334,33 +337,39 @@ def export_data(
 
     print(f'exporting data from: {filename}')
 
-    if '/' in filename:
-        path, fname = filename.rsplit('/', 1)
-    else:
-        fname = filename
+    fname = Path(filename)
+    if not fname.exists():
+        raise ValueError(f'"{fname}" does not exist')
+    if not fname.is_file():
+        raise ValueError(f'"{fname}" is not a file')
+
     if outdir:
-        path = outdir.rstrip('/') + '/'
-    if not path:
-        path = '.'
+        outdir = Path(outdir)
+        if not outdir.exists():
+            outdir.mkdir()
+    else:
+        outdir = fname.parent
+
+    path = fname.parent
 
     import re
 
-    base_fname = re.sub(r'(\.assembled)?\.f(ast)?q$', '', fname)
-    f_log = base_fname + '.processed.log'
-    f_json = base_fname + '.processed.json'
-    f_extra = base_fname + '.processed.extra'
-    f_seq = base_fname + '.processed.txt'
-    f_seq_aa = base_fname + '_aa.processed.txt'
+    base_fname = outdir / re.sub(r'(\.assembled)?\.f(ast)?q$', '', fname.name)
+    f_log = base_fname.with_suffix(f'.{ITP_FILE_SUFFIX}.log')
+    f_json = base_fname.with_suffix(f'.{ITP_FILE_SUFFIX}.json')
+    # f_extra = base_fname.with_suffix(f'.{ITP_FILE_SUFFIX}.extra')
+    f_seq_nuc = base_fname.with_suffix(f'.nuc.{ITP_FILE_SUFFIX}.txt')
+    f_seq_aa = base_fname.with_suffix(f'.aa.{ITP_FILE_SUFFIX}.txt')
 
     max_untranslated_overhang = untranslated_overhang + 2
 
     if stats:
-        with open(f'{path}/{f_json}', 'w') as f_json:
+        with open(f_json, 'w') as f_json:
             import json
 
             f_json.write(json.dumps(stats))
 
-        with open(f'{path}/{f_log}', 'w') as f_log:
+        with open(f_log, 'w') as f_log:
             f_log.write('')
             N = len(str(stats['total_sequences'])) + 2
             f_log.write(
@@ -385,8 +394,8 @@ def export_data(
                     'Distribution of subsequences length:\nno sequences\n'
                 )
             f_log.write(simple_graph(stats['lengths'], start=1) + '\n')
-    if extras:
-        np.array(extras, dtype=np.int8).tofile(f'{path}/{f_extra}')
+    # if extras:
+    #    np.array(extras, dtype=np.int8).tofile(f_extra)
     if seqs:
         # <----------- MAX ------------>
         # [1][2][3][4][5][6][7][8][9][X] # MAX_PROT
@@ -396,9 +405,7 @@ def export_data(
         # .....................[E][P][A]..............
         #                               xxxxxxxxxxxxxx  # max_untranslated_overhang
 
-        with open(f'{path}/{f_seq}', 'w') as f, open(
-            f'{path}/{f_seq_aa}', 'w'
-        ) as f_aa:
+        with open(f_seq_nuc, 'w') as f, open(f_seq_aa, 'w') as f_aa:
             if not MAX:
                 MAX = 12
             MAX = max(
