@@ -11,7 +11,7 @@ from pandas import DataFrame
 from .utils import fcache
 
 __all__ = [
-    'read_aafile_as_series',
+    'read_itp_file_as_series',
     'read_log_json',
     'code2pos',
     'ranges',
@@ -26,7 +26,7 @@ __all__ = [
 @lru_cache
 @fcache
 # @log
-def read_aafile_as_series(
+def read_itp_file_as_series(
     filename,
     min_peptide=None,
     max_peptide=None,

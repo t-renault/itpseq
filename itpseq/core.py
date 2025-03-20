@@ -127,9 +127,9 @@ class Replicate:
         else:
             self.name = name
 
-    @wraps(read_aafile_as_series)
+    @wraps(read_itp_file_as_series)
     def load_data(self, **kwargs):
-        return read_aafile_as_series(
+        return read_itp_file_as_series(
             self.filename,
             _cache_dir=self._cache_dir,
             _cache_prefix=self.name,
