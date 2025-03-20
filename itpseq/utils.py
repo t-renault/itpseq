@@ -2,6 +2,7 @@ import io
 import logging
 from functools import wraps
 from pathlib import Path
+from collections import defaultdict
 
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -19,6 +20,7 @@ __all__ = [
     'plot_to_html',
     'table_to_html',
     'dict_to_tuple',
+    'dedup_names',
 ]
 
 logging.basicConfig(
@@ -47,6 +49,40 @@ def dict_to_tuple(d, *, ignore=None, keep=None):
             )
         )
     return tuple(sorted(d.items()))
+
+
+def dedup_names(names, sep='.'):
+    """
+    Rename labels if duplicates exist.
+
+    Inspired by pandas.io.common.dedup_names
+
+    Parameters
+    ----------
+    names :
+        Iterable of names to deduplicate.
+
+    sep : str, optional
+        String to use a separator with the suffix.
+
+    Examples
+    --------
+    >>> dedup_names(['x', 'y', 'x', 'x'])
+    ['x', 'y', 'x.1', 'x.2']
+    """
+    names = list(names)
+    counts = defaultdict(int)
+
+    for i, label in enumerate(names):
+        cur_count = counts[label]
+        while cur_count > 0:
+            counts[label] = cur_count + 1
+            label = f'{label}{sep}{cur_count}'
+            cur_count = counts[label]
+        names[i] = label
+        counts[label] = cur_count + 1
+
+    return names
 
 
 def log(func):

@@ -28,24 +28,24 @@ __all__ = [
 # @log
 def read_itp_file_as_series(
     filename,
+    how='aax',
     min_peptide=None,
     max_peptide=None,
-    how='aax',
     limit=None,
     sample=None,
 ):
-    """Reads the aminoacid inverse-toeprint file as a pandas Series, filters entries based on peptide length and stop codons.
+    """Reads the nucleotide/aminoacid inverse-toeprint file as a pandas Series, filters entries based on peptide length and stop codons.
 
     Parameters
     ----------
+    how : str, optional
+        Mode to filter the stops: "aax" will remove peptides with a stop before the A-site, by default 'aax'
     filename : Path or str
-        Path to the amino-acid file
+        Path to the nucleotide/amino-acid file
     min_peptide : int, optional
         Minimum peptide length to keep, by default None
     max_peptide : int, optional
         Maximum peptide length to keep, by default None
-    how : str, optional
-        Mode to filter the stops: "aax" will remove peptides with a stop before the A-site, by default 'aax'
 
     Returns
     -------
@@ -70,6 +70,7 @@ def read_itp_file_as_series(
      Length: 2828882, dtype: object
     """
     with open(filename) as f:
+        # FIXME decide how to handle min_peptide/max_peptide for non-amino-acids
         if min_peptide or max_peptide or how == 'aax':
             S = '*' if how == 'aax' else ''
             min_ = min_peptide - 1 if min_peptide else ''

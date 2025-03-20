@@ -7,6 +7,7 @@ from functools import total_ordering, lru_cache, cached_property, wraps
 import re
 import datetime
 from copy import deepcopy
+import uuid
 
 import numpy as np
 import pandas as pd
@@ -20,6 +21,7 @@ import warnings
 from .utils import *
 from .processing import *
 from .plotting import *
+from .config import *
 
 IPYTHON = False
 try:
@@ -66,21 +68,19 @@ class Replicate:
         self,
         *,
         replicate: Optional[str] = None,
-        filename: Optional[Path] = None,
+        file_prefix: Optional[Path] = None,
         sample: Optional['Sample'] = None,
         labels: Optional[dict] = None,
         **kwargs,
     ):
         # print(f'Replicate {kwargs=}')
-        self.filename = filename
-        # self.file_pattern = file_pattern or '{lib_type}_{sample}{replicate}_aa.processed.txt'
+        self.file_prefix = file_prefix
         self.sample = sample
         self.replicate = replicate
         self.labels = labels
         self.rename() # automatically set replicate name
         self._cache_dir = self.dataset.cache_path if self.dataset else None
         self.meta = kwargs
-        #self._raw_data = None
 
     def __repr__(self):
         return f'Replicate({self.name})'
@@ -91,7 +91,28 @@ class Replicate:
     def __gt__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (self.sample, self.replicate) > (other.sample, other.replicate)
+        if not self.sample and other.sample:
+            try:
+                return self.replicate > other.replicate
+            except TypeError:
+                return str(self.replicate) > str(other.replicate)
+        else:
+            try:
+                return (self.sample, self.replicate) > (other.sample, other.replicate)
+            except TypeError:
+                return (self.sample, str(self.replicate)) > (other.sample, str(other.replicate))
+
+    @property
+    def filename(self):
+        return self.file_prefix + f'.nuc.{ITP_FILE_SUFFIX}.txt'
+
+    @property
+    def aa_filename(self):
+        return self.file_prefix + f'.aa.{ITP_FILE_SUFFIX}.txt'
+
+    @property
+    def json_filename(self):
+        return self.file_prefix + f'.{ITP_FILE_SUFFIX}.json'
 
     @property
     def sample_name(self):
@@ -121,29 +142,25 @@ class Replicate:
         if name is None:
             self.name = (
             f'{self.sample.name}.{self.replicate}'
-            if self.sample
+            if self.sample and self.replicate
             else self.replicate
         )
         else:
             self.name = name
 
-    @wraps(read_itp_file_as_series)
-    def load_data(self, **kwargs):
-        return read_itp_file_as_series(
-            self.filename,
-            _cache_dir=self._cache_dir,
-            _cache_prefix=self.name,
-            **kwargs,
-        )
-
-    def copy(self, name=None):
+    def copy(self, sample=None, replicate=None, name=None):
         """
         Creates a copy of the replicate.
 
         Parameters
         ----------
+        sample : Sample, optional
+            New sample for the replicate.
+        replicate : optional
+            New identifier or label for the replicate.
         name : str, optional
-            New name for the sample.
+            Instead of passing a Sample and replicate identifier, use a string as new name for the replicate.
+            This will not assign a reference to a Sample.
 
         Returns
         -------
@@ -153,14 +170,40 @@ class Replicate:
         Examples
         --------
         Create a copy of "replicate" and change its name to "new_name".
-         >>> new_rep = replicate.copy(name='new_name')
+         >>> new_rep = replicate.copy(replicate='new_name')
          >>> print(new_rep)
-         Replicate(new_name:[1, 2, 3], ref: ref_name)
+         Replicate(new_name)
         """
         new = deepcopy(self)
-        if name:
+        if sample or replicate:
+            new.sample = sample
+            new.replicate = replicate
+            new.rename()
+        else:
             new.rename(name)
         return new
+
+    def infos(self):
+        return read_log_json(self.json_filename)
+
+    @wraps(read_itp_file_as_series)
+    def load_data(self, how='aax', **kwargs):
+        if how in {'aa', 'aax'}:
+            filename = self.aa_filename
+        # elif how == 'codons':  # TODO
+        #    filename = self.filename
+        elif how == 'nuc':
+            filename = self.filename
+        else:
+            raise ValueError(f"how should be among ['aa', 'aax', 'nuc'], received: {how}")
+
+        return read_itp_file_as_series(
+            filename,
+            how=how,
+            _cache_dir=self._cache_dir,
+            _cache_prefix=self.name,
+            **kwargs,
+        )
 
     @lru_cache
     def get_counts(self, pos=None, **kwargs):
@@ -305,39 +348,55 @@ class Sample:
     def __init__(
         self,
         *,
-        labels: dict,
+        replicates=None,
+        labels=None,
         reference=None,
         dataset=None,
-        data=None,
+        #data=None,
         keys=('sample',),
+        name=None,
         **kwargs,
     ):
-        """ """
-        # print(f'Sample {kwargs=}')
+        """"""
+
         self.labels = labels
-        self.name = '.'.join(labels[k] for k in keys)
+        if name:
+            self.name = name
+        elif labels:
+            #self.name = '.'.join(labels[k] or '' for k in keys) # FIXME decide of best way to handle empty keys
+            self.name = '.'.join(labels[k] for k in keys if labels[k] is not None)
+        else:
+            self.name = f'{uuid.uuid4()}' # if no name was provided use a UUID
         self.dataset = dataset
         self._cache_dir = self.dataset.cache_path if self.dataset else None
-        self.reference = reference  # If None, this sample is the reference
-        self.data = data
+        self.reference = reference  # If None, this sample has no reference
         self.meta = kwargs
-        # self.replicates = []
-        #
-        # for p, rep in self.paths:
-        #    self.replicates.append(Replicate(filename=p, replicate=rep, sample=self))
+        #self.data = data
 
-        # self.replicates = sorted([Replicate(filename=p, replicate=rep, sample=self, labels=labels)
-        #                          for p, rep, labels in self.paths])
+        if replicates is None:
+            replicates = {}
+        elif isinstance(replicates, list):
+            names = [d.get('replicate') if isinstance(d, dict)
+                     else d.replicate if isinstance(d, Replicate)
+                     else f'sample{i}'
+                     for i, d in enumerate(replicates, start=1)]
+            replicates = dict(zip(dedup_names(names), replicates))
+
         self.replicates = sorted(
-            [Replicate(**data, sample=self) for data in self.data]
+            [Replicate(**{**data, 'replicate': k}, sample=self)
+             if isinstance(data, dict)
+             else data.copy(sample=self, replicate=k)
+             for k, data in replicates.items()
+             ],
         )
+
 
     def __getitem__(self, key):
         return self.replicates[key]
 
     def __repr__(self):
         r = (
-            f':[{", ".join([r.replicate for r in self.replicates])}]'
+            f':[{", ".join([str(r.replicate) for r in self.replicates])}]'
             if self.replicates
             else ''
         )
@@ -441,9 +500,9 @@ class Sample:
                               f'Keeping the original reference {self.reference.name if self.reference else None}.')
         return new
 
-    def load_replicates(self): ## FIXME is this useful to keep?
+    def load_replicates(self, how='aax'): ## FIXME is this useful to keep?
         for replicate in self.replicates:
-            replicate.load_data()
+            replicate.load_data(how=how)
 
     def infos(self, html=False):
         """
@@ -476,7 +535,7 @@ class Sample:
         key = {c: i for i, c in enumerate(order)}
         out = (
             pd.DataFrame.from_dict(
-                {r.name: r.meta['fastq'] for r in self.replicates},
+                {r.name: r.infos() for r in self.replicates},
                 orient='index',
             )
             .sort_index(axis=1, key=lambda x: x.map(key))
@@ -1465,7 +1524,7 @@ class Sample:
         return (
             pd.concat(
                 {
-                    r.replicate: pd.Series(r.meta['fastq']['lengths'])
+                    r.replicate: pd.Series(r.infos()['lengths'])
                     for r in self.replicates
                 },
                 axis=1,
@@ -1557,7 +1616,7 @@ class Sample:
         return (
             pd.concat(
                 {
-                    r.name: pd.Series(r.meta['fastq']['lengths'])
+                    r.name: pd.Series(r.infos()['lengths'])
                     for r in self.replicates
                 },
                 axis=1,
@@ -1656,11 +1715,11 @@ class Sample:
 
 
 class DataSet:
-    r"""
+    fr"""
     Loads an iTP-Seq dataset and provides methods for analyzing and visualizing the data.
 
     A DataSet object is constructed to handle iTP-Seq Samples with their respective Replicates.
-    By default, it infers the files to uses in the provided directory by looking for "\*.processed.json" files produced
+    By default, it infers the files to uses in the provided directory by looking for "\*.{ITP_FILE_SUFFIX}.json" files produced
     during the initial step of pre-processing and filtering the fastq files.
     It uses the pattern of the file names to group the Replicates into a Sample, and to define which condition
     is the reference in the DataSet (the Sample with name "noa" by default).
@@ -1671,8 +1730,9 @@ class DataSet:
         Path to the data directory containing the output files from the fastq pre-processing.
     result_path: str or Path
         Path to the directory where the results of the analysis will be saved.
-    samples: dict or None
-        Dictionary of Samples in the DataSet. By default, it is None and will be populated automatically.
+    samples: list or dict or None
+        List or dictionary of Samples in the DataSet.
+        By default, it is None and will be populated automatically if data_path is provided.\
     keys: tuple
         Properties in the file name to use for identifying the reference.
     ref_labels: str or tuple
@@ -1681,13 +1741,11 @@ class DataSet:
         Path used to cache intermediate results. By default, this creates a subdirectory called "cache" in the result_path directory.
     file_pattern: str
         Regex pattern used to identify the sample files in the data_path directory.
-        If None, defaults to `r'(?P<lib_type>[^_]+)_(?P<sample>[^_\d]+)(?P<replicate>\d+)\.processed\.json'`
-        which matches files like nnn15_noa1.processed.json, nnn15_tcx2.processed.json, etc.
-    aafile_pattern: str
-        Pattern used to identify the amino acid files in the data_path directory.
-        It will use the values captured in the `file_pattern` regex to construct the file names.
-        If None, defaults to `'{lib_type}_{sample}{replicate}_aa.processed.txt'`
+        If None, defaults to `r'(?P<lib_type>[^_]+)_(?P<sample>[^_\d]+)(?P<replicate>\d+)'`
+        which matches files like nnn15_noa1.{ITP_FILE_SUFFIX}.json, nnn15_tcx2.{ITP_FILE_SUFFIX}.json, etc.
 
+    """
+    """
     Examples
     --------
     Creating a DataSet from a simple antibiotic treatment (tcx) vs no treatement (noa) with 3 replicates each (1, 2, 3).
@@ -1697,7 +1755,7 @@ class DataSet:
      >>> data = DataSet(data_path='.')
      >>> data
      DataSet(data_path=PosixPath('.'),
-             file_pattern='(?P<lib_type>[^_]+)_(?P<sample>[^_\\d]+)(?P<replicate>\\d+)\\.processed\\.json',
+             file_pattern='(?P<lib_type>[^_]+)_(?P<sample>[^_\\d]+)(?P<replicate>\\d+)',
              samples=[Sample(nnn15.noa:[1, 2, 3]),
                       Sample(nnn15.tcx:[1, 2, 3], ref: nnn15.noa)],
              )
@@ -1706,7 +1764,7 @@ class DataSet:
      >>> data = DataSet(data_path='.', keys=['sample'])
      >>> data
      DataSet(data_path=PosixPath('.'),
-             file_pattern='(?P<lib_type>[^_]+)_(?P<sample>[^_\\d]+)(?P<replicate>\\d+)\\.processed\\.json',
+             file_pattern='(?P<lib_type>[^_]+)_(?P<sample>[^_\\d]+)(?P<replicate>\\d+)',
              samples=[Sample(noa:[1, 2, 3]),
                       Sample(tcx:[1, 2, 3], ref: noa)],
              )
@@ -1720,7 +1778,7 @@ class DataSet:
 
     def __init__(
         self,
-        data_path: Path = '.',
+        data_path: Path = None,
         result_path: Path = None,
         samples: Optional[dict] = None,
         keys=None,
@@ -1728,31 +1786,36 @@ class DataSet:
         # max_workers: int = 4,
         cache_path=None,
         file_pattern=None,
-        aafile_pattern=None,
+        #aafile_pattern=None,
     ):
-        self.data_path = Path(data_path)
-        if result_path is None:
+        self.data_path = Path(data_path) if data_path else None
+        if result_path is None and self.data_path:
             result_path = self.data_path / 'results'
         if cache_path is None:
-            cache_path = self.data_path / 'results/cache'
-        self.result_path = Path(result_path)
-        if not self.result_path.exists():
+            if self.data_path:
+                cache_path = self.data_path / 'results' / 'cache'
+            else:
+                import tempfile
+                cache_path = tempfile.TemporaryDirectory().name
+                print(f'Creating temporary cache directory: "{cache_path}"')
+        self.result_path = Path(result_path) if result_path else None
+        if self.result_path and not self.result_path.exists():
             self.result_path.mkdir(parents=True)
         self.cache_path = Path(cache_path)
         if not self.cache_path.exists():
             self.cache_path.mkdir(parents=True)
-        # self.file_pattern = r'nnn15_(?P<sample>[^_]+)(?P<replicate>\d+)\.processed\.json'
+        # self.file_pattern = r'nnn15_(?P<sample>[^_]+)(?P<replicate>\d+)'
         self.file_pattern = (
             file_pattern
-            or r'(?P<lib_type>[^_]+)_(?P<sample>[^_\d]+)(?P<replicate>\d+)\.processed\.json'
+            or FILE_PATTERN
         )
-        self.aafile_pattern = (
-            aafile_pattern or '{lib_type}_{sample}{replicate}_aa.processed.txt'
-        )
+        # self.aafile_pattern = (
+        #     aafile_pattern or f'{lib_type}_{sample}{replicate}.aa.{ITP_FILE_SUFFIX}.txt'
+        # )
         # if no keys are provided, use all the named capturing groups of file_pattern, excepted "replicate"
         self.keys = (
             keys
-            if keys
+            if keys is not None
             else [
                 g
                 for g in re.compile(self.file_pattern).groupindex
@@ -1783,7 +1846,25 @@ class DataSet:
         self.reference = None
         # self.max_workers = max_workers
 
-        self.samples = samples or self._infer_samples()
+        # Define the Samples in the DataSet
+        # if data_path is provided, try to infer the samples from the file names using file_pattern
+        if data_path:
+            if not samples:
+                self.samples = self._infer_samples()
+            else:
+                raise ValueError('Cannot use both "data_path" and "samples".')
+        # if a list or dictionary of Samples/Replicates is provided
+        # create the objects if needed and assign them to the DataSet
+        elif samples:
+            if isinstance(samples, list):
+                samples = {f'sample{i}': S for i, S in enumerate(samples, start=1)}
+
+            self.samples = {k: data if isinstance(data, Sample) else Sample(replicates=data, name=k, dataset=self)
+                            for k, data in samples.items()
+                            }
+        else:
+            self.samples = {}
+
         self.replicates = {
             r.name: r for s in self.samples.values() for r in s.replicates
         }
@@ -1798,8 +1879,9 @@ class DataSet:
         sep = ',\n        '
         sep2 = sep + ' ' * 9
         filepat = f'{sep}file_pattern={self.file_pattern!r}'
+        data_path = f"data_path='{self.data_path}'{filepat}" if self.data_path else ''
         samples = (
-            f'{sep}samples=[{sep2.join(repr(s) for s in self.samples.values())}]{sep}'
+            f'{sep if self.data_path else ""}samples=[{sep2.join(repr(s) for s in self.samples.values())}]{sep}'
             if self.samples
             else ''
         )
@@ -1807,7 +1889,7 @@ class DataSet:
             f'{sep}reference={repr(self.reference)}' if self.reference else ''
         )
         # return f'''DataSet(data_path={repr(self.data_path)}, result_path={repr(self.result_path)}{ref}{samples})'''
-        return f"""DataSet(data_path={repr(self.data_path)}{filepat}{ref}{samples})"""
+        return f"""DataSet({data_path}{ref}{samples})"""
 
     def _clear_cache(self, force=False):
         import os
@@ -1825,9 +1907,8 @@ class DataSet:
         # file_paths = list(self.data_path.glob("*.json"))
 
         for f in self.data_path.iterdir():  ## TODO: wrap with SampleGrouper
-            if m := re.search(self.file_pattern, f.name):
+            if m := re.search(self.file_pattern+fr'(?=\.{ITP_FILE_SUFFIX}\.json$)', f.name):
                 labels = m.groupdict()
-                fastq_meta = read_log_json(f)
                 # if set(labels) >= {'sample', 'replicate'}:
                 if set(labels) > {'replicate'}:
                     rep = labels['replicate']
@@ -1835,11 +1916,10 @@ class DataSet:
                     keys = dict_to_tuple(labels, keep=self.keys)
                     inferred_samples[keys].append(
                         {
-                            'filename': self.data_path
-                            / self.aafile_pattern.format(**labels),
+                            #'file_prefix': str(self.data_path / self.aafile_pattern.format(**labels)),
+                            'file_prefix': str(self.data_path / m.group(0)),
                             'replicate': rep,
                             'labels': labels,
-                            'fastq': fastq_meta,
                         }
                     )
 
@@ -1850,7 +1930,7 @@ class DataSet:
 
         for key, data in inferred_samples.items():
             s = Sample(
-                labels=dict(key), data=data, dataset=self, keys=self.keys
+                labels=dict(key), replicates=data, dataset=self, keys=self.keys
             )
             samples[s.name] = s
             samples_by_tup[key] = s
@@ -1944,7 +2024,7 @@ class DataSet:
         key = {c: i for i, c in enumerate(order)}
         out = (
             pd.DataFrame.from_dict(
-                {name: r.meta['fastq'] for name, r in self.replicates.items()},
+                {name: r.infos() for name, r in self.replicates.items()},
                 orient='index',
             )
             .sort_index(axis=1, key=lambda x: x.map(key))
@@ -2092,7 +2172,7 @@ class DataSet:
         return (
             pd.concat(
                 {
-                    r.name: pd.Series(r.meta['fastq']['lengths'])
+                    r.name: pd.Series(r.infos()['lengths'])
                     for _, r in self.replicates.items()
                 },
                 axis=1,
