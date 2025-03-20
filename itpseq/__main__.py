@@ -1,6 +1,6 @@
 import click
 import sys
-from . import parse_filter_fastq
+from . import parsing
 from .core import DataSet
 from pathlib import Path
 import webbrowser
@@ -104,9 +104,9 @@ def parse(args):
     """
     Parse and filter the assembled iTP-Seq FASTQ files to produce files needed for the analysis.
     """
-    # Pass arguments directly to parse_filter_fastq.main()
+    # Pass arguments directly to parsing.main()
     sys.argv = ['parse'] + list(args)  # Simulate sys.argv for argparse
-    parse_filter_fastq.main()
+    parsing.main()
 
 
 if __name__ == '__main__':
