@@ -1809,6 +1809,12 @@ class DataSet:
         # return f'''DataSet(data_path={repr(self.data_path)}, result_path={repr(self.result_path)}{ref}{samples})'''
         return f"""DataSet(data_path={repr(self.data_path)}{filepat}{ref}{samples})"""
 
+    def _clear_cache(self, force=False):
+        import os
+        from shutil import rmtree
+        if force or self.cache_path.exists() and input(f'Delete {len(next(os.walk(self.cache_path))[2])} files in "{self.cache_path}"? (y/N): ').lower() == 'y':
+            rmtree(self.cache_path)
+
     @property
     def samples_with_ref(self):
         return {k: s for k, s in self.samples.items() if s.reference}
