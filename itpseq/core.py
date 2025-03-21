@@ -347,8 +347,8 @@ class Sample:
 
     def __init__(
         self,
-        *,
         replicates=None,
+        *,
         labels=None,
         reference=None,
         dataset=None,
@@ -376,19 +376,17 @@ class Sample:
         if replicates is None:
             replicates = {}
         elif isinstance(replicates, list):
-            names = [d.get('replicate') if isinstance(d, dict)
-                     else d.replicate if isinstance(d, Replicate)
-                     else f'sample{i}'
-                     for i, d in enumerate(replicates, start=1)]
+            names = [x.get('replicate', f'rep{i}') if isinstance(x, dict)
+                     else x.replicate or f'rep{i}' if isinstance(x, Replicate)
+                     else f'rep{i}'
+                     for i, x in enumerate(replicates, start=1)]
             replicates = dict(zip(dedup_names(names), replicates))
 
-        self.replicates = sorted(
-            [Replicate(**{**data, 'replicate': k}, sample=self)
+        self.replicates = [Replicate(**{**data, 'replicate': k}, sample=self)
              if isinstance(data, dict)
              else data.copy(sample=self, replicate=k)
              for k, data in replicates.items()
-             ],
-        )
+             ]
 
 
     def __getitem__(self, key):
@@ -1743,6 +1741,11 @@ class DataSet:
         Regex pattern used to identify the sample files in the data_path directory.
         If None, defaults to `r'(?P<lib_type>[^_]+)_(?P<sample>[^_\d]+)(?P<replicate>\d+)'`
         which matches files like nnn15_noa1.{ITP_FILE_SUFFIX}.json, nnn15_tcx2.{ITP_FILE_SUFFIX}.json, etc.
+    allow_partial_keys: bool
+        If no exact match of the keys if found, try to map a reference using partial keys.
+    ref_mapping: dict or None
+        If set, do not try to infer the references but use the passed dictionary as mapping.
+        The dictionary should have a format: `{{'sample.id': 'ref.id'}}` where "sample.id" and "ref.id" are the labels generated upon import.
 
     """
     """
@@ -1778,6 +1781,8 @@ class DataSet:
 
     def __init__(
         self,
+        data=None,
+        *,
         data_path: Path = None,
         result_path: Path = None,
         samples: Optional[dict] = None,
@@ -1786,8 +1791,20 @@ class DataSet:
         # max_workers: int = 4,
         cache_path=None,
         file_pattern=None,
-        #aafile_pattern=None,
+        allow_partial_keys=True,
+        ref_mapping=None,
     ):
+        # if data is passed, try to infer if this is data_path or samples:
+        if data:
+            if data_path or samples:
+                raise ValueError('If data is set, cannot use data_path or samples')
+            if isinstance(data, (str, Path)):
+                data_path = data
+            elif isinstance(data, (tuple, list, dict)):
+                samples = data
+            else:
+                raise ValueError(f'Unrecognized data: {type(data)}')
+
         self.data_path = Path(data_path) if data_path else None
         if result_path is None and self.data_path:
             result_path = self.data_path / 'results'
@@ -1822,6 +1839,7 @@ class DataSet:
                 if g != 'replicate'
             ]
         )
+        self.ref_mapping = ref_mapping
 
         # ref_labels can be passed as various formats
         # 'noa'
@@ -1843,14 +1861,11 @@ class DataSet:
         else:
             self.ref_labels = ()
 
-        self.reference = None
-        # self.max_workers = max_workers
-
         # Define the Samples in the DataSet
         # if data_path is provided, try to infer the samples from the file names using file_pattern
         if data_path:
             if not samples:
-                self.samples = self._infer_samples()
+                self.samples = self._infer_samples(allow_partial_keys)
             else:
                 raise ValueError('Cannot use both "data_path" and "samples".')
         # if a list or dictionary of Samples/Replicates is provided
@@ -1864,6 +1879,9 @@ class DataSet:
                             }
         else:
             self.samples = {}
+
+        if self.ref_mapping is not None:
+            self.set_references(self.ref_mapping)
 
         self.replicates = {
             r.name: r for s in self.samples.values() for r in s.replicates
@@ -1885,11 +1903,8 @@ class DataSet:
             if self.samples
             else ''
         )
-        ref = (
-            f'{sep}reference={repr(self.reference)}' if self.reference else ''
-        )
-        # return f'''DataSet(data_path={repr(self.data_path)}, result_path={repr(self.result_path)}{ref}{samples})'''
-        return f"""DataSet({data_path}{ref}{samples})"""
+        # return f'''DataSet(data_path={repr(self.data_path)}, result_path={repr(self.result_path)}{samples})'''
+        return f"""DataSet({data_path}{samples})"""
 
     def _clear_cache(self, force=False):
         import os
@@ -1901,7 +1916,13 @@ class DataSet:
     def samples_with_ref(self):
         return {k: s for k, s in self.samples.items() if s.reference}
 
-    def _infer_samples(self) -> list[str]:
+    def set_references(self, ref_mapping=None):
+        if ref_mapping is not None:
+            for k, s in self.samples.items():
+                if k in ref_mapping and self.ref_mapping[k] in self.samples:
+                    s.reference = self.samples[ref_mapping[k]]
+
+    def _infer_samples(self, allow_partial_keys=True) -> list[str]:
         """Infers sample names from the files in the data path."""
         inferred_samples = defaultdict(list)
         # file_paths = list(self.data_path.glob("*.json"))
@@ -1923,24 +1944,66 @@ class DataSet:
                         }
                     )
 
+        # initialize Samples (without reference)
         samples = {}
-        samples_by_tup = {}
-        # self.infsamp = inferred_samples
-        # print(inferred_samples)
-
         for key, data in inferred_samples.items():
             s = Sample(
                 labels=dict(key), replicates=data, dataset=self, keys=self.keys
             )
             samples[s.name] = s
-            samples_by_tup[key] = s
 
-        for s in samples.values():
-            # get potential ref key/label
-            ref_lbl = s.labels | dict(self.ref_labels)
-            ref_tup = tuple(sorted(ref_lbl.items()))
-            if ref_lbl != s.labels and ref_tup in inferred_samples:
-                s.reference = samples_by_tup[ref_tup]
+        if self.ref_mapping is None:
+            # create a dictionary of reference samples based on self.ref_labels
+            ref_keys = set(dict(self.ref_labels))
+            ref_items = dict(self.ref_labels).items()
+            ref_samples = {dict_to_tuple(s.labels, ignore=ref_keys): s
+                           for k, s in list(samples.items())[::-1]
+                           if ref_items <= s.labels.items()
+                           }
+
+            # create a dictionary of reference samples
+            # ignoring keys with None as value
+            # this is used if no exact match is found
+            ref_samples_minkey = defaultdict(list)
+            for k, s in ref_samples.items():
+                new_key = tuple(t for t in k if t[0] in ref_keys)
+                ref_samples_minkey[new_key].append(s)
+
+            # ensure there is a single value for a given key
+            # if several references match a single key, they will be removed from ref_samples_minkey
+            for k in list(ref_samples_minkey):
+                if len(ref_samples_minkey[k]) > 1:
+                    spl_str = ", ".join(str(x) for x in ref_samples_minkey[k])
+                    print(f'Multiple references for {dict(k)}: [{spl_str}]')
+                    ref_samples_minkey.pop(k)
+            # flatten dictionary to keep the single references
+            ref_samples_minkey = {k: l[0] for k, l in ref_samples_minkey.items()}
+
+            # loop over the samples
+            # first try to find a reference with an exact match of the keys
+            # if no exact match is found, try to find a reference with less keys that all match
+            ref_ids = {s.name for s in ref_samples.values()}
+            for k, s in samples.items():
+                if k in ref_ids:  # if this is a reference sample, continue
+                    continue
+                items = dict(dict_to_tuple(s.labels, ignore=ref_keys)).items()
+                sample_labels = dict_to_tuple(s.labels, ignore=ref_keys)
+
+                # exact match
+                if sample_labels in ref_samples:
+                    # print(f'{s} -> {ref_samples[sample_labels]}')
+                    s.reference = ref_samples[sample_labels]
+                    continue
+                spl_lbl = dict(sample_labels).items()
+
+                # sub match (the reference can have less keys than the sample, but all must match)
+                if allow_partial_keys:
+                    for ref_lbl, ref_s in ref_samples_minkey.items():
+                        ref_lbl = dict(ref_lbl).items()
+                        if ref_lbl <= spl_lbl:
+                            # print(f'{s} -> {ref_s}')
+                            s.reference = ref_s
+                            continue
 
         return {k: samples[k] for k in sorted(samples)}
 
