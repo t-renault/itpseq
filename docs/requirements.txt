@@ -3,6 +3,8 @@ numpydoc
 nbsphinx
 sphinx-gallery
 sphinx_design
+ipython
+pydata-sphinx-theme
 
 regex
 numpy

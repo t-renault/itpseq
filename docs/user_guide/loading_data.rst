@@ -116,7 +116,7 @@ The different parts of the filename can be defined through ``file_pattern``:
 .. ipython:: python
 
   from itpseq import DataSet
-  data = DataSet('.', file_pattern='(?P<sample>[^_]+)(?P<replicate>\d+)(_(?P<concentration>\d+µM))?')
+  data = DataSet('.', file_pattern=r'(?P<sample>[^_]+)(?P<replicate>\d+)(_(?P<concentration>\d+µM))?')
   data
   data.samples
 
@@ -127,7 +127,7 @@ replicate. For instance, using ``ref_labels={'sample': 'drugA'}`` would define
 .. ipython:: python
 
   data = DataSet('.',
-                 file_pattern='(?P<sample>[^_]+)(?P<replicate>\d+)(_(?P<concentration>\d+µM))?',
+                 file_pattern=r'(?P<sample>[^_]+)(?P<replicate>\d+)(_(?P<concentration>\d+µM))?',
                  ref_labels={'sample': 'drugA'},
                  )
   data
