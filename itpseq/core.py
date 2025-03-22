@@ -828,8 +828,10 @@ class Sample:
 
         Examples
         --------
-        Create a heatmap for positions E-P-A
+        Create a heatmap for positions E-P-A:
+
          >>> sample.hmap('E', 'A')
+
         .. image:: /_static/sample_hmap.png
         """
 
@@ -1000,15 +1002,18 @@ class Sample:
         matplotlib.figure.Figure
             The figure object containing the grid of heatmaps.
 
-
         Examples
         --------
-        Create the default heatmap grid for all combinations of -2/E/P/A
+        Create the default heatmap grid for all combinations of -2/E/P/A:
+
          >>> sample.hmap_grid()
+
         .. image:: /_static/sample_hmap_grid.png
 
-        Create a heatmap grid for combinations of E/P/A
+        Create a heatmap grid for combinations of E/P/A:
+
          >>> sample.hmap_grid(['E', 'P', 'A'])
+
         .. image:: /_static/sample_hmap_grid_EPA.png
         """
 
@@ -1272,11 +1277,9 @@ class Sample:
         annotate : bool, optional
             If True, annotate the points from the query.
         text_stroke : bool, optional
-
         outfile : str, optional
             If specified, save the figure to a file.
         density_thresh : int, optional
-
         kwargs : optional
             Optional parameters passed to :meth:`~itpseq.Sample.DE`.
 
@@ -1286,19 +1289,25 @@ class Sample:
 
         Examples
         --------
-        Create a volcano plot for positions E-A.
+        Create a volcano plot for positions E-A:
+
          >>> sample.volcano('E:A')
+
         .. image:: /_static/sample_volcano.png
 
-        Create a volcano plot for positions -2/E/P/A
-        Highlight and annotate the points above a threshold abs(L2FC) and log10(p-value).
+        Create a volcano plot for positions -2/E/P/A.
+        Highlight and annotate the points above a threshold abs(L2FC) and log10(p-value):
+
          >>> sample.volcano('-2:A', query='(abs(log2FoldChange) > 2) & (log10pvalue > 10)')
+
         .. image:: /_static/sample_volcano_query.png
 
-        Create a volcano plot for positions -2/E/P/A
+        Create a volcano plot for positions -2/E/P/A.
         Highlight the points for motifs containing a central QK motif.
+
          >>> sample.volcano('-2:A', motif='.QK.', motif_color='#FFAC1E',
                             query='', annotate=False)
+
         .. image:: /_static/sample_volcano_motif.png
         """
         df = self.DE(pos=pos, **kwargs)
@@ -1432,6 +1441,7 @@ class Sample:
         Examples
         --------
          >>> tcx2.all_logos()
+
         .. image:: /_static/sample_all_logos.png
         """
         f, axes = plt.subplots(nrows=len(self.replicates), sharex=True)
@@ -1457,6 +1467,7 @@ class Sample:
         Examples
         --------
          >>> tcx2.logo()
+
         .. image:: /_static/sample_logo.png
         """
         df = np.log2(
@@ -1571,6 +1582,7 @@ class Sample:
         Examples
         --------
          >>> sample.itp_len_plot()
+
         .. image:: /_static/sample_itp_len_plot.png
         """
 
@@ -1641,7 +1653,7 @@ class Sample:
         ----------
         plot : str, optional
             Type of representation. "bands" will display lines with a width proportional to the number of reads.
-            "shades" will display
+            "shades" will display a fixed-height line with a varying shade.
         norm : str, optional
             Type of normalization for each lane (possible values are None, 'mean', 'median', 'max', 'std')
         norm_range : tuple, optional
@@ -1666,15 +1678,21 @@ class Sample:
         Examples
         --------
         Create a virtual inverse-toeprint with bands.
+
          >>> sample.itoeprint(exposure=3)
+
         .. image:: /_static/sample_itoeprint.png
 
-        Create a virtual inverse-toeprint with shades.
+        Create a virtual inverse-toeprint with shades:
+
          >>> sample.itoeprint(plot='shades')
+
         .. image:: /_static/sample_itoeprint_shades.png
 
-        Create an interactive visualization (requires running in a notebook with ipywidgets).
+        Create an interactive visualization (requires running in a notebook with ipywidgets):
+
          >>> sample.itoeprint(interactive=True)
+
         .. image:: /_static/sample_itoeprint_interactive.png
         """
         if interactive:
@@ -1723,7 +1741,7 @@ class DataSet:
     is the reference in the DataSet (the Sample with name "noa" by default).
 
     Attributes
-    ----------
+    ----------\
     data_path : str or Path
         Path to the data directory containing the output files from the fastq pre-processing.
     result_path: str or Path
@@ -2047,7 +2065,8 @@ class DataSet:
         # self.__dict__.pop('toeprint_df')
 
     def infos(self, html=False):
-        """Displays summary information about the dataset NGS reads per replicate.
+        """
+        Displays summary information about the dataset NGS reads per replicate.
 
         This information is computed during the parsing step and includes:
          - the total number of reads,
@@ -2098,10 +2117,11 @@ class DataSet:
         return out
 
     def DE(self, pos='E:A', **kwargs):
-        """Computes the log2-FoldChange for each motif described by `pos` for each sample in the DataSet relative to their reference
+        """
+        Computes the log2-FoldChange for each motif described by `pos` for each sample in the DataSet relative to their reference
 
         Attributes
-        -----------
+        ----------
         pos: str
             position of the motif to consider.
             This ca be a range of positions (e.g. '-2:A' for -2/E/P/A sites)
@@ -2168,12 +2188,16 @@ class DataSet:
 
         Examples
         --------
-        Plot a line with error band for each sample.
+        Plot a line with error band for each sample:
+
          >>> dataset.itp_len_plot()
+
         .. image:: /_static/dataset_itp_len_plot.png
 
-        Create a figure with a subplot per sample and a line per replicate.
+        Create a figure with a subplot per sample and a line per replicate:
+
          >>> dataset.itp_len_plot(row='sample')
+
         .. image:: /_static/dataset_itp_len_plot_row.png
         """
 

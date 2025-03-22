@@ -1,0 +1,11 @@
+
+:root {
+  --pst-color-info: 23, 99, 184;
+}
+
+
+.intro-card .sd-card-img-top {
+  margin: 10px;
+  height: 52px;
+  background: none !important;
+}

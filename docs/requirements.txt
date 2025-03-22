@@ -2,6 +2,7 @@ sphinx
 numpydoc
 nbsphinx
 sphinx-gallery
+sphinx_design
 
 regex
 numpy
