@@ -1826,14 +1826,14 @@ class DataSet:
         self.data_path = Path(data_path) if data_path else None
         if result_path is None and self.data_path:
             result_path = self.data_path / 'results'
+        self.result_path = Path(result_path) if result_path else None
         if cache_path is None:
-            if self.data_path:
-                cache_path = self.data_path / 'results' / 'cache'
+            if self.result_path:
+                cache_path = self.result_path / 'cache'
             else:
                 import tempfile
                 cache_path = tempfile.TemporaryDirectory().name
                 print(f'Creating temporary cache directory: "{cache_path}"')
-        self.result_path = Path(result_path) if result_path else None
         if self.result_path and not self.result_path.exists():
             self.result_path.mkdir(parents=True)
         self.cache_path = Path(cache_path)
@@ -1992,7 +1992,7 @@ class DataSet:
             for k in list(ref_samples_minkey):
                 if len(ref_samples_minkey[k]) > 1:
                     spl_str = ", ".join(str(x) for x in ref_samples_minkey[k])
-                    print(f'Multiple references for {dict(k)}: [{spl_str}]')
+                    # print(f'Multiple references for {dict(k)}: [{spl_str}]')
                     ref_samples_minkey.pop(k)
             # flatten dictionary to keep the single references
             ref_samples_minkey = {k: l[0] for k, l in ref_samples_minkey.items()}
