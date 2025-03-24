@@ -3,6 +3,8 @@
 from pathlib import Path
 from .config import *
 
+from functools import partial
+
 DEFAULTS = dict(
     a1='GTATAAGGAGGAAAAAAT',
     a2='GGTATCTCGGTGTGACTG',
@@ -208,6 +210,15 @@ def parse_trim_filter_fastq(
 
     return seqs, stats, extras
 
+def parse_file_wrapper(filename, **global_kwargs):
+    seqs, stats, extras = parse_trim_filter_fastq(
+        filename, **global_kwargs
+    )
+    if global_kwargs.get('save'):
+        export_data(
+            filename, seqs=seqs, stats=stats, extras=extras, outdir=global_kwargs.get('outdir')
+        )
+    return seqs, stats, extras
 
 def parse_all(files=None, pattern=None, save=False, outdir=None, **kwargs):
     """
@@ -218,20 +229,9 @@ def parse_all(files=None, pattern=None, save=False, outdir=None, **kwargs):
 
     if pattern:
         from glob import glob
-
         files = glob(pattern)
 
-    global f
-
-    def f(filename, *args):
-        seqs, stats, extras = parse_trim_filter_fastq(
-            filename, *args, **kwargs
-        )
-        if save:
-            export_data(
-                filename, seqs=seqs, stats=stats, extras=extras, outdir=outdir
-            )
-        return seqs, stats, extras
+    f = partial(parse_file_wrapper, **kwargs, save=save, outdir=outdir)
 
     with Pool(cpu_count() - 2) as pool:
         result = pool.map(f, files)
