@@ -1927,7 +1927,7 @@ class DataSet:
     def _clear_cache(self, force=False):
         import os
         from shutil import rmtree
-        if force or self.cache_path.exists() and input(f'Delete {len(next(os.walk(self.cache_path))[2])} files in "{self.cache_path}"? (y/N): ').lower() == 'y':
+        if self.cache_path.exists() and (force or input(f'Delete {len(next(os.walk(self.cache_path))[2])} files in "{self.cache_path}"? (y/N): ').lower() == 'y'):
             rmtree(self.cache_path)
 
     @property
