@@ -733,9 +733,10 @@ class Sample:
         cond = self.name
         ref = self.reference.name
 
-        df = self.reference.get_counts(pos=pos, **kwargs).join(
-            self.get_counts(pos=pos, **kwargs)
-        )
+        #df = self.reference.get_counts(pos=pos, **kwargs).join(
+        #    self.get_counts(pos=pos, **kwargs)
+        #)
+        df = self.get_counts_ratio(pos, **kwargs)
 
         if filter_size:
             df = df[~df.index.str.startswith(' ')]
