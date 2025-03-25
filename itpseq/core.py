@@ -78,7 +78,7 @@ class Replicate:
         self.sample = sample
         self.replicate = replicate
         self.labels = labels
-        self.rename() # automatically set replicate name
+        self.rename()   # automatically set replicate name
         self._cache_dir = self.dataset.cache_path if self.dataset else None
         self.meta = kwargs
 
@@ -98,9 +98,15 @@ class Replicate:
                 return str(self.replicate) > str(other.replicate)
         else:
             try:
-                return (self.sample, self.replicate) > (other.sample, other.replicate)
+                return (self.sample, self.replicate) > (
+                    other.sample,
+                    other.replicate,
+                )
             except TypeError:
-                return (self.sample, str(self.replicate)) > (other.sample, str(other.replicate))
+                return (self.sample, str(self.replicate)) > (
+                    other.sample,
+                    str(other.replicate),
+                )
 
     @property
     def filename(self):
@@ -141,10 +147,10 @@ class Replicate:
         """
         if name is None:
             self.name = (
-            f'{self.sample.name}.{self.replicate}'
-            if self.sample and self.replicate
-            else self.replicate
-        )
+                f'{self.sample.name}.{self.replicate}'
+                if self.sample and self.replicate
+                else self.replicate
+            )
         else:
             self.name = name
 
@@ -195,7 +201,9 @@ class Replicate:
         elif how == 'nuc':
             filename = self.filename
         else:
-            raise ValueError(f"how should be among ['aa', 'aax', 'nuc'], received: {how}")
+            raise ValueError(
+                f"how should be among ['aa', 'aax', 'nuc'], received: {how}"
+            )
 
         return read_itp_file_as_series(
             filename,
@@ -217,7 +225,7 @@ class Replicate:
             If None is passed, then this returns a DataFrame with the counts of each amino-acid per position.
 
         kwargs : optional
-            Optional parameters to pass to load_data (min_peptide, max_peptide, how, limit, sample)
+            Optional parameters to pass to :meth:`Replicate.load_data` (min_peptide, max_peptide, how, limit, sample)
 
         Returns
         -------
@@ -275,8 +283,10 @@ class Replicate:
             If False, removes `m` (formyl-methionine / start codon) from the alignment when building the logo. Defaults to False.
         type : str, optional
             The transformation type applied to the counts matrix. Possible values include:
+
             - `'information'` for information content.
             - `'probability'` for probabilities.
+
             Defaults to `'information'`.
         **kwargs : dict
             Additional keyword arguments passed to filter the input data (e.g., `pos`, `min_peptide`, `max_peptide`...).
@@ -352,7 +362,7 @@ class Sample:
         labels=None,
         reference=None,
         dataset=None,
-        #data=None,
+        # data=None,
         keys=('sample',),
         name=None,
         **kwargs,
@@ -363,31 +373,37 @@ class Sample:
         if name:
             self.name = name
         elif labels:
-            #self.name = '.'.join(labels[k] or '' for k in keys) # FIXME decide of best way to handle empty keys
-            self.name = '.'.join(labels[k] for k in keys if labels[k] is not None)
+            # self.name = '.'.join(labels[k] or '' for k in keys) # FIXME decide of best way to handle empty keys
+            self.name = '.'.join(
+                labels[k] for k in keys if labels[k] is not None
+            )
         else:
-            self.name = f'{uuid.uuid4()}' # if no name was provided use a UUID
+            self.name = f'{uuid.uuid4()}'  # if no name was provided use a UUID
         self.dataset = dataset
         self._cache_dir = self.dataset.cache_path if self.dataset else None
         self.reference = reference  # If None, this sample has no reference
         self.meta = kwargs
-        #self.data = data
+        # self.data = data
 
         if replicates is None:
             replicates = {}
         elif isinstance(replicates, list):
-            names = [x.get('replicate', f'rep{i}') if isinstance(x, dict)
-                     else x.replicate or f'rep{i}' if isinstance(x, Replicate)
-                     else f'rep{i}'
-                     for i, x in enumerate(replicates, start=1)]
+            names = [
+                x.get('replicate', f'rep{i}')
+                if isinstance(x, dict)
+                else x.replicate or f'rep{i}'
+                if isinstance(x, Replicate)
+                else f'rep{i}'
+                for i, x in enumerate(replicates, start=1)
+            ]
             replicates = dict(zip(dedup_names(names), replicates))
 
-        self.replicates = [Replicate(**{**data, 'replicate': k}, sample=self)
-             if isinstance(data, dict)
-             else data.copy(sample=self, replicate=k)
-             for k, data in replicates.items()
-             ]
-
+        self.replicates = [
+            Replicate(**{**data, 'replicate': k}, sample=self)
+            if isinstance(data, dict)
+            else data.copy(sample=self, replicate=k)
+            for k, data in replicates.items()
+        ]
 
     def __getitem__(self, key):
         return self.replicates[key]
@@ -494,11 +510,13 @@ class Sample:
             if isinstance(reference, (Sample, NoneType)):
                 new.reference = reference
             else:
-                warnings.warn(f'reference must be a Sample or None, received: {type(reference)}. '
-                              f'Keeping the original reference {self.reference.name if self.reference else None}.')
+                warnings.warn(
+                    f'reference must be a Sample or None, received: {type(reference)}. '
+                    f'Keeping the original reference {self.reference.name if self.reference else None}.'
+                )
         return new
 
-    def load_replicates(self, how='aax'): ## FIXME is this useful to keep?
+    def load_replicates(self, how='aax'):   ## FIXME is this useful to keep?
         for replicate in self.replicates:
             replicate.load_data(how=how)
 
@@ -555,7 +573,7 @@ class Sample:
             If None is passed, then this returns a DataFrame with the counts of each amino-acid per position.
 
         kwargs : optional
-            Optional parameters to pass to load_data (min_peptide, max_peptide, how, limit, sample).
+            Optional parameters to pass to :meth:`Replicate.load_data` (min_peptide, max_peptide, how, limit, sample).
 
         Returns
         -------
@@ -616,7 +634,7 @@ class Sample:
         exclude_empty : bool, optional
             Exclude the rows with incomplete peptides.
         kwargs : optional
-            Optional parameters to pass to load_data (min_peptide, max_peptide, how, limit, sample).
+            Optional parameters to pass to :meth:`Replicate.load_data` (min_peptide, max_peptide, how, limit, sample).
 
         Returns
         -------
@@ -695,11 +713,20 @@ class Sample:
             The number of CPUs to utilize for parallel processing. Defaults to the total number of available CPUs.
         filter_size: bool
             Only considers reads for which an amino acid is present in all target positions.
+        **kwargs: optional
+            Additional parameters to :meth:`get_counts_ratio` and :meth:`Replicate.load_data`.
+            For instance ``min_peptide`` and ``max_peptide`` are useful to filter the peptide size of the inverse toeprints to consider.
 
         Returns
         -------
         DataFrame
             DataFrame of the differential expression statistics with a row per motif.
+
+        See Also
+        --------
+        Sample.get_counts_ratio: Gets the inverse toeprint counts and sample/reference ration of normalized counts.
+        Sample.volcano: Draws a volcano plot from the Differential Expression data.
+        Sample.subset_logo: Creates a logo from a subset of the Differential Expression data.
 
         Examples
         --------
@@ -733,9 +760,9 @@ class Sample:
         cond = self.name
         ref = self.reference.name
 
-        #df = self.reference.get_counts(pos=pos, **kwargs).join(
+        # df = self.reference.get_counts(pos=pos, **kwargs).join(
         #    self.get_counts(pos=pos, **kwargs)
-        #)
+        # )
         df = self.get_counts_ratio(pos, **kwargs)
 
         if filter_size:
@@ -780,7 +807,7 @@ class Sample:
         c=None,
         *,
         pos=None,
-        #how='aax',
+        # how='aax',
         col='auto',
         transform=np.log2,
         cmap='vlag',
@@ -963,7 +990,7 @@ class Sample:
     def hmap_grid(
         self,
         pos=None,
-        #how='aax',
+        # how='aax',
         col='auto',
         transform=np.log2,
         cmap='vlag',
@@ -1037,7 +1064,7 @@ class Sample:
                 self.hmap(
                     r=r,
                     c=c,
-                    #how=how,
+                    # how=how,
                     col=col,
                     transform=transform,
                     cmap=cmap,
@@ -1104,10 +1131,7 @@ class Sample:
 
         return (
             pd.concat(
-                {
-                    p: self.get_counts_ratio(p, **kwargs)['ratio']
-                    for p in pos
-                },
+                {p: self.get_counts_ratio(p, **kwargs)['ratio'] for p in pos},
                 axis=1,
             )
             .reindex(aa_order)
@@ -1119,9 +1143,9 @@ class Sample:
         self,
         pos=None,
         *,
-        #how='aax',
-        #col='auto',
-        #transform=np.log2,
+        # how='aax',
+        # col='auto',
+        # transform=np.log2,
         cmap='vlag',
         vmax=None,
         center=0,
@@ -1256,7 +1280,7 @@ class Sample:
         Parameters
         ----------
         pos : str, optional
-            Positions used to compute the :meth:`~itpseq.Sample.DE`.
+            Positions used to compute the :meth:`DE`.
         query : str, optional
             Query used to select points to highlight and annotate by data.
         motif : str, optional
@@ -1264,9 +1288,9 @@ class Sample:
         ax : matplotlib.axes.Axes, optional
             ax to use for plotting, otherwise create a new figure.
         x : str, optional
-            Column from the :meth:`~itpseq.Sample.DE` output to use as the x-axis.
+            Column from the :meth:`DE` output to use as the x-axis.
         y : str, optional
-            Column from the :meth:`~itpseq.Sample.DE` output to use as the y-axis.
+            Column from the :meth:`DE` output to use as the y-axis.
         query_color : str, optional
             Color of the points in the query.
         motif_color : str, optional
@@ -1282,11 +1306,16 @@ class Sample:
             If specified, save the figure to a file.
         density_thresh : int, optional
         kwargs : optional
-            Optional parameters passed to :meth:`~itpseq.Sample.DE`.
+            Optional parameters passed to :meth:`DE`.
 
         Returns
         -------
         matplotlib.axes.Axes
+
+        See Also
+        --------
+        Sample.DE: Computes the differential expression between the sample and its reference.
+        Sample.subset_logo: Creates a logo from a subset of the Differential Expression data.
 
         Examples
         --------
@@ -1510,7 +1539,11 @@ class Sample:
         logo_kwargs : dict, optional
             Optional parameters to pass to logomaker.Logo.
         kwargs : optional
-            Optional parameters to pass to :meth:`~itpseq.Sample.logo`.
+            Optional parameters to pass to :meth:`logo`.
+
+        See Also
+        --------
+        Sample.logo: Creates a logo for the selected positions.
 
         Examples
         --------
@@ -1530,13 +1563,18 @@ class Sample:
         Parameters
         ----------
         pos : tuple
-            Positions to use in the logo (see :meth:`~itpseq.Sample.get_counts_ratio_pos`)
+            Positions to use in the logo (see :meth:`get_counts_ratio_pos`)
         logo_kwargs : dict, optional
             Optional parameters to pass to logomaker.Logo.
         ax : matplotlib.axes.Axes, optional
             ax to use for plotting, otherwise create a new figure.
         kwargs : optional
-            Optional parameters to pass to :meth:`~itpseq.Sample.get_counts_ratio_pos`.
+            Optional parameters to pass to :meth:`get_counts_ratio_pos`.
+
+        See Also
+        --------
+        Sample.all_logos: Creates a logo for all positions for each replicate in the sample.
+        Sample.subset_logo: Creates a logo from a subset of the Differential Expression data.
 
         Examples
         --------
@@ -1544,16 +1582,15 @@ class Sample:
 
         .. image:: /_static/sample_logo.png
         """
-        df = np.log2(
-            self.get_counts_ratio_pos(pos=pos, **kwargs)
-        ).fillna(0)
+        df = np.log2(self.get_counts_ratio_pos(pos=pos, **kwargs)).fillna(0)
 
         import logomaker
 
         if logo_kwargs is None:
-            logo_kwargs = {'color_scheme': 'NajafabadiEtAl2017',
-                           'flip_below': False,
-                           }
+            logo_kwargs = {
+                'color_scheme': 'NajafabadiEtAl2017',
+                'flip_below': False,
+            }
 
         # df = logomaker.transform_matrix(df, from_type='counts', to_type=type)
         # print(df)
@@ -1565,7 +1602,7 @@ class Sample:
         logo.ax.set_xticks(range(df.shape[0]), df.index)
         return logo
 
-    @cached_property #FIXME consider not using a property if we want to be able to modify replicates
+    @cached_property   # FIXME consider not using a property if we want to be able to modify replicates
     def itp_len(self):
         """
         Combines the counts of inverse-toeprints (ITPs) for each length across all replicates.
@@ -1577,6 +1614,7 @@ class Sample:
         -------
         pandas.DataFrame
             A DataFrame with the following columns:
+
             - `length` : int
                 The length of the inverse-toeprints.
             - `replicate` : str
@@ -1646,6 +1684,10 @@ class Sample:
         -------
         matplotlib.axes.Axes
             The axes object containing the plotted lineplot.
+
+        See Also
+        --------
+        DataSet.itp_len_plot
 
         Notes
         -----
@@ -1805,7 +1847,8 @@ class Sample:
 
 
 class DataSet:
-    fr"""
+    __doc__ = (
+        rf"""
     Loads an iTP-Seq dataset and provides methods for analyzing and visualizing the data.
 
     A DataSet object is constructed to handle iTP-Seq Samples with their respective Replicates.
@@ -1815,14 +1858,14 @@ class DataSet:
     is the reference in the DataSet (the Sample with name "noa" by default).
 
     Attributes
-    ----------\
+    ----------
     data_path : str or Path
         Path to the data directory containing the output files from the fastq pre-processing.
     result_path: str or Path
         Path to the directory where the results of the analysis will be saved.
     samples: list or dict or None
         List or dictionary of Samples in the DataSet.
-        By default, it is None and will be populated automatically if data_path is provided.\
+        By default, it is None and will be populated automatically if data_path is provided.
     keys: tuple
         Properties in the file name to use for identifying the reference.
     ref_labels: str or tuple
@@ -1838,9 +1881,8 @@ class DataSet:
     ref_mapping: dict or None
         If set, do not try to infer the references but use the passed dictionary as mapping.
         The dictionary should have a format: `{{'sample.id': 'ref.id'}}` where "sample.id" and "ref.id" are the labels generated upon import.
-
     """
-    """
+        + """
     Examples
     --------
     Creating a DataSet from a simple antibiotic treatment (tcx) vs no treatement (noa) with 3 replicates each (1, 2, 3).
@@ -1870,6 +1912,7 @@ class DataSet:
     Display a graph of the inverse-toeprints lengths for each sample
      >>> data.itp_len_plot(row='sample')
     """
+    )
 
     def __init__(
         self,
@@ -1889,7 +1932,9 @@ class DataSet:
         # if data is passed, try to infer if this is data_path or samples:
         if data:
             if data_path or samples:
-                raise ValueError('If data is set, cannot use data_path or samples')
+                raise ValueError(
+                    'If data is set, cannot use data_path or samples'
+                )
             if isinstance(data, (str, Path)):
                 data_path = data
             elif isinstance(data, (tuple, list, dict)):
@@ -1906,6 +1951,7 @@ class DataSet:
                 cache_path = self.result_path / 'cache'
             else:
                 import tempfile
+
                 cache_path = tempfile.TemporaryDirectory().name
                 print(f'Creating temporary cache directory: "{cache_path}"')
         if self.result_path and not self.result_path.exists():
@@ -1914,10 +1960,7 @@ class DataSet:
         if not self.cache_path.exists():
             self.cache_path.mkdir(parents=True)
         # self.file_pattern = r'nnn15_(?P<sample>[^_]+)(?P<replicate>\d+)'
-        self.file_pattern = (
-            file_pattern
-            or FILE_PATTERN
-        )
+        self.file_pattern = file_pattern or FILE_PATTERN
         # self.aafile_pattern = (
         #     aafile_pattern or f'{lib_type}_{sample}{replicate}.aa.{ITP_FILE_SUFFIX}.txt'
         # )
@@ -1964,11 +2007,16 @@ class DataSet:
         # create the objects if needed and assign them to the DataSet
         elif samples:
             if isinstance(samples, list):
-                samples = {f'sample{i}': S for i, S in enumerate(samples, start=1)}
+                samples = {
+                    f'sample{i}': S for i, S in enumerate(samples, start=1)
+                }
 
-            self.samples = {k: data if isinstance(data, Sample) else Sample(replicates=data, name=k, dataset=self)
-                            for k, data in samples.items()
-                            }
+            self.samples = {
+                k: data
+                if isinstance(data, Sample)
+                else Sample(replicates=data, name=k, dataset=self)
+                for k, data in samples.items()
+            }
         else:
             self.samples = {}
 
@@ -1989,7 +2037,9 @@ class DataSet:
         sep = ',\n        '
         sep2 = sep + ' ' * 9
         filepat = f'{sep}file_pattern={self.file_pattern!r}'
-        data_path = f"data_path='{self.data_path}'{filepat}" if self.data_path else ''
+        data_path = (
+            f"data_path='{self.data_path}'{filepat}" if self.data_path else ''
+        )
         samples = (
             f'{sep if self.data_path else ""}samples=[{sep2.join(repr(s) for s in self.samples.values())}]{sep}'
             if self.samples
@@ -2001,7 +2051,14 @@ class DataSet:
     def _clear_cache(self, force=False):
         import os
         from shutil import rmtree
-        if self.cache_path.exists() and (force or input(f'Delete {len(next(os.walk(self.cache_path))[2])} files in "{self.cache_path}"? (y/N): ').lower() == 'y'):
+
+        if self.cache_path.exists() and (
+            force
+            or input(
+                f'Delete {len(next(os.walk(self.cache_path))[2])} files in "{self.cache_path}"? (y/N): '
+            ).lower()
+            == 'y'
+        ):
             rmtree(self.cache_path)
 
     @property
@@ -2019,8 +2076,12 @@ class DataSet:
         inferred_samples = defaultdict(list)
         # file_paths = list(self.data_path.glob("*.json"))
 
-        for f in sorted(self.data_path.iterdir()):  ## TODO: wrap with SampleGrouper
-            if m := re.search(self.file_pattern+fr'(?=\.{ITP_FILE_SUFFIX}\.json$)', f.name):
+        for f in sorted(
+            self.data_path.iterdir()
+        ):  ## TODO: wrap with SampleGrouper
+            if m := re.search(
+                self.file_pattern + rf'(?=\.{ITP_FILE_SUFFIX}\.json$)', f.name
+            ):
                 labels = m.groupdict()
                 # if set(labels) >= {'sample', 'replicate'}:
                 if set(labels) > {'replicate'}:
@@ -2048,10 +2109,11 @@ class DataSet:
             # create a dictionary of reference samples based on self.ref_labels
             ref_keys = set(dict(self.ref_labels))
             ref_items = dict(self.ref_labels).items()
-            ref_samples = {dict_to_tuple(s.labels, ignore=ref_keys): s
-                           for k, s in list(samples.items())[::-1]
-                           if ref_items <= s.labels.items()
-                           }
+            ref_samples = {
+                dict_to_tuple(s.labels, ignore=ref_keys): s
+                for k, s in list(samples.items())[::-1]
+                if ref_items <= s.labels.items()
+            }
 
             # create a dictionary of reference samples
             # ignoring keys with None as value
@@ -2065,11 +2127,13 @@ class DataSet:
             # if several references match a single key, they will be removed from ref_samples_minkey
             for k in list(ref_samples_minkey):
                 if len(ref_samples_minkey[k]) > 1:
-                    spl_str = ", ".join(str(x) for x in ref_samples_minkey[k])
+                    spl_str = ', '.join(str(x) for x in ref_samples_minkey[k])
                     # print(f'Multiple references for {dict(k)}: [{spl_str}]')
                     ref_samples_minkey.pop(k)
             # flatten dictionary to keep the single references
-            ref_samples_minkey = {k: l[0] for k, l in ref_samples_minkey.items()}
+            ref_samples_minkey = {
+                k: l[0] for k, l in ref_samples_minkey.items()
+            }
 
             # loop over the samples
             # first try to find a reference with an exact match of the keys
@@ -2104,7 +2168,7 @@ class DataSet:
         Reorders the samples in the DataSet.
 
         This method is useful to specify a custom order to use in the different graphs
-        (e.g. in :meth:`~itpseq.DataSet.itoeprint`).
+        (e.g. in :meth:`itoeprint`).
 
         Parameters
         ----------
@@ -2143,12 +2207,13 @@ class DataSet:
         Displays summary information about the dataset NGS reads per replicate.
 
         This information is computed during the parsing step and includes:
-         - the total number of reads,
-         - the number of reads without adaptors,
-         - the number of reads that are contaminants,
-         - the number of reads with a low quality,
-         - the number of reads that are too short or too long,
-         - the number of extra nucleotides at the 3'-end of the inverse-toeprints,
+
+        - the total number of reads,
+        - the number of reads without adaptors,
+        - the number of reads that are contaminants,
+        - the number of reads with a low quality,
+        - the number of reads that are too short or too long,
+        - the number of extra nucleotides at the 3'-end of the inverse-toeprints,
 
         Parameters
         ----------
@@ -2203,6 +2268,14 @@ class DataSet:
         kwargs:
             parameters passed to `Sample.get_counts` computes the counts for the given motif.
             for example `min_peptide=3` to consider only peptides of at least 3 amino acids.
+
+        Returns
+        -------
+        dictionary of {sample_name: DE}
+
+        See Also
+        --------
+        Sample.DE: Compute differential Expression for a Sample
         """
         out = {}
         for sample in self.samples_with_ref.values():
@@ -2253,6 +2326,10 @@ class DataSet:
         Returns
         -------
         matplotlib.axes.Axes or seaborn.axisgrid.FacetGrid
+
+        See Also
+        --------
+        Sample.itp_len_plot
 
         Notes
         -----
@@ -2369,7 +2446,6 @@ class DataSet:
         Create an HTML report in the notebook
          >>> dataset.report()
         """
-
 
         from jinja2 import Environment, FileSystemLoader, PackageLoader
 
