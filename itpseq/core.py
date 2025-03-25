@@ -1946,7 +1946,7 @@ class DataSet:
         inferred_samples = defaultdict(list)
         # file_paths = list(self.data_path.glob("*.json"))
 
-        for f in self.data_path.iterdir():  ## TODO: wrap with SampleGrouper
+        for f in sorted(self.data_path.iterdir()):  ## TODO: wrap with SampleGrouper
             if m := re.search(self.file_pattern+fr'(?=\.{ITP_FILE_SUFFIX}\.json$)', f.name):
                 labels = m.groupdict()
                 # if set(labels) >= {'sample', 'replicate'}:
