@@ -1428,6 +1428,79 @@ class Sample:
 
         return ax
 
+    def subset_logo(
+        self,
+        pos,
+        *,
+        query='',
+        motif=None,
+        logo_type='extra_counts_bits',
+        ax=None,
+        logo_kwargs={'color_scheme': aa_colors},
+        return_matrix=False,
+        **kwargs,
+    ):
+        """
+        Creates a logo from a subset of the Differential Expression data.
+
+        This first runs the :meth:`.DE` method with ``pos``, then uses the ``query`` and ``motif`` parameters to filter
+        the output, and uses the filtered table to produce a logo.
+        Each motif is weighted using the average normalized counts from :meth:`.get_counts_ratio`.
+
+        Parameters
+        ----------
+
+        pos: str
+            Ribosome positions to consider to compute the differential expression. Passed to :meth:`DE`.
+        query: str, optional
+            Query used to select rows in the :meth:`DE` output.
+        motif: regex, optional
+            Regex used to select motifs (e.g., '.QK.' in a 4 amino-acid motif would fix the central QK).
+        logo_type: str, optional
+            Type of logo to compute:
+
+            - "raw_freq": unweighted frequencies of the amino-acids for all present motifs
+            - "extra_counts": Computes the sum of extra counts (sample - reference) for each residue per position
+            - "sum_log2FC": sum of the log2FoldChange for each residue per position
+            - "<logo_type>_bits": If any of the above has a "_bits" suffix, an extra conversion to bits is performed.
+
+        ax: matplotlib Axes, optional
+            If passed, the figure will be drawn on the given Axes. A new Axes is created otherwise.
+        logo_kwargs: dict, optional
+            Additional parameters passed to logomaker.Logo.
+        return_matrix: bool, optional
+            If True, the logo matrix is returned as together with the logo as (logo, matrix).
+        kwargs: optional
+            Additional parameters passed to the :meth:`.DE` method.
+
+        Returns
+        -------
+        logomaker.Logo
+
+        Examples
+        --------
+         >>> sample.subset_logo('-2:A', query='(log2FoldChange > 2) & (log10pvalue > 2)')
+
+        .. image:: /_static/sample_subset_logo.png
+        """
+
+        df = self.DE(pos, join=True, **kwargs)
+
+        if motif is not None:
+            df = df[df.index.str.match(motif)]
+
+        if query:
+            df = df.query(query)
+
+        return motif_logo(
+            df,
+            ref_spl=[self.reference.name, self.name],
+            ax=ax,
+            logo_type=logo_type,
+            logo_kwargs=logo_kwargs,
+            return_matrix=return_matrix,
+        )
+
     def all_logos(self, logo_kwargs=None, **kwargs):
         """
         Creates a logo for all positions for each replicate in the sample.

@@ -1,10 +1,13 @@
 import numpy as np
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 from matplotlib.collections import LineCollection
 
-__all__ = ['itoeprint_plot']
+from .utils import aa_colors
+
+__all__ = ['itoeprint_plot', 'motif_logo']
 
 
 def itoeprint_plot(
@@ -95,3 +98,114 @@ def itoeprint_plot(
     ax.tick_params(top=False, labeltop=True, bottom=False)
 
     return ax
+
+
+def motif_logo(
+    df,
+    ref_spl=None,
+    *,
+    ax=None,
+    logo_type='extra_counts_bits',
+    logo_kwargs={'color_scheme': aa_colors},
+    return_matrix=False,
+):
+    """Plots a logo based on a DatFrame of the sample/reference counts.
+
+    Parameters
+    ----------
+    df: pandas.DataFrame
+        The input DataFrame must have the motifs as index and two columns "sample" and "ref" which contain the
+        average normalized counts of the sample and reference.
+    ref_spl: list or None,
+        Instead of passing a DataFrame with "sample" and "ref" columns, it is also possible to define the column names
+         to use by passing a list of the [ref, sample] column names.
+    ax: matplotlib Axes, optional
+        If passed, the figure will be drawn on the given axes.
+    logo_type: str, optional
+        Type of logo to compute:
+        * "raw_freq": unweighted frequencies of the amino-acids for all present motifs
+        * "extra_counts": Computes the sum of extra counts (sample - reference) for each residue per position
+        * "sum_log2FC": sum of the log2FoldChange for each residue per position
+        * "<logo_type>_bits": If any of the above has a "_bits" suffix, an extra conversion to bits is performed.
+    return_matrix: bool, optional
+        If True, the logo matrix is returned as together with the logo as (logo, matrix).
+    """
+    if df.empty:
+        print('Input DataFrame is empty. Cannot compute a logo.')
+        return
+    assert logo_type in {
+        'raw_freq',
+        'extra_counts',
+        'sum_log2FC',
+        'raw_freq_bits',
+        'extra_counts_bits',
+        'sum_log2FC_bits',
+    }
+
+    import logomaker
+
+    if isinstance(ref_spl, list) and len(ref_spl) == 2:
+        # df = df[ref_spl].set_axis(['ref', 'sample'], axis='columns')
+        df = df.rename(columns=dict(zip(ref_spl, ['ref', 'sample'])))
+
+    df = df.rename_axis('motif')
+
+    if not ax:
+        ax = plt.subplot()
+
+    if logo_type in {'raw_freq', 'raw_freq_bits'}:
+        # counts the frequency of each amino-acid at each position
+        # no weighting is done based on the enrichment data
+        tmp = df.index.to_series().str.extractall('(?P<aa>.)').reset_index()
+        matrix = pd.crosstab(tmp['match'], tmp['aa'], normalize='index')
+        if logo_type == 'raw_freq_bits':
+            matrix = logomaker.transform_matrix(
+                matrix, from_type='probability', to_type='information'
+            )
+    elif logo_type in {'extra_counts', 'extra_counts_bits'}:
+        # computes the sum of extra counts (sample - ref)
+        w = df['sample'].sub(df['ref']).rename('weight')
+        cnts = (
+            df.index.to_series()
+            .str.extractall('(?P<aa>.)')
+            .join(w)
+            .reset_index()
+            .pivot_table(
+                index='match', columns='aa', values='weight', aggfunc='sum'
+            )
+        )
+        mask = cnts.isna()
+        matrix = cnts.fillna(0)
+        if logo_type == 'extra_counts':
+            matrix = logomaker.transform_matrix(
+                matrix, from_type='counts', to_type='probability'
+            )
+        elif logo_type == 'extra_counts_bits':
+            matrix = logomaker.transform_matrix(
+                matrix, from_type='counts', to_type='information'
+            )
+        # logomaker transforms zeros into small numbers
+        matrix = matrix.mask(mask, 0)
+    elif logo_type in {'sum_log2FC', 'sum_log2FC_bits'}:
+        matrix = (
+            df.index.to_series()
+            .str.extractall('(?P<aa>.)')
+            .join(df['log2FoldChange'])
+            .reset_index()
+            .pivot_table(
+                index='match',
+                columns='aa',
+                values='log2FoldChange',
+                aggfunc='sum',
+            )
+        ).fillna(0)
+        matrix = matrix.div(matrix.sum(axis=1), axis=0)
+        if logo_type == 'sum_log2FC_bits':
+            matrix = logomaker.transform_matrix(
+                matrix, from_type='probability', to_type='information'
+            )
+
+    logo = logomaker.Logo(matrix, **logo_kwargs, ax=ax)
+    if return_matrix:
+        return logo, matrix
+    return logo
