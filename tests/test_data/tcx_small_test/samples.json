@@ -1,0 +1,12 @@
+{
+ "tcx":[
+  {"file_prefix":"nnn15_tcx1"},
+  {"file_prefix":"nnn15_tcx2"},
+  {"file_prefix":"nnn15_tcx3"}
+ ],
+ "noa":[
+  {"file_prefix":"nnn15_noa1"},
+  {"file_prefix":"nnn15_noa2","replicate":"custom_name"},
+  {"file_prefix":"nnn15_noa3"}
+ ]
+}
