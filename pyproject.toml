@@ -26,7 +26,7 @@ dependencies = [
     'pydeseq2',
     'matplotlib',
     'seaborn',
-    'logomaker',
+    'logomaker==0.8',
     'Jinja2',
     'weasyprint',
     'click',
