@@ -27,6 +27,7 @@ Methods
    Sample.hmap
    Sample.hmap_grid
    Sample.volcano
+   Sample.subset_logo
    Sample.logo
    Sample.all_logos
    Sample.itp_len_plot

@@ -8,6 +8,7 @@ After :ref:`installation<installation>`, the ``itpseq`` command should be
 available in the shell.
 
 .. _cli_parsing:
+
 Parsing the fastq files
 -----------------------
 
@@ -63,6 +64,7 @@ reads, or the adaptors that were used in the design. For more details run:
     itpseq parse --help
 
 .. _cli_report:
+
 Generating the report
 ---------------------
 

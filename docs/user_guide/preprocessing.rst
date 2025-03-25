@@ -25,6 +25,7 @@ To be able to :ref:`automatically import<auto_loading>` the files in a
 
 
 .. _pairing:
+
 Merging paired-end sequencing files
 -----------------------------------
 
@@ -54,12 +55,13 @@ antibiotic-treated condition (``tcx``), with 3 replicates each might look like:
     nnn15_tcx3.assembled.fastq
 
 .. _naming:
+
 Naming conventions
 ------------------
 
-``itpseq`` relies on filenames to match and load data files. Although not
-strictly required we recommend to use filenames without spaces and with short
-descriptors of the sample properties and groups.
+``itpseq`` relies on filenames to :ref:`automatically load<auto_loading>` data files and match the
+references. Although not strictly required we recommend to use filenames without
+spaces and with short descriptors of the sample properties and groups.
 
 For instance, we use ``nnn15`` as a prefix to indicate that a random NNN15
 library was used. In case of an antibiotic treatment vs no-antibiotic control we

@@ -1,12 +1,14 @@
 .. _loading_data:
 
-====================
-Loading iTP-Seq data
-====================
+==============================
+Loading iTP-Seq data in Python
+==============================
 
 .. _auto_loading:
+
 Automatic loading from a directory
 ----------------------------------
+
 The easiest approach to create a :class:`DataSet` is to use a consistent format of
 the file names (see :ref:`naming`).
 
@@ -134,8 +136,12 @@ replicate. For instance, using ``ref_labels={'sample': 'drugA'}`` would define
 
 
 .. _manual_loading:
-Manual loading from a directory
--------------------------------
+
+Manual loading
+--------------
+
+From ``Sample``/``Replicate`` objects
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 It is also possible to create :class:`Replicate`, :class:`Sample`, and
 :class:`DataSet` objects manually. 
@@ -162,7 +168,10 @@ It is also possible to create :class:`Replicate`, :class:`Sample`, and
             )
   S
 
-Or using a dictionary of samples/replicates:
+From a dictionary
+~~~~~~~~~~~~~~~~~
+
+From a dictionary of samples/replicates:
 
 .. ipython:: python
 
@@ -175,6 +184,36 @@ Or using a dictionary of samples/replicates:
                           {'file_prefix': 'nnn15_noa3'}
                          ]},
                  ref_mapping={'tcx': 'noa'})
+
+  data
+
+From config files (e.g. JSON)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+From a JSON file (e.g. ``samples.json``):
+
+.. code-block:: console
+
+    {
+     "tcx":[
+      {"file_prefix":"nnn15_tcx1"},
+      {"file_prefix":"nnn15_tcx2"},
+      {"file_prefix":"nnn15_tcx3"}
+     ],
+     "noa":[
+      {"file_prefix":"nnn15_noa1"},
+      {"file_prefix":"nnn15_noa2","replicate":"custom_name"},
+      {"file_prefix":"nnn15_noa3"}
+     ]
+    }
+
+.. ipython:: python
+
+  import json
+  from itpseq import DataSet
+
+  with open('samples.json') as f:
+      data = DataSet(json.load(f))
 
   data
 
