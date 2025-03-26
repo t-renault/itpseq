@@ -1,16 +1,17 @@
+"""General helper functions for the itpseq library"""
+
 import io
 import logging
+from collections import defaultdict
 from functools import wraps
 from pathlib import Path
-from collections import defaultdict
-
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
-from seaborn.axisgrid import FacetGrid
-import pandas as pd
-from pandas.api.types import is_numeric_dtype
 
 import matplotlib.pyplot as plt
+import pandas as pd
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
+from pandas.api.types import is_numeric_dtype
+from seaborn.axisgrid import FacetGrid
 
 __all__ = [
     'log',
@@ -140,38 +141,38 @@ def fcache(func):
 
 
 # amino acids color codes
-h = '#74C170'  # hydrophobic
-s = '#E4DF51'  # special
-n = '#7094C1'  # negatively charged
-p = '#DB4755'  # positively charged
-o = '#AF70C1'  # polar
+HYDRO = '#74C170'      # hydrophobic
+SPECIAL = '#E4DF51'    # special
+NEGATIVE = '#7094C1'   # negatively charged
+POSITIVE = '#DB4755'   # positively charged
+POLAR = '#AF70C1'      # polar
 
 aa_colors = {
-    'A': h,
-    'C': s,
-    'D': n,
-    'E': n,
-    'F': h,
-    'G': s,
-    'H': p,
-    'I': h,
-    'K': p,
-    'L': h,
-    'M': h,
-    'N': o,
-    'P': s,
-    'Q': o,
-    'R': p,
-    'S': o,
-    'T': o,
-    'V': h,
-    'W': h,
-    'Y': h,
+    'A': HYDRO,
+    'C': SPECIAL,
+    'D': NEGATIVE,
+    'E': NEGATIVE,
+    'F': HYDRO,
+    'G': SPECIAL,
+    'H': POSITIVE,
+    'I': HYDRO,
+    'K': POSITIVE,
+    'L': HYDRO,
+    'M': HYDRO,
+    'N': POLAR,
+    'P': SPECIAL,
+    'Q': POLAR,
+    'R': POSITIVE,
+    'S': POLAR,
+    'T': POLAR,
+    'V': HYDRO,
+    'W': HYDRO,
+    'Y': HYDRO,
     '*': 'grey',
-    'm': h,
+    'm': HYDRO,
 }
 
-del h, s, n, p, o
+del HYDRO, SPECIAL, NEGATIVE, POSITIVE, POLAR
 
 aa_order = list('HRKDESTNQCGPAVILMFYW*m')
 
@@ -179,6 +180,8 @@ aa_order = list('HRKDESTNQCGPAVILMFYW*m')
 def plot_to_html(
     fig, format='svg', figsize=None, dpi=150, destroy=True, bgcolor='none'
 ):
+    """Converts a matplotlib figure or axes to an SVG or PNG image that can be
+    embedded in HTML"""
 
     if format not in ('svg', 'png'):
         raise ValueError(f'format must be one of "svg" or "png", got {format}')
@@ -190,7 +193,7 @@ def plot_to_html(
     elif isinstance(fig, FacetGrid):
         fig = fig.fig
     elif fig is None:
-        return
+        return None
     else:
         return f'unknown object type: {type(fig)}'
 
@@ -216,7 +219,7 @@ def plot_to_html(
         b64 = base64.b64encode(out.getvalue()).decode('utf-8')
         outstr = f"<img src='data:image/png;base64,{b64}'>"
     else:
-        return
+        return None
 
     if destroy:
         plt.close(fig)
@@ -229,6 +232,7 @@ def plot_to_html(
 
 
 def table_to_html(df):
+    """Converts a Pandas DataFrame to a HTML table"""
     return (
         df.style.set_properties(**{'text-align': 'right'})
         .set_table_styles(

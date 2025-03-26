@@ -1,8 +1,9 @@
-import pytest
 import os
 from pathlib import Path
 
-from itpseq import DataSet, Sample, Replicate
+import pytest
+
+from itpseq import DataSet, Replicate, Sample
 
 
 class TestDataSet:
@@ -52,6 +53,7 @@ class TestDataSet:
         assert df.sum().sum() == 551145
 
 
+# noinspection PyComparisonWithNone
 class TestSample:
     @pytest.fixture(scope='class', autouse=True)
     def setup_class(self, request, data_dir):
@@ -61,7 +63,7 @@ class TestSample:
         self.tcx_data._clear_cache(force=True)
         new = self.tcx_data['nnn15.tcx'].copy(name='new', reference=None)
         assert new.name == 'new'
-        assert new.reference == None
+        assert new.reference is None
 
     def test_infos(self):
         self.tcx_data._clear_cache(force=True)

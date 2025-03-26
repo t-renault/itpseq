@@ -4,7 +4,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
@@ -52,27 +54,32 @@ nbsphinx_thumbnails = {
     'notebooks/report_tutorial': '_static/report_page.png',
 }
 
-import itpseq, warnings, inspect
+import inspect
+import warnings
+
+import itpseq
+
+
 def linkcode_resolve(domain, info) -> str | None:
     """
     Determine the URL corresponding to Python object
     """
-    if domain != "py":
+    if domain != 'py':
         return None
 
-    modname = info["module"]
-    fullname = info["fullname"]
+    modname = info['module']
+    fullname = info['fullname']
 
     submod = sys.modules.get(modname)
     if submod is None:
         return None
 
     obj = submod
-    for part in fullname.split("."):
+    for part in fullname.split('.'):
         try:
             with warnings.catch_warnings():
                 # Accessing deprecated objects will generate noisy warnings
-                warnings.simplefilter("ignore", FutureWarning)
+                warnings.simplefilter('ignore', FutureWarning)
                 obj = getattr(obj, part)
         except AttributeError:
             return None
@@ -98,25 +105,25 @@ def linkcode_resolve(domain, info) -> str | None:
         lineno = None
 
     if lineno:
-        linespec = f"#L{lineno}-L{lineno + len(source) - 1}"
+        linespec = f'#L{lineno}-L{lineno + len(source) - 1}'
     else:
-        linespec = ""
+        linespec = ''
 
     fn = os.path.relpath(fn, start=os.path.dirname(itpseq.__file__))
 
-    if "+" in itpseq.__version__:
-        return f"https://github.com/t-renault/itpseq/blob/main/itpseq/{fn}{linespec}"
+    if '+' in itpseq.__version__:
+        return f'https://github.com/t-renault/itpseq/blob/main/itpseq/{fn}{linespec}'
     else:
         return (
-            f"https://github.com/t-renault/itpseq/blob/"
-            f"{itpseq.__version__}/itpseq/{fn}{linespec}"
+            f'https://github.com/t-renault/itpseq/blob/'
+            f'{itpseq.__version__}/itpseq/{fn}{linespec}'
         )
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-#html_theme = 'classic'
+# html_theme = 'classic'
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
 html_css_files = ['css/itpseq.css']

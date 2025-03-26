@@ -1,11 +1,13 @@
-import click
-import sys
-from . import parsing
-from .core import DataSet
-from pathlib import Path
-import webbrowser
+"""Entry point for the command line tool"""
 
-from . import __version__
+import sys
+import webbrowser
+from pathlib import Path
+
+import click
+
+from . import __version__, parsing
+from .core import DataSet
 
 
 @click.group(
@@ -26,7 +28,6 @@ def main():
                version: {__version__}
 """
     )
-    pass
 
 
 @main.command()

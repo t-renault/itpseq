@@ -1,8 +1,9 @@
-import pytest
 import os
 from pathlib import Path
 
-from itpseq import DataSet, Sample, Replicate
+import pytest
+
+from itpseq import DataSet, Replicate, Sample
 
 
 class TestDataSetPlots:

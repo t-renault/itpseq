@@ -1,9 +1,10 @@
-import pytest
-import itpseq.parsing
-
-from pathlib import Path
-from itertools import product
 import filecmp
+from itertools import product
+from pathlib import Path
+
+import pytest
+
+import itpseq.parsing
 
 
 class TestParse:
@@ -13,16 +14,8 @@ class TestParse:
             pattern=str(path / '*.fastq'), outdir=tmp_outdir, save=True
         )
         # check all files were processed
-        assert set(d) == set(
-            (
-                'nnn15_noa1.assembled.fastq',
-                'nnn15_noa2.assembled.fastq',
-                'nnn15_noa3.assembled.fastq',
-                'nnn15_tcx1.assembled.fastq',
-                'nnn15_tcx2.assembled.fastq',
-                'nnn15_tcx3.assembled.fastq',
-            )
-        )
+        assert set(d) == {'nnn15_noa1.assembled.fastq', 'nnn15_noa2.assembled.fastq', 'nnn15_noa3.assembled.fastq',
+                          'nnn15_tcx1.assembled.fastq', 'nnn15_tcx2.assembled.fastq', 'nnn15_tcx3.assembled.fastq'}
         files = [
             ''.join(p)
             for p in product(

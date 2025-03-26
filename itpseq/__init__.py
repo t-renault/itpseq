@@ -1,4 +1,4 @@
-# Define the itpseq version
+"""Defines the itpseq version"""
 
 from .core import *
 

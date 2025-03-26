@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
+"""Module to parse iTP-Seq fastq files for downstream analysis"""
 
 import sys
 from contextlib import nullcontext
-from pathlib import Path
-from .config import *
-
 from functools import partial
+from pathlib import Path
+
+from .config import *
 
 DEFAULTS = dict(
     a1='GTATAAGGAGGAAAAAAT',
@@ -44,7 +45,7 @@ to_aa['   '] = ' '
 to_aa['\n'] = '\n'
 
 
-def FastQIterator(filename):
+def fastq_iterator(filename):
     """
     Reads 'filename' as a fastq sequence and yield only the sequence and quality lines
 
@@ -79,21 +80,39 @@ def parse_trim_filter_fastq(
 ):
     """
     Takes a 'filename' as input (fastq format), loops over the fastq using
-    FastQIterator and performd several checks to extract valid ITP sequences.
+    fastq_iterator and performd several checks to extract valid ITP sequences.
     Also computes various statistics on the dataset.
 
-    Parameters:
-        filename:  fastq file to process
-              a1:  left adaptator
-              a2:  right adaptator
-             mm1:  tolerated mismatches in a1
-             mm2:  tolerated mismatches in a2
-           limit:  max number of sequences to process (useful for quick tests)
-     min_seq_len:  minimum length of the matched sequence to keep
-     max_seq_len:  maximum length of the matched sequence to keep
+    Parameters
+    ----------
+
+    filename:
+        fastq file to process
+    a1: str
+        Sequence of the left adaptator
+    a2: str
+        Sequence of right adaptator
+    mm1: int
+        Number of tolerated mismatches in a1
+    mm2: int
+        Number of tolerated mismatches in a2
+    limit: int or None
+        Maximum number of sequences to process (useful for quick tests)
+    min_seq_len: int or None
+        Minimum length of the matched sequence to keep
+    max_seq_len: int or None
+        Maximum length of the matched sequence to keep
+    quality: int
+        Minimum quality required in the coding sequence to keep a read
+    contaminants: str,
+        Regex defining the contaminants to remove the matching reads
+    untranslated_overhang: int
+        Minimum extra nucleotides after the A-site (for RNAse R w/ ribosome this is 12).
+        The possible overhangs are x / x+2.
     """
 
     from collections import Counter
+
     import regex
 
     items = [
@@ -139,11 +158,11 @@ def parse_trim_filter_fastq(
 
             # span, subsequence, quality substring, min quality
             # out.append((*m.span(), subseq, subqual, minqual))
-            L = len(subseq)
-            lengths[L] += 1
+            subseq_len = len(subseq)
+            lengths[subseq_len] += 1
 
-            extra = L % 3
-            MAX = L + (2 - extra)
+            extra = subseq_len % 3
+            MAX = subseq_len + (2 - extra)
             subseq = subseq + ' ' * (2 - extra)
             stats[f'extra{extra}'] += 1
 
@@ -166,10 +185,10 @@ def parse_trim_filter_fastq(
                 stats['subseq_N'] += 1
                 keep = False
 
-            if L < min_seq_len_overhang:
+            if subseq_len < min_seq_len_overhang:
                 stats['tooshort'] += 1
                 keep = False
-            elif L > max_seq_len_overhang:
+            elif subseq_len > max_seq_len_overhang:
                 stats['toolong'] += 1
                 keep = False
 
@@ -185,10 +204,10 @@ def parse_trim_filter_fastq(
         if 'N' in seq:
             stats['seq_N'] += 1
 
-    if not filename:
+    if not filename:   # FIXME what happens if no filename? Can we refactor?
         pass
     else:
-        records = FastQIterator(filename)
+        records = fastq_iterator(filename)
 
     if limit:
         from itertools import islice
@@ -214,13 +233,13 @@ def parse_trim_filter_fastq(
 
 
 def parse_file_wrapper(filename, **global_kwargs):
+    """Wrapper to :func:`parse_trim_filter_fastq` and :func:`export_data` for multiprocessing"""
     seqs, stats, extras = parse_trim_filter_fastq(filename, **global_kwargs)
     if global_kwargs.get('save'):
         export_data(
             filename,
             seqs=seqs,
             stats=stats,
-            extras=extras,
             outdir=global_kwargs.get('outdir'),
         )
     return seqs, stats, extras
@@ -257,59 +276,60 @@ def simple_graph(
     ticks=10,
     wrap=80,
 ):
+    """Generate an ASCII bar graph from a Counter"""
     import math
 
     bars = ' _▁▂▃▄▅▆▇█'[1:]
-    L = max(counter)
-    a = np.array([counter[i] for i in range(L)])
-    MAX = a.max()
+    max_x = max(counter)
+    y_values = np.array([counter[i] for i in range(max_x)])
+    max_y = y_values.max()
 
-    # floating vmin/vmax = relative to MAX
+    # floating vmin/vmax = relative to max_y
     if isinstance(vmin, float):
-        vmin = int(vmin * MAX)
+        vmin = int(vmin * max_y)
     if isinstance(vmax, float):
-        vmax = int(vmax * MAX)
+        vmax = int(vmax * max_y)
 
-    # trim below percent MAX
+    # trim below percent max_y
     if isinstance(trim_below, float):
-        trim_below = int(trim_below * MAX)
+        trim_below = int(trim_below * max_y)
 
     if trim_below:
-        l = len(a)
-        a[a < trim_below] = 0
-        a = np.trim_zeros(a, trim='b')
-        L -= l - len(a)
+        l = len(y_values)
+        y_values[y_values < trim_below] = 0
+        y_values = np.trim_zeros(y_values, trim='b')
+        max_x -= l - len(y_values)
 
     if start == 'auto':
-        start = np.min(np.nonzero(np.hstack((a, 1)))) // ticks * ticks
-    L -= start
-    a = a[start:]
+        start = np.min(np.nonzero(np.hstack((y_values, 1)))) // ticks * ticks
+    max_x -= start
+    y_values = y_values[start:]
 
     if not vmin:
         vmin = 0
     if not vmax:
-        vmax = MAX
+        vmax = max_y
     # handle custom vmax
-    if vmax < MAX:
+    if vmax < max_y:
         bars += '▒'
         vmax += 1
 
     b = (
-        ((a - vmin) / (vmax - vmin) * (len(bars) - 1))
+        ((y_values - vmin) / (vmax - vmin) * (len(bars) - 1))
         .astype(int)
         .clip(0, len(bars) - 1)
         .tolist()
     )
 
     graph = ''.join(bars[i] for i in b)
-    xticks = (f'╹{" "*(ticks-1)}' * math.ceil((L + start) / ticks))[:L]
+    xticks = (f'╹{" "*(ticks-1)}' * math.ceil((max_x + start) / ticks))[:max_x]
 
     # left-aligned tick labels
     # labels = ''.join(f'{i: <{ticks}}' for i in range(start, L+start, ticks))
 
     # right-aligned tick labels
     labels = ''.join(
-        f'{i: >{ticks}}' for i in range(start + ticks, L + start, ticks)
+        f'{i: >{ticks}}' for i in range(start + ticks, max_x + start, ticks)
     )
     S = str(start)
     labels = S + labels[len(S) - 1 :]
@@ -327,6 +347,11 @@ def simple_graph(
 
 
 def seq2aa(seq):
+    """
+    Translates a nucleotide sequence into an amino acid sequence
+
+    We are not using BioPython to improve the speed of the module
+    """
     return ''.join(
         [to_aa.get(seq[i : i + 3], '?') for i in range(0, len(seq), 3)]
     )
@@ -336,11 +361,19 @@ def export_data(
     filename,
     seqs=None,
     stats=None,
-    extras=None,
     outdir=None,
     MAX=None,
     untranslated_overhang=12,
 ):
+    __doc__ = rf"""
+    Exports the itpseq output files from the parsed data
+    
+    This creates the following files:
+    - ``<file_prefix>.nuc.{ITP_FILE_SUFFIX}.txt``: inverse toeprints as nucleotides
+    - ``<file_prefix>.aa.{ITP_FILE_SUFFIX}.txt``: inverse toeprints as amino acids
+    - ``<file_prefix>.{ITP_FILE_SUFFIX}.json``: metadata as JSON
+    - ``<file_prefix>.{ITP_FILE_SUFFIX}.log``: log file
+    """
 
     print(f'exporting data from: {filename}')
 
@@ -356,8 +389,6 @@ def export_data(
             outdir.mkdir()
     else:
         outdir = fname.parent
-
-    path = fname.parent
 
     import re
 
@@ -435,6 +466,7 @@ def export_data(
 
 
 def export_all(results_all, outdir=None):
+    """Exports files for all results using :func:`export_data`"""
     for filename, (seqs, stats) in results_all.items():
         print(filename)
         print(simple_graph(stats['lengths'], start=0, wrap=81))
@@ -444,6 +476,29 @@ def export_all(results_all, outdir=None):
 def format_sequences(
     filename, codons=False, aa=False, repeat_header=False, out=None, limit=None
 ):
+    """
+    Formats a nucleotide inverse toeprint file in a custom human-readable format
+
+    Parameters
+    ----------
+
+    filename : str
+        Name of the nucleotide inverse toeprint file to use as input
+    codons : bool
+        If True, splits the coding sequence into codons
+    aa: bool
+        If True, interleave the codons below each nucleotide sequence
+        Adds the length of the peptide after the amino-acids.
+    repeat_header : bool or int:
+        If given an integer, repeats the header every <repeat_sequence> reads.
+    out : str or Path
+        If defined, write the output to this file. If None, write to stdout.
+    limit: int or None
+        Limit the number of reads to process
+
+    Examples
+    --------
+    """
     with open(filename) as f, nullcontext(sys.stdout) if out is None else open(
         out, 'w'
     ) as f_out:
@@ -478,12 +533,13 @@ def format_sequences(
 
 
 def main(out=False):
+    """Wrapper for the command line interface"""
     import argparse
     import datetime
 
     def ArgRange(string):
-        from argparse import ArgumentTypeError
         import re
+        from argparse import ArgumentTypeError
 
         if string.isdigit():
             return (int(string),) * 2
@@ -558,8 +614,8 @@ def main(out=False):
     kwargs = args_dic.copy()
 
     kwargs['min_seq_len'] = args_dic['range'][0] * 3
-    MAX = args_dic['range'][1]
-    kwargs['max_seq_len'] = MAX * 3 if MAX else None
+    max_peptide = args_dic['range'][1]
+    kwargs['max_seq_len'] = max_peptide * 3 if max_peptide else None
 
     del kwargs['files']
     del kwargs['outdir']

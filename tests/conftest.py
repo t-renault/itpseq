@@ -1,11 +1,10 @@
 # module_dir/tests/conftest.py
 import os
-import pytest
-import tempfile
 import shutil
-
+import tempfile
 from pathlib import Path
 
+import pytest
 
 
 @pytest.fixture(scope='module')

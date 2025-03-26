@@ -1,8 +1,10 @@
+"""Helper functions to produce graphs from the itpseq data"""
+
+import matplotlib.patheffects as path_effects
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
-import matplotlib.patheffects as path_effects
 from matplotlib.collections import LineCollection
 
 from .utils import aa_colors
@@ -20,6 +22,30 @@ def itoeprint_plot(
     show_range=True,
     ax=None,
 ):
+    """
+    Plots a virtual inverse-toeprint gel.
+
+        Parameters
+        ----------
+        dataset : str, optional
+            DataSet or Sample to use as source of data (needs a ``toeprint_df`` attribute)
+        plot : str, optional
+            Type of representation. "bands" will display lines with a width proportional to the number of reads.
+            "shades" will display a fixed-height line with a varying shade.
+        norm : str, optional
+            Type of normalization for each lane (possible values are None, 'mean', 'median', 'max', 'std')
+        norm_range : tuple, optional
+            Range of lengths considered to perform the normalization.
+            Defaults to 21-51, which corresponds to the first 10 codons after the start.
+        exposure : int, optional
+            Modulates the global intensity of the bands in the "bands" type of plot.
+        limit: tuple, optional
+            Limits the visible range of lengths.
+        show_range : bool, optional
+            Shows the regions excluded from the normalization in light red.
+        ax : matplotlib.axes.Axes, optional
+             ax to use for plotting, otherwise create a new figure.
+    """
     if not ax:
         ax = plt.subplot()
 
@@ -72,6 +98,7 @@ def itoeprint_plot(
             ax=ax,
             cbar=False,
         )
+        i = 0   # avoid static checker complaint
         for i in range(0, df.shape[1] + 1):
             ax.axvline(i, c='w', lw=70 / (df.shape[1] + 1), zorder=1)
 
@@ -127,6 +154,7 @@ def motif_logo(
         * "extra_counts": Computes the sum of extra counts (sample - reference) for each residue per position
         * "sum_log2FC": sum of the log2FoldChange for each residue per position
         * "<logo_type>_bits": If any of the above has a "_bits" suffix, an extra conversion to bits is performed.
+
     return_matrix: bool, optional
         If True, the logo matrix is returned as together with the logo as (logo, matrix).
     """
@@ -186,7 +214,8 @@ def motif_logo(
             )
         # logomaker transforms zeros into small numbers
         matrix = matrix.mask(mask, 0)
-    elif logo_type in {'sum_log2FC', 'sum_log2FC_bits'}:
+    # elif logo_type in {'sum_log2FC', 'sum_log2FC_bits'}:
+    else:
         matrix = (
             df.index.to_series()
             .str.extractall('(?P<aa>.)')

@@ -1,11 +1,13 @@
-import re
-import json
-import pandas as pd
-import numpy as np
-from pathlib import Path
+"""Helper functions to process the itpseq data"""
 
+import json
+import re
 from functools import lru_cache
-from typing import overload, Optional, Union, Any
+from pathlib import Path
+from typing import Any, Optional, Union, overload
+
+import numpy as np
+import pandas as pd
 from pandas import DataFrame
 
 from .utils import fcache
@@ -39,13 +41,21 @@ def read_itp_file_as_series(
     Parameters
     ----------
     how : str, optional
-        Mode to filter the stops: "aax" will remove peptides with a stop before the A-site, by default 'aax'
+        Defines which type of inverse toeprints to load:
+        - 'nuc': loads the nucleotide data
+        - 'aa': loads the amino acid data
+        - 'aax': loads the amino acid data, removes peptides with a stop in the coding sequence (before the A-site)
+
     filename : Path or str
         Path to the nucleotide/amino-acid file
     min_peptide : int, optional
         Minimum peptide length to keep, by default None
     max_peptide : int, optional
         Maximum peptide length to keep, by default None
+    limit : int or None, optional
+        If not None, limits the number of reads to process. This is useful to perform quick tests.
+    sample : str or None, optional
+        If not None, samples <sample> reads randomly.
 
     Returns
     -------
@@ -72,10 +82,10 @@ def read_itp_file_as_series(
     with open(filename) as f:
         # FIXME decide how to handle min_peptide/max_peptide for non-amino-acids
         if min_peptide or max_peptide or how == 'aax':
-            S = '*' if how == 'aax' else ''
+            stop = '*' if how == 'aax' else ''
             min_ = min_peptide - 1 if min_peptide else ''
             max_ = max_peptide - 1 if max_peptide else ''
-            pat = re.compile(rf'^\s*[^\s{S}]{{{min_},{max_}}}.$')
+            pat = re.compile(rf'^\s*[^\s{stop}]{{{min_},{max_}}}.$')
             out = pd.Series(
                 [
                     line
@@ -216,6 +226,7 @@ def get_ribosome_site(pos, short=False):
 
 @fcache
 def compute_counts(seqs_series, pos):
+    """Computes the counts of each character per position in the input Series"""
     if not pos:
         return (
             seqs_series.str.split('(?<=.)(?=.)', expand=True)
@@ -233,6 +244,7 @@ def compute_counts(seqs_series, pos):
 
 
 def itp_len_add_positions(ax, min_codon=0, max_codon=10):
+    """Decorates the ax with grey bands for each codon between min_codon and max_codon"""
     greys = ['#808080', '#CACACA']
     start = 18
     ax.axvline(start + 3 * min_codon, color='k', alpha=0.1, zorder=-1)
@@ -262,12 +274,12 @@ def itp_len_add_positions(ax, min_codon=0, max_codon=10):
 def DE(
     df: DataFrame,
     sample_df: DataFrame,
-    cond: str = None,
-    ref: str = None,
+    cond: str,
+    ref: str,
     join: bool = False,
     quiet: bool = True,
     multi: bool = True,
-    n_cpus: int = None,
+    n_cpus: Union[str, None] = None,
     raw: bool = False,
 ) -> DataFrame | None | Any:
     """
@@ -317,9 +329,8 @@ def DE(
     - Prints a message and returns `None` if the DESeq2 analysis fails due to invalid input or other issues.
     """
 
-    import contextlib, io
-
-    f = io.StringIO()
+    import contextlib
+    import io
 
     if not n_cpus:
         import multiprocessing

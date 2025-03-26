@@ -1,35 +1,35 @@
-from pathlib import Path
-from typing import Optional, Union
-from collections import defaultdict
+"""Core classes for itpseq"""
 
-from functools import total_ordering, lru_cache, cached_property, wraps
-
-import re
 import datetime
-from copy import deepcopy
+import re
 import uuid
+import warnings
+from collections import defaultdict
+from copy import deepcopy
+from functools import cached_property, lru_cache, total_ordering, wraps
+from pathlib import Path
+from types import NoneType
+from typing import Optional, Union
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import seaborn as sns
-
 from pandas.api.extensions import no_default
-from types import NoneType
-import warnings
 
-from .utils import *
-from .processing import *
-from .plotting import *
 from .config import *
+from .plotting import *
+from .processing import *
+from .utils import *
 
 IPYTHON = False
 try:
     from IPython import get_ipython
 
-    ip = get_ipython()
-    if ip is not None and getattr(ip, 'kernel', None) is not None:
+    IP = get_ipython()
+    if IP is not None and getattr(IP, 'kernel', None) is not None:
         IPYTHON = True
+        del IP
 except ImportError:
     pass
 
@@ -74,6 +74,7 @@ class Replicate:
         **kwargs,
     ):
         # print(f'Replicate {kwargs=}')
+        self.name = None
         self.file_prefix = file_prefix
         self.sample = sample
         self.replicate = replicate
@@ -110,22 +111,27 @@ class Replicate:
 
     @property
     def filename(self):
+        """File name for the nucleotide inverse toeprints for the replicate"""
         return self.file_prefix + f'.nuc.{ITP_FILE_SUFFIX}.txt'
 
     @property
     def aa_filename(self):
+        """File name for the amino-acid inverse toeprints for the replicate"""
         return self.file_prefix + f'.aa.{ITP_FILE_SUFFIX}.txt'
 
     @property
     def json_filename(self):
+        """File name for the JSON metadata for the replicate"""
         return self.file_prefix + f'.{ITP_FILE_SUFFIX}.json'
 
     @property
     def sample_name(self):
+        """Linked Sample name (if any)"""
         return self.sample.name if self.sample else ''
 
     @property
     def dataset(self):
+        """Linked DataSet name (if any)"""
         return self.sample.dataset if self.sample else None
 
     def rename(self, name=None):
@@ -190,10 +196,16 @@ class Replicate:
         return new
 
     def infos(self):
+        """Returns the Replicate metadata from the JSON file"""
         return read_log_json(self.json_filename)
 
     @wraps(read_itp_file_as_series)
     def load_data(self, how='aax', **kwargs):
+        """
+        Reads the inverse toeprint sequences from the appropriate file
+        Delegated to processing.read_itp_file_as_series
+
+        """
         if how in {'aa', 'aax'}:
             filename = self.aa_filename
         # elif how == 'codons':  # TODO
@@ -428,12 +440,13 @@ class Sample:
             return NotImplemented
         if other == self.reference:
             return True
-        elif other.reference == self:
+        if other.reference == self:
             return False
         return (self.dataset, self.name) > (other.dataset, other.name)
 
     @property
     def name_vs_ref(self):
+        """Name of the Sample combined with its reference"""
         return (
             f'{self.name} vs {self.reference.name}'
             if self.reference
@@ -442,6 +455,7 @@ class Sample:
 
     @property
     def name_ref(self):
+        """Name of the Sample combined with its reference"""
         return (
             f'{self.name}-{self.reference.name}'
             if self.reference
@@ -517,6 +531,11 @@ class Sample:
         return new
 
     def load_replicates(self, how='aax'):   ## FIXME is this useful to keep?
+        """
+        Loads all the Replicates in the Sample with the defined method (``how``)
+
+        This function can be used to generate the cached files
+        """
         for replicate in self.replicates:
             replicate.load_data(how=how)
 
@@ -895,10 +914,7 @@ class Sample:
 
         table = table.copy()  # avoid modifying the input object
         # keep only motifs without gap
-        try:
-            table = table.loc[~table.index.str.contains(' ')]
-        except:
-            print(table)
+        table = table.loc[~table.index.str.contains(' ')]
 
         names = list(map(get_ribosome_site, names))
 
@@ -907,7 +923,7 @@ class Sample:
         )
 
         if not ax:
-            f, ax = plt.subplots()
+            _, ax = plt.subplots()
 
         t = table[col].unstack()
         if len(t) == 0:
@@ -1048,8 +1064,12 @@ class Sample:
         if not pos:
             pos = ['-2', 'E', 'P', 'A']
 
-        N = len(pos) - 1
-        f, axes = plt.subplots(nrows=N, ncols=N, figsize=(N * 5, N * 5))
+        grid_size = len(pos) - 1
+        f, axes = plt.subplots(
+            nrows=grid_size,
+            ncols=grid_size,
+            figsize=(grid_size * 5, grid_size * 5),
+        )
 
         for i, r in enumerate(pos[:-1]):
             for j, c in enumerate(pos[1:]):
@@ -1166,8 +1186,6 @@ class Sample:
             If 'aax' is provided, sequences with stop codons in the peptide are excluded. Default is 'aax'.
         col : str, optional
             The DataFrame column to utilize for enrichment visualization. Defaults to 'auto'.
-        transform : callable, optional
-            A function or callable to apply to the enrichment matrix before plotting. Defaults to `numpy.log2`.
         cmap : str or matplotlib.colors.Colormap, optional
             The colormap to use for the heatmap visualization. Defaults to 'vlag'.
         vmax : float, optional
@@ -1343,7 +1361,7 @@ class Sample:
         df = self.DE(pos=pos, **kwargs)
         if df is None:
             print(f'Skipping volcano plot for {self}')
-            return
+            return None
         # df.astype(float)  ### FIXME
 
         df['rank'] = df[x].abs() * df[y]
@@ -1351,7 +1369,7 @@ class Sample:
         df.sort_values(by='qrank', ascending=False, inplace=True)
 
         if not ax:
-            f, ax = plt.subplots()
+            _, ax = plt.subplots()
 
         if not annotate:
             annotate = ''
@@ -1369,7 +1387,7 @@ class Sample:
             df = df.assign(
                 keep=flag_low_density(df[x], df[y], 50, int(m.group(1)))
             )
-            query = f'keep'
+            query = 'keep'
 
         elif query.startswith('auto'):
             quantile = 0.90
@@ -1378,13 +1396,13 @@ class Sample:
                 quantile = float(m.group(1))
                 query = 'auto'
             if query == 'auto':
-                x_thresh = df['log2FoldChange'].abs().quantile(quantile)
-                y_thresh = df['log10pvalue'].abs().quantile(quantile)
+                x_thresh = df[x].abs().quantile(quantile)
+                y_thresh = df[y].abs().quantile(quantile)
 
-                x_min = df['log2FoldChange'].agg(['min', 'max']).abs().min()
+                x_min = df[x].agg(['min', 'max']).abs().min()
                 x_thresh = min(x_thresh, x_min)
 
-                query = f'(log10pvalue > @y_thresh) & (abs(log2FoldChange) > @x_thresh)'
+                query = f'(log10pvalue > {y_thresh}) & (abs(log2FoldChange) > {x_thresh})'
             else:
                 thresh = {2: (0.05, 0.2), 3: (0.05, 1), 4: (0.2, 2)}
                 padj, l2fc = thresh.get(len(df.index[0]), (0.05, 1))
@@ -1395,14 +1413,14 @@ class Sample:
                 query, engine='python'
             )  # engine='python' to prevent bug with <NA> type
             df_query.plot.scatter(x=x, y=y, color=query_color, ax=ax, **params)
-            if (annotate == True) or ('query' in annotate):
+            if (annotate is True) or ('query' in annotate):
                 dfs.append(df_query)
                 colors.append(query_color)
 
         if motif:
             df_motif = df[df.index.str.match(motif)]
             df_motif.plot.scatter(x=x, y=y, color=motif_color, ax=ax, **params)
-            if (annotate == True) or ('motif' in annotate):
+            if (annotate is True) or ('motif' in annotate):
                 dfs.append(df_motif)
                 colors.append(motif_color)
 
@@ -1421,9 +1439,7 @@ class Sample:
                 ):   # should be much faster than iterrows if many points
 
                     # adapt position of the label
-                    left = ((sx < 0) and (sy < -sx)) or (
-                        (sx > 0) and (sy > sx)
-                    )
+                    left = ((sx < 0) and (sy < -sx)) or (0 < sx < sy)
 
                     txt = ax.annotate(
                         name,
@@ -1551,7 +1567,7 @@ class Sample:
 
         .. image:: /_static/sample_all_logos.png
         """
-        f, axes = plt.subplots(nrows=len(self.replicates), sharex=True)
+        _, axes = plt.subplots(nrows=len(self.replicates), sharex=True)
         for r, ax in zip(self.replicates, axes.flat):
             r.logo(logo_kwargs=logo_kwargs, ax=ax, **kwargs)
             ax.set_title(r)
@@ -1724,7 +1740,7 @@ class Sample:
             )
 
         if not ax:
-            f, ax = plt.subplots()
+            _, ax = plt.subplots()
 
         sns.lineplot(
             data=df_len.rename(columns=names),
@@ -1739,6 +1755,7 @@ class Sample:
 
     @cached_property
     def toeprint_df(self):
+        """DataFrame of the counts of each inverse toeprint length per Replicate"""
         return (
             pd.concat(
                 {
@@ -1812,8 +1829,8 @@ class Sample:
         .. image:: /_static/sample_itoeprint_interactive.png
         """
         if interactive:
-            from ipywidgets import interact, fixed
             import ipywidgets as widgets
+            from ipywidgets import fixed, interact
 
             interact(
                 itoeprint_plot,
@@ -1833,6 +1850,7 @@ class Sample:
                 # equalize_lanes=widgets.Checkbox(value=equalize_lanes),
                 ax=fixed(None),
             )
+            return None
         else:
             return itoeprint_plot(
                 self,
@@ -2063,13 +2081,29 @@ class DataSet:
 
     @property
     def samples_with_ref(self):
+        """Dictionary of the samples that have a reference"""
         return {k: s for k, s in self.samples.items() if s.reference}
 
-    def set_references(self, ref_mapping=None):
+    def set_references(self, ref_mapping=None, exact_mapping=False):
+        """
+        Sets the Sample references from a mapping
+
+        Parameters
+        ----------
+        ref_mapping : mapping, optional
+            Mapping (ex. dictionary) of {'sample_label': Replicate or 'replicate_label'}
+        exact_mapping : bool, optional
+            If set to True, will remove the existing references for samples not defined in the mapping
+        """
         if ref_mapping is not None:
             for k, s in self.samples.items():
-                if k in ref_mapping and self.ref_mapping[k] in self.samples:
-                    s.reference = self.samples[ref_mapping[k]]
+                if k in ref_mapping:
+                    ref = ref_mapping[k]
+                    if not isinstance(ref, Replicate):
+                        ref = self.samples[ref]
+                    s.reference = ref
+                elif exact_mapping:
+                    s.reference = None
 
     def _infer_samples(self, allow_partial_keys=True) -> list[str]:
         """Infers sample names from the files in the data path."""
@@ -2127,7 +2161,7 @@ class DataSet:
             # if several references match a single key, they will be removed from ref_samples_minkey
             for k in list(ref_samples_minkey):
                 if len(ref_samples_minkey[k]) > 1:
-                    spl_str = ', '.join(str(x) for x in ref_samples_minkey[k])
+                    # spl_str = ', '.join(str(x) for x in ref_samples_minkey[k])
                     # print(f'Multiple references for {dict(k)}: [{spl_str}]')
                     ref_samples_minkey.pop(k)
             # flatten dictionary to keep the single references
@@ -2142,7 +2176,7 @@ class DataSet:
             for k, s in samples.items():
                 if k in ref_ids:  # if this is a reference sample, continue
                     continue
-                items = dict(dict_to_tuple(s.labels, ignore=ref_keys)).items()
+                # items = dict(dict_to_tuple(s.labels, ignore=ref_keys)).items()
                 sample_labels = dict_to_tuple(s.labels, ignore=ref_keys)
 
                 # exact match
@@ -2385,14 +2419,14 @@ class DataSet:
                 hue='replicate' if hue == 'auto' else hue,
                 **plt_kwargs,
             )
-            for ax in g.axes.flat:
+            for ax_ in g.axes.flat:
                 itp_len_add_positions(
-                    ax, min_codon=min_codon, max_codon=max_codon
+                    ax_, min_codon=min_codon, max_codon=max_codon
                 )
             return g
 
         if not ax:
-            f, ax = plt.subplots()
+            _, ax = plt.subplots()
 
         sns.lineplot(
             data=df_len.rename(columns=names),
@@ -2407,6 +2441,7 @@ class DataSet:
 
     @cached_property
     def toeprint_df(self):
+        """DataFrame of the counts of each inverse toeprint length per Replicate"""
         return (
             pd.concat(
                 {
@@ -2459,7 +2494,7 @@ class DataSet:
         html_template = env.get_template(f'{template}.html')
 
         # additional variables
-        vars = {
+        render_kwargs = {
             'today': datetime.date.today(),
         }
 
@@ -2474,12 +2509,12 @@ class DataSet:
                     plot_to_html=plot_to_html,
                     css_file=css_file,
                     output='html',
-                    **vars,
+                    **render_kwargs,
                 )
                 with open(output, 'w') as f:
                     f.write(html)
             elif output.suffix == '.pdf':
-                from weasyprint import HTML, CSS
+                from weasyprint import CSS, HTML
 
                 css_file = static_dir / f'{template}-pdf.css'
                 if not css_file.exists():
@@ -2488,15 +2523,18 @@ class DataSet:
                     dataset=self,
                     plot_to_html=plot_to_html,
                     output='pdf',
-                    **vars,
+                    **render_kwargs,
                 )
                 HTML(string=html).write_pdf(
                     output, stylesheets=[CSS(filename=css_file)]
                 )
-            return
+            return None
         else:
             html = html_template.render(
-                dataset=self, plot_to_html=plot_to_html, output='other', **vars
+                dataset=self,
+                plot_to_html=plot_to_html,
+                output='other',
+                **render_kwargs,
             )
 
             if IPYTHON:

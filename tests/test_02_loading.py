@@ -1,14 +1,15 @@
-import pytest
 import os
 from pathlib import Path
 
-from itpseq import DataSet, Sample, Replicate
+import pytest
+
+from itpseq import DataSet, Replicate, Sample
 
 data_dir = Path(__file__).parent / 'test_data/'
 
 
 class TestDataSet:
-    def test_DataSet_from_path(self, tmp_outdir):
+    def test_dataset_from_path(self, tmp_outdir):
         data = DataSet(data_dir / 'tcx_small_test/', result_path=tmp_outdir)
         assert set(data.samples) == {'nnn15.noa', 'nnn15.tcx'}
         assert set(data.samples_with_ref) == {'nnn15.tcx'}
@@ -30,7 +31,7 @@ class TestDataSet:
                  Sample(nnn15.tcx:[1, 2, 3], ref: nnn15.noa)],
         )"""
 
-    def test_DataSet_from_path_keys(self, tmp_outdir):
+    def test_dataset_from_path_keys(self, tmp_outdir):
         data = DataSet(
             data_dir / 'tcx_small_test/',
             keys=['sample'],
@@ -49,7 +50,7 @@ class TestDataSet:
         assert data.keys == ['sample']
         assert data.ref_labels == (('sample', 'noa'),)
 
-    def test_DataSet_from_path_pattern(self, tmp_outdir):
+    def test_dataset_from_path_pattern(self, tmp_outdir):
         data = DataSet(
             data_dir / 'loading_concentrations/',
             file_pattern=r'(?P<sample>[^_]+)(?P<replicate>\d+)(_(?P<concentration>\d+µM))?',
@@ -73,7 +74,7 @@ class TestDataSet:
             'drugB.30µM',
         }
 
-    def test_DataSet_from_dictionary(self, tmp_outdir):
+    def test_dataset_from_dictionary(self, tmp_outdir):
         data = DataSet(
             {
                 'tcx': [
