@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import sys
+from contextlib import nullcontext
 from pathlib import Path
 from .config import *
 
@@ -442,8 +444,6 @@ def export_all(results_all, outdir=None):
 def format_sequences(
     filename, codons=False, aa=False, repeat_header=False, out=None, limit=None
 ):
-    from contextlib import nullcontext
-
     with open(filename) as f, nullcontext(sys.stdout) if out is None else open(
         out, 'w'
     ) as f_out:
