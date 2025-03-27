@@ -2104,7 +2104,7 @@ class DataSet:
                 elif exact_mapping:
                     s.reference = None
 
-    def _infer_samples(self, allow_partial_keys=True) -> list[str]:
+    def _infer_samples(self, allow_partial_keys=True):
         """Infers sample names from the files in the data path."""
         inferred_samples = defaultdict(list)
         # file_paths = list(self.data_path.glob("*.json"))

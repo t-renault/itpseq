@@ -281,7 +281,7 @@ def DE(
     multi: bool = True,
     n_cpus: Union[str, None] = None,
     raw: bool = False,
-) -> DataFrame | None | Any:
+):
     """
     Performs differential expression (DE) analysis using DESeq2 via the `pydeseq2` library.
 

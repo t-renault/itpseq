@@ -7,7 +7,7 @@ The latest documentation is available at [itpseq.readthedocs.io](https://itpseq.
 
 Dependencies
 ------------
-Supports python xx
+Supports python 3.9+
 
 Installation requires [regex](https://pypi.org/project/regex/),
 [numpy](https://numpy.org/),
