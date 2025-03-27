@@ -8,7 +8,6 @@ from collections import defaultdict
 from copy import deepcopy
 from functools import cached_property, lru_cache, total_ordering, wraps
 from pathlib import Path
-from types import NoneType
 from typing import Optional, Union
 
 import matplotlib.pyplot as plt
@@ -521,7 +520,7 @@ class Sample:
         if name:
             new.rename(name)
         if reference is not no_default:
-            if isinstance(reference, (Sample, NoneType)):
+            if isinstance(reference, (Sample, type(None))):
                 new.reference = reference
             else:
                 warnings.warn(
