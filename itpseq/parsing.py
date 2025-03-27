@@ -3,10 +3,12 @@
 
 import sys
 from contextlib import nullcontext
-from functools import partial
+from functools import partial, wraps
 from pathlib import Path
 
 from .config import *
+
+__all__ = ['parse']
 
 DEFAULTS = dict(
     a1='GTATAAGGAGGAAAAAAT',
@@ -63,8 +65,9 @@ def fastq_iterator(filename):
             yield (seq[:-1], score[:-1])
 
 
-def parse_trim_filter_fastq(
-    filename=None,
+def parse_filter_fastq(
+    filename,
+    *,
     a1=DEFAULTS['a1'],  # adaptators
     a2=DEFAULTS['a2'],
     mm1=2,  # allowed number of mismatches
@@ -204,10 +207,7 @@ def parse_trim_filter_fastq(
         if 'N' in seq:
             stats['seq_N'] += 1
 
-    if not filename:   # FIXME what happens if no filename? Can we refactor?
-        pass
-    else:
-        records = fastq_iterator(filename)
+    records = fastq_iterator(filename)
 
     if limit:
         from itertools import islice
@@ -233,8 +233,8 @@ def parse_trim_filter_fastq(
 
 
 def parse_file_wrapper(filename, **global_kwargs):
-    """Wrapper to :func:`parse_trim_filter_fastq` and :func:`export_data` for multiprocessing"""
-    seqs, stats, extras = parse_trim_filter_fastq(filename, **global_kwargs)
+    """Wrapper to :func:`parse_filter_fastq` and :func:`export_data` for multiprocessing"""
+    seqs, stats, extras = parse_filter_fastq(filename, **global_kwargs)
     if global_kwargs.get('save'):
         export_data(
             filename,
@@ -247,7 +247,7 @@ def parse_file_wrapper(filename, **global_kwargs):
 
 def parse_all(files=None, pattern=None, save=False, outdir=None, **kwargs):
     """
-    Apply parse_trim_filter_fastq on multiple files
+    Apply parse_filter_fastq on multiple files
     """
 
     from multiprocessing import Pool, cpu_count
@@ -359,6 +359,7 @@ def seq2aa(seq):
 
 def export_data(
     filename,
+    *,
     seqs=None,
     stats=None,
     outdir=None,
@@ -471,6 +472,22 @@ def export_all(results_all, outdir=None):
         print(filename)
         print(simple_graph(stats['lengths'], start=0, wrap=81))
         export_data(filename, seqs=seqs, stats=stats, outdir=outdir, MAX=None)
+
+
+@wraps(parse_filter_fastq) # FIXME add parameters of export_data
+def parse(
+    filename,
+    *,
+    seqs=None,
+    stats=None,
+    outdir=None,
+    MAX=None,
+    untranslated_overhang=12,
+    **kwargs
+):
+    """Wrapper to combine parse_filter_fastq and export_data"""
+    seqs, stats, _ = parse_filter_fastq(filename, **kwargs)
+    export_data(filename, seqs=seqs, stats=stats, outdir=outdir, MAX=MAX, untranslated_overhang=untranslated_overhang)
 
 
 def format_sequences(
