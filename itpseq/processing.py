@@ -4,7 +4,7 @@ import json
 import re
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Optional, Union, overload
+from typing import Any, Union
 
 import numpy as np
 import pandas as pd

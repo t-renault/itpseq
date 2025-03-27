@@ -2481,7 +2481,7 @@ class DataSet:
          >>> dataset.report()
         """
 
-        from jinja2 import Environment, FileSystemLoader, PackageLoader
+        from jinja2 import Environment, FileSystemLoader
 
         template_dir = Path(__file__).resolve().parent / 'templates'
         static_dir = Path(__file__).resolve().parent / 'static'
@@ -2502,7 +2502,7 @@ class DataSet:
             if output.suffix == '.html':
                 css_file = static_dir / f'{template}-html.css'
                 if not css_file.exists():
-                    css_file = static_dir / f'report-html.css'
+                    css_file = static_dir / 'report-html.css'
                 html = html_template.render(
                     dataset=self,
                     plot_to_html=plot_to_html,
@@ -2517,7 +2517,7 @@ class DataSet:
 
                 css_file = static_dir / f'{template}-pdf.css'
                 if not css_file.exists():
-                    css_file = static_dir / f'report-pdf.css'
+                    css_file = static_dir / 'report-pdf.css'
                 html = html_template.render(
                     dataset=self,
                     plot_to_html=plot_to_html,
