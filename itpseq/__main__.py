@@ -37,14 +37,13 @@ def help():
     module_dir = Path(__file__).resolve().parent.parent
     docs_index = module_dir.joinpath('docs', '_build', 'html', 'index.html')
 
-    if not docs_index.exists():
-        print(
-            'Error: Documentation not found. Please build the Sphinx documentation first.'
-        )
-        return
-
-    # Open the documentation in the default web browser
-    webbrowser.open(f'file://{docs_index}')
+    if docs_index.exists():
+        url = f'file://{docs_index}'
+    else:
+        print('Local documentation not found.')
+        url = 'https://itpseq.readthedocs.io'
+    print(f'Loading documentation from: {url}')
+    webbrowser.open(url)
 
 
 @main.command()
