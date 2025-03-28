@@ -403,12 +403,12 @@ def export_data(
     max_untranslated_overhang = untranslated_overhang + 2
 
     if stats:
-        with open(f_json, 'w') as f_json:
+        with open(f_json, 'w', encoding='utf-8') as f_json:
             import json
 
             f_json.write(json.dumps(stats))
 
-        with open(f_log, 'w') as f_log:
+        with open(f_log, 'w', encoding='utf-8') as f_log:
             f_log.write('')
             N = len(str(stats['total_sequences'])) + 2
             f_log.write(
@@ -444,7 +444,9 @@ def export_data(
         # .....................[E][P][A]..............
         #                               xxxxxxxxxxxxxx  # max_untranslated_overhang
 
-        with open(f_seq_nuc, 'w') as f, open(f_seq_aa, 'w') as f_aa:
+        with open(f_seq_nuc, 'w', encoding='utf-8') as f, open(
+            f_seq_aa, 'w', encoding='utf-8'
+        ) as f_aa:
             if not MAX:
                 MAX = 12
             MAX = max(

@@ -80,6 +80,9 @@ def report(directory, keys, ref_labels, file_pattern, output):
     Generate a report for the dataset in the specified DIRECTORY.
     """
     from .core import DataSet
+    import matplotlib
+
+    matplotlib.use('Agg')
 
     # Create the DataSet instance
     dataset = DataSet(
