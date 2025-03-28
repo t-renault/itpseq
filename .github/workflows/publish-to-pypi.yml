@@ -1,6 +1,11 @@
-name: Publish Python 🐍 distribution 📦 to PyPI and TestPyPI
+name: Publish to PyPI
 
-on: push
+on:
+  push:
+    paths:  # only run on changes in
+      - 'itpseq/**'                      # source directory
+      - 'pyproject.toml'                 # build configuration
+      - '.github/workflows/publish-to-pypi.yml'  # workflow file
 
 jobs:
   build:

@@ -1,6 +1,10 @@
-name: Cross-platform testing
+name: Unit testing
 
-on: push
+on:
+  push:
+    paths:  # only run on changes in
+      - 'itpseq/**'                                     # source directory
+      - '.github/workflows/cross-platform-testing.yml'  # workflow file
 
 jobs:
   test:
