@@ -262,7 +262,7 @@ def parse_all(files=None, pattern=None, save=False, outdir=None, **kwargs):
     with Pool(max(1, cpu_count() - 2)) as pool:
         result = pool.map(f, files)
 
-    short = list(map(lambda x: x.rsplit('/', 1)[-1], files))
+    short = [Path(f).name for f in files]
 
     return dict(zip(short, result))
 
