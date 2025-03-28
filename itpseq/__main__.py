@@ -79,8 +79,9 @@ def report(directory, keys, ref_labels, file_pattern, output):
     """
     Generate a report for the dataset in the specified DIRECTORY.
     """
-    from .core import DataSet
     import matplotlib
+
+    from .core import DataSet
 
     matplotlib.use('Agg')
 
