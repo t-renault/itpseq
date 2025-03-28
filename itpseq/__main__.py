@@ -6,8 +6,7 @@ from pathlib import Path
 
 import click
 
-from . import __version__, parsing
-from .core import DataSet
+from . import __version__
 
 
 @click.group(
@@ -80,6 +79,8 @@ def report(directory, keys, ref_labels, file_pattern, output):
     """
     Generate a report for the dataset in the specified DIRECTORY.
     """
+    from .core import DataSet
+
     # Create the DataSet instance
     dataset = DataSet(
         data_path=Path(directory),
@@ -104,6 +105,8 @@ def parse(args):
     """
     Parse and filter the assembled iTP-Seq FASTQ files to produce files needed for the analysis.
     """
+    from . import parsing
+
     # Pass arguments directly to parsing.main()
     sys.argv = ['parse'] + list(args)  # Simulate sys.argv for argparse
     parsing.main()
