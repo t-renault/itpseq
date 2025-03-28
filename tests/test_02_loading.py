@@ -105,3 +105,18 @@ class TestDataSet:
             'noa.custom_name',
             'noa.rep3',
         }
+
+    def test_dataset_from_json(self, tmp_outdir):
+        import json
+
+        with open(data_dir / 'tcx_small_test' / 'samples.json') as f:
+            data = DataSet(json.load(f))
+        assert set(data.samples) == {'noa', 'tcx'}
+        assert set(data.replicates) == {
+            'tcx.rep1',
+            'tcx.rep2',
+            'tcx.rep3',
+            'noa.rep1',
+            'noa.custom_name',
+            'noa.rep3',
+        }
