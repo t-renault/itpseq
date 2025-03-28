@@ -10,7 +10,7 @@ import pytest
 @pytest.fixture(scope='module')
 def data_dir():
     """Fixture that returns the path to the test data directory."""
-    return Path(__file__).parent / 'test_data/'
+    return Path(__file__).parent / 'test_data'
 
 
 @pytest.fixture(scope='class')
