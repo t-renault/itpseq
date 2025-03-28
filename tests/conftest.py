@@ -12,6 +12,7 @@ def data_dir():
     """Fixture that returns the path to the test data directory."""
     return Path(__file__).parent / 'test_data/'
 
+
 @pytest.fixture(scope='class')
 def tmp_outdir():
     """
@@ -22,6 +23,7 @@ def tmp_outdir():
     yield temp_dir
     shutil.rmtree(temp_dir)
 
+
 @pytest.fixture
 def parsed_output_dir(test_data_dir, temp_output_dir):
     """
@@ -30,15 +32,15 @@ def parsed_output_dir(test_data_dir, temp_output_dir):
     This is useful for tests that depend on the output of the parsing.
     """
     from itpseq.parsing import parse_all
-    
+
     fastq_files = [
-        os.path.join(test_data_dir, f) 
-        for f in os.listdir(test_data_dir) 
+        os.path.join(test_data_dir, f)
+        for f in os.listdir(test_data_dir)
         if f.endswith('.fastq')
     ]
-    
+
     output_dir = os.path.join(temp_output_dir, 'parsed_output')
     os.makedirs(output_dir, exist_ok=True)
-    
+
     parse_all(fastq_files, output_dir)
     return output_dir

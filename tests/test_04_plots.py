@@ -20,12 +20,13 @@ class TestDataSetPlots:
     def test_itp_len_plot_row_sample(self):
         self.tcx_data.itp_len_plot(row='sample')
 
+
 class TestSamplePlots:
     @pytest.fixture(scope='class', autouse=True)
     def setup_class(self, request, data_dir, tmp_outdir):
         request.cls.tcx = DataSet(
             data_dir / 'tcx_small_test/', result_path=tmp_outdir
-        )['nnn15.tcx'] 
+        )['nnn15.tcx']
         request.cls.tcx.dataset._clear_cache(force=True)
 
     def test_itp_len_plot(self):
@@ -39,7 +40,7 @@ class TestSamplePlots:
 
     def test_hmap_pos(self):
         self.tcx.hmap_pos()
-        
+
     def test_hmap_pos_EPA(self):
         self.tcx.hmap_pos(('E', 'P', 'A'))
 

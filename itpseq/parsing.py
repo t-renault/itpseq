@@ -259,7 +259,7 @@ def parse_all(files=None, pattern=None, save=False, outdir=None, **kwargs):
 
     f = partial(parse_file_wrapper, **kwargs, save=save, outdir=outdir)
 
-    with Pool(cpu_count() - 2) as pool:
+    with Pool(max(1, cpu_count() - 2)) as pool:
         result = pool.map(f, files)
 
     short = list(map(lambda x: x.rsplit('/', 1)[-1], files))

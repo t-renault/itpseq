@@ -5,12 +5,12 @@ import pytest
 
 from itpseq import DataSet, Replicate, Sample
 
-data_dir = Path(__file__).parent / 'test_data/'
+data_dir = Path(__file__).parent / 'test_data'
 
 
 class TestDataSet:
     def test_dataset_from_path(self, tmp_outdir):
-        data = DataSet(data_dir / 'tcx_small_test/', result_path=tmp_outdir)
+        data = DataSet(data_dir / 'tcx_small_test', result_path=tmp_outdir)
         assert set(data.samples) == {'nnn15.noa', 'nnn15.tcx'}
         assert set(data.samples_with_ref) == {'nnn15.tcx'}
         assert set(data.replicates) == {
@@ -23,17 +23,19 @@ class TestDataSet:
         }
         assert data.keys == ['lib_type', 'sample']
         assert data.ref_labels == (('sample', 'noa'),)
+        # fmt: off
         assert data['nnn15.tcx'].labels == {'lib_type': 'nnn15', 'sample': 'tcx'}
         assert data['nnn15.noa'].labels == {'lib_type': 'nnn15', 'sample': 'noa'}
-        assert repr(data) == """DataSet(data_path='"""+str(data_dir)+"""/tcx_small_test',
+        assert repr(data) == """DataSet(data_path='"""+str(data_dir/'tcx_small_test')+"""',
         file_pattern='(?P<lib_type>[^_]+)_(?P<sample>[^_\\\\d]+)(?P<replicate>\\\\d+)',
         samples=[Sample(nnn15.noa:[1, 2, 3]),
                  Sample(nnn15.tcx:[1, 2, 3], ref: nnn15.noa)],
         )"""
+        # fmt: on
 
     def test_dataset_from_path_keys(self, tmp_outdir):
         data = DataSet(
-            data_dir / 'tcx_small_test/',
+            data_dir / 'tcx_small_test',
             keys=['sample'],
             result_path=tmp_outdir,
         )
@@ -52,7 +54,7 @@ class TestDataSet:
 
     def test_dataset_from_path_pattern(self, tmp_outdir):
         data = DataSet(
-            data_dir / 'loading_concentrations/',
+            data_dir / 'loading_concentrations',
             file_pattern=r'(?P<sample>[^_]+)(?P<replicate>\d+)(_(?P<concentration>\d+µM))?',
             result_path=tmp_outdir,
         )
@@ -78,17 +80,17 @@ class TestDataSet:
         data = DataSet(
             {
                 'tcx': [
-                    {'file_prefix': 'tcx_small_test/nnn15_tcx1'},
-                    {'file_prefix': 'tcx_small_test/nnn15_tcx2'},
-                    {'file_prefix': 'tcx_small_test/nnn15_tcx3'},
+                    {'file_prefix': Path('tcx_small_test') / 'nnn15_tcx1'},
+                    {'file_prefix': Path('tcx_small_test') / 'nnn15_tcx2'},
+                    {'file_prefix': Path('tcx_small_test') / 'nnn15_tcx3'},
                 ],
                 'noa': [
-                    {'file_prefix': 'tcx_small_test/nnn15_noa1'},
+                    {'file_prefix': Path('tcx_small_test') / 'nnn15_noa1'},
                     {
-                        'file_prefix': 'tcx_small_test/nnn15_noa2',
+                        'file_prefix': Path('tcx_small_test') / 'nnn15_noa2',
                         'replicate': 'custom_name',
                     },
-                    {'file_prefix': 'tcx_small_test/nnn15_noa3'},
+                    {'file_prefix': Path('tcx_small_test') / 'nnn15_noa3'},
                 ],
             },
             ref_mapping={'tcx': 'noa'},

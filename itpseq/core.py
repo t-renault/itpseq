@@ -2510,7 +2510,7 @@ class DataSet:
                     output='html',
                     **render_kwargs,
                 )
-                with open(output, 'w') as f:
+                with open(output, 'w', encoding='utf-8') as f:
                     f.write(html)
             elif output.suffix == '.pdf':
                 from weasyprint import CSS, HTML
