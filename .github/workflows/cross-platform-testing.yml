@@ -4,6 +4,7 @@ on:
   push:
     paths:  # only run on changes in
       - 'itpseq/**'                                     # source directory
+      - 'tests/**'                                      # test files
       - '.github/workflows/cross-platform-testing.yml'  # workflow file
 
 jobs:
