@@ -474,7 +474,7 @@ def export_all(results_all, outdir=None):
         export_data(filename, seqs=seqs, stats=stats, outdir=outdir, MAX=None)
 
 
-@wraps(parse_filter_fastq) # FIXME add parameters of export_data
+@wraps(parse_filter_fastq)   # FIXME add parameters of export_data
 def parse(
     filename,
     *,
@@ -483,11 +483,18 @@ def parse(
     outdir=None,
     MAX=None,
     untranslated_overhang=12,
-    **kwargs
+    **kwargs,
 ):
     """Wrapper to combine parse_filter_fastq and export_data"""
     seqs, stats, _ = parse_filter_fastq(filename, **kwargs)
-    export_data(filename, seqs=seqs, stats=stats, outdir=outdir, MAX=MAX, untranslated_overhang=untranslated_overhang)
+    export_data(
+        filename,
+        seqs=seqs,
+        stats=stats,
+        outdir=outdir,
+        MAX=MAX,
+        untranslated_overhang=untranslated_overhang,
+    )
 
 
 def format_sequences(
