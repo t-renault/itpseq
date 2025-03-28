@@ -2,6 +2,7 @@
 
 import io
 import logging
+import tempfile
 from collections import defaultdict
 from functools import wraps
 from pathlib import Path
@@ -27,7 +28,7 @@ __all__ = [
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    filename='/tmp/itpseq.log',
+    filename=Path(tempfile.gettempdir()) / 'itpseq.log',
     filemode='a',
 )
 logger = logging.getLogger('itpseq')
