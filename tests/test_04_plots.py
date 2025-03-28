@@ -10,7 +10,7 @@ class TestDataSetPlots:
     @pytest.fixture(scope='class', autouse=True)
     def setup_class(self, request, data_dir, tmp_outdir):
         request.cls.tcx_data = DataSet(
-            data_dir / 'tcx_small_test/', result_path=tmp_outdir
+            data_dir / 'tcx_small_test', result_path=tmp_outdir
         )
         request.cls.tcx_data._clear_cache(force=True)
 
@@ -25,7 +25,7 @@ class TestSamplePlots:
     @pytest.fixture(scope='class', autouse=True)
     def setup_class(self, request, data_dir, tmp_outdir):
         request.cls.tcx = DataSet(
-            data_dir / 'tcx_small_test/', result_path=tmp_outdir
+            data_dir / 'tcx_small_test', result_path=tmp_outdir
         )['nnn15.tcx']
         request.cls.tcx.dataset._clear_cache(force=True)
 
