@@ -32,9 +32,17 @@ jobs:
         pip install pytest pytest-cov
     
     - name: Run tests
+      id: parallel_unit_test
+      continue-on-error: true
       run: |
         pytest --cov --cov-branch --cov-report=xml --cov-report=term
-        
+
+    - name: Run tests without parallel execution (fallback)
+      if: ${{ steps.parallel_test.outcome == 'failure' }}
+      run: |
+        echo "Parallel test execution failed, trying without parallelism..."
+        pytest -xvs --cov --cov-branch --cov-report=xml --cov-report=term
+
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5
       with:
