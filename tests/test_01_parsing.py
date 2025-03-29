@@ -2,9 +2,8 @@ import filecmp
 from itertools import product
 from pathlib import Path
 
-import pytest
-
 import itpseq.parsing
+import pytest
 
 
 class TestParse:
@@ -30,5 +29,10 @@ class TestParse:
             )
         ]
         # check the content of the output files is the same
-        ok, nok, err = filecmp.cmpfiles(path, tmp_outdir, files)
+        ok, nok, err = filecmp.cmpfiles(path, tmp_outdir, files, shallow=False)
         assert nok == [] and err == []
+
+    def test_cli_parse(self, data_dir, tmp_outdir):
+        """Extra test due to an issue to correctly report test coverage with multiprocessing"""
+        path = data_dir / 'tcx_small_test'
+        itpseq.parsing.parse(path / 'nnn15_noa1.assembled.fastq')

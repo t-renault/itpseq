@@ -1,0 +1,17 @@
+Total sequences read:   100000
+
+Rejected sequences
+    no adaptor found:    99223
+         contaminant:        0
+      stretches of A:        0
+      seq contains N:        0
+   subseq contains N:        0
+         low quality:      173
+    subseq too short:       64
+     subseq too long:      306
+
+Distribution of subsequences length:
+scale: 1–42
+_____________▁▂▄█▂▄▅▃▂▄▁▃▄▂▂▃_▂▂▁▂▁▂▂▂▂▁▁▂▁▁▂▃▂_▁_▂▂_▁▃_▂▁▁▂_▂▁▂▃_▁_▁_▂_▁▁▂▁
+╹         ╹         ╹         ╹         ╹         ╹         ╹         ╹
+1        11        21        31        41        51        61        71

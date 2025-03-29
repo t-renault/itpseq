@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 import pytest
-
 from itpseq import DataSet, Replicate, Sample
 
 data_dir = Path(__file__).parent / 'test_data'
