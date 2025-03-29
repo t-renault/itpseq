@@ -36,3 +36,27 @@ class TestParse:
         """Extra test due to an issue to correctly report test coverage with multiprocessing"""
         path = data_dir / 'tcx_small_test'
         itpseq.parsing.parse(path / 'nnn15_noa1.assembled.fastq')
+
+    def test_format_sequences(self, data_dir, tmp_outdir):
+        path = data_dir / 'tcx_small_test'
+        out = Path(tmp_outdir) / 'out.txt'
+        itpseq.parsing.format_sequences(
+            path / 'nnn15_noa1.nuc.itp.txt',
+            codons=True,
+            aa=True,
+            repeat_header=2,
+            out=out,
+            limit=3,
+        )
+        with open(out) as f:
+            assert f.readlines() == [
+                '#                           [E] [P] [A]               \n',
+                '                            ATG GGA CGC cccgcagtatct  \n',
+                '                             M   G   R  3\n',
+                '        ATG AGT TAC AAA GGC AAC TCG GAA caggtagcatatc \n',
+                '         M   S   Y   K   G   N   S   E  8\n',
+                '\n',
+                '#                           [E] [P] [A]               \n',
+                '                            ATG GAA GAG gcccatgccattcc\n',
+                '                             M   E   E  3\n',
+            ]

@@ -80,8 +80,12 @@ class TestCLI:
             result.exit_code == 0
         ), f'"parse" failed with error: {result.output}'
 
-    def cli_help(self):
+    def test_cli_help(self):
         runner = CliRunner()
+        result = runner.invoke(cli.help, ['--help'])
+        assert (
+            result.exit_code == 0
+        ), f'"help --help" failed with error: {result.output}'
         result = runner.invoke(cli.help)
         assert (
             result.exit_code == 0

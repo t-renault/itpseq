@@ -50,13 +50,21 @@ class TestSamplePlots:
         self.tcx.volcano('E:P')
 
     def test_itoeprint(self):
-        self.tcx.itoeprint()
+        self.tcx.itoeprint(show_range=True)
 
     def test_itoeprint_shades(self):
-        self.tcx.itoeprint('shades')
+        self.tcx.itoeprint('shades', show_range=True)
 
     def test_subset_logo(self):
-        self.tcx.subset_logo('E:P', query='log2FoldChange > 0')
+        for logo_type in ['raw_freq', 'extra_counts', 'sum_log2FC']:
+            self.tcx.subset_logo(
+                'E:P', logo_type=logo_type, query='log2FoldChange > 0'
+            )
+            self.tcx.subset_logo(
+                'E:P',
+                logo_type=f'{logo_type}_bits',
+                query='log2FoldChange > 0',
+            )
 
     def test_logo(self):
         self.tcx.logo()
