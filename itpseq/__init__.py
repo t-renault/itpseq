@@ -3,7 +3,7 @@
 import importlib
 import sys
 
-__version__ = '0.0.1a12'
+__version__ = '0.0.1a13'
 
 _LAZY_MODULES = {
     '.core': ['DataSet', 'Sample', 'Replicate'],
