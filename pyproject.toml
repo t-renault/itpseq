@@ -14,11 +14,15 @@ description = 'A tool to process and analyze iTP-Seq datasets'
 readme = 'README.md'
 requires-python = '>=3.9'
 classifiers = [
+    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+    'Natural Language :: English',
     'Programming Language :: Python :: 3',
     'Operating System :: OS Independent',
+    'Intended Audience :: Science/Research',
+    'Topic :: Scientific/Engineering :: Bio-Informatics',
 ]
-license = 'gpl-3.0'
-license-files = ['LICEN[CS]E*']
+keywords = ['ribosome', 'inverse toeprinting', 'iTP-Seq']
+license = 'GPL-3.0-only'
 dependencies = [
     'regex',
     'numpy',
@@ -26,7 +30,7 @@ dependencies = [
     'pydeseq2',
     'matplotlib',
     'seaborn',
-    'logomaker==0.8',
+    'logomaker',
     'Jinja2',
     'weasyprint',
     'click',
@@ -49,3 +53,7 @@ include = [
     'pyproject.toml',
     'README.md',
 ]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+license-files = ['LICENSE']
