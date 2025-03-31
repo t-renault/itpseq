@@ -1322,6 +1322,7 @@ class Sample:
         outfile : str, optional
             If specified, save the figure to a file.
         density_thresh : int, optional
+            Filters out annotation in dense parts of the plot. A low value decreases the number of annotations.
         kwargs : optional
             Optional parameters passed to :meth:`DE`.
 
