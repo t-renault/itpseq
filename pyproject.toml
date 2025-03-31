@@ -39,7 +39,7 @@ Issues = 'https://github.com/t-renault/itpseq/issues'
 Documentation = 'https://itpseq.readthedocs.io'
 
 [project.scripts]
-itpseq = 'itpseq.__main__:main'
+itpseq = 'itpseq.__main__:cli'
 
 [tool.hatch.build]
 include = [

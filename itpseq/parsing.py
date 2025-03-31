@@ -508,8 +508,9 @@ def format_sequences(
     Parameters
     ----------
 
-    filename : str
-        Name of the nucleotide inverse toeprint file to use as input
+    filename : str or list
+        Name of the nucleotide inverse toeprint file to use as input.
+        If a list of filenames or a directory is passed, apply the function to all the nucleotide inverse toeprint files.
     codons : bool
         If True, splits the coding sequence into codons
     aa: bool
@@ -525,6 +526,44 @@ def format_sequences(
     Examples
     --------
     """
+
+    SUFFIX = f'.nuc.{ITP_FILE_SUFFIX}.txt'
+
+    if out is not None:
+        out = Path(out)
+
+    # if out is a list of files or a directory, apply on all the files
+    if (is_list := isinstance(filename, list)) or (
+        dir_ := Path(filename)
+    ).is_dir():
+        if not is_list:
+            filename = list(dir_.glob(f'*{SUFFIX}'))
+        if out is not None:
+            if (out := Path(out)).exists():
+                if not out.is_dir():
+                    raise ValueError(
+                        'If several files or a directory are passed as input, "out" should be a directory.'
+                    )
+            else:
+                out.mkdir(parents=True)
+        for f in filename:
+            if out is None:
+                # if no output dir, display the input file name before each output
+                print(f'{f}')
+            format_sequences(
+                f,
+                codons=codons,
+                aa=aa,
+                repeat_header=repeat_header,
+                limit=limit,
+                out=out,
+            )
+        return   # delegate processing to a new function call, stop here
+
+    if isinstance(out, Path) and out.is_dir():
+        # If out is a directory, create a filename based on the original name
+        out /= Path(filename).name.removesuffix(SUFFIX) + f'.formatted{SUFFIX}'
+
     with open(filename) as f, nullcontext(sys.stdout) if out is None else open(
         out, 'w'
     ) as f_out:
