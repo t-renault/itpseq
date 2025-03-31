@@ -90,3 +90,10 @@ class TestCLI:
         assert (
             result.exit_code == 0
         ), f'"help" failed with error: {result.output}'
+
+    def test_cli_completion(self):
+        runner = CliRunner()
+        result = runner.invoke(cli.completion, ['bash'])
+        assert (
+            result.exit_code == 0
+        ), f'"help --help" failed with error: {result.output}'

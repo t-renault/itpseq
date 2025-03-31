@@ -49,6 +49,9 @@ class TestSamplePlots:
     def test_volcano(self):
         self.tcx.volcano('E:P')
 
+    def test_volcano_density(self):
+        self.tcx.volcano('E:P', density_thresh=3)
+
     def test_itoeprint(self):
         self.tcx.itoeprint(show_range=True)
 

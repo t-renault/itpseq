@@ -25,12 +25,26 @@ class TestDataSet:
         # fmt: off
         assert data['nnn15.tcx'].labels == {'lib_type': 'nnn15', 'sample': 'tcx'}
         assert data['nnn15.noa'].labels == {'lib_type': 'nnn15', 'sample': 'noa'}
+
+        # testing __repr__ and __gt__
         assert repr(data) == """DataSet(data_path='"""+str(data_dir/'tcx_small_test')+"""',
         file_pattern='(?P<lib_type>[^_]+)_(?P<sample>[^_\\\\d]+)(?P<replicate>\\\\d+)',
         samples=[Sample(nnn15.noa:[1, 2, 3]),
                  Sample(nnn15.tcx:[1, 2, 3], ref: nnn15.noa)],
         )"""
         # fmt: on
+        assert repr(data['nnn15.noa']) == 'Sample(nnn15.noa:[1, 2, 3])'
+        assert (
+            repr(data['nnn15.tcx'])
+            == 'Sample(nnn15.tcx:[1, 2, 3], ref: nnn15.noa)'
+        )
+        assert repr(data.replicates['nnn15.noa.1']) == 'Replicate(nnn15.noa.1)'
+        assert data['nnn15.noa'] < data['nnn15.tcx']
+
+        assert data.replicates['nnn15.noa.1'].sample_name == 'nnn15.noa'
+        assert data.replicates['nnn15.noa.1'].filename == str(
+            data_dir / 'tcx_small_test' / 'nnn15_noa1.nuc.itp.txt'
+        )
 
     def test_dataset_from_path_keys(self, tmp_outdir):
         data = DataSet(

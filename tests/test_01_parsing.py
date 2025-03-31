@@ -60,3 +60,30 @@ class TestParse:
                 '                            ATG GAA GAG gcccatgccattcc\n',
                 '                             M   E   E  3\n',
             ]
+
+    def test_format_sequences_dir(self, capsys, monkeypatch, data_dir):
+        # temporarily change directory for this test
+        monkeypatch.chdir(data_dir / 'tcx_small_test')
+        itpseq.parsing.format_sequences('.', limit=1)
+        # capture stdout
+        captured = capsys.readouterr()
+        assert captured.out.splitlines() == [
+            'nnn15_noa1.nuc.itp.txt',
+            '#                    [E][P][A]               ',
+            '                     ATGGGACGC cccgcagtatct  ',
+            'nnn15_noa2.nuc.itp.txt',
+            '#                    [E][P][A]               ',
+            '                        ATGTAC tcacatccccgatc',
+            'nnn15_noa3.nuc.itp.txt',
+            '#                    [E][P][A]               ',
+            '         ATGGGCCTATACTGTTATGAA ctacccatagcagt',
+            'nnn15_tcx1.nuc.itp.txt',
+            '#                    [E][P][A]               ',
+            '                        ATGTCA cgtcaaacccaagt',
+            'nnn15_tcx2.nuc.itp.txt',
+            '#                    [E][P][A]               ',
+            '               ATGCACATAACCTAA tgaatcctaactc ',
+            'nnn15_tcx3.nuc.itp.txt',
+            '#                    [E][P][A]               ',
+            '                     ATGAATACG tattgtcaaccct ',
+        ]
