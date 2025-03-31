@@ -537,7 +537,7 @@ def format_sequences(
         dir_ := Path(filename)
     ).is_dir():
         if not is_list:
-            filename = list(dir_.glob(f'*{SUFFIX}'))
+            filename = sorted(list(dir_.glob(f'*{SUFFIX}')))
         if out is not None:
             if (out := Path(out)).exists():
                 if not out.is_dir():
