@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Module to parse iTP-Seq fastq files for downstream analysis"""
-
+import bz2
+import gzip
+import lzma
 import sys
+import zipfile
 from contextlib import nullcontext
 from functools import partial, wraps
 from pathlib import Path
@@ -51,12 +54,31 @@ def fastq_iterator(filename):
     """
     Reads 'filename' as a fastq sequence and yield only the sequence and quality lines
 
-
-    This does not perform any check on the validity od the file!
+    This does not perform any check on the validity of the file!
     """
     from itertools import islice
 
-    with open(filename) as f:
+    fn = str(filename)
+    if fn.endswith('.gz'):
+        import gzip
+
+        opener = gzip.open
+    elif fn.endswith('.bz2'):
+        import bz2
+
+        opener = bz2.open
+    elif fn.endswith('.zip'):
+        import zipfile
+
+        opener = zipfile.ZipFile
+    elif fn.endswith('.xz') or fn.endswith('.lzma'):
+        import lzma
+
+        opener = lzma.open
+    else:
+        opener = open
+
+    with opener(filename, 'rt') as f:
         while True:
             chunk = list(islice(f, 4))
             if not chunk:
@@ -83,7 +105,7 @@ def parse_filter_fastq(
 ):
     """
     Takes a 'filename' as input (fastq format), loops over the fastq using
-    fastq_iterator and performd several checks to extract valid ITP sequences.
+    fastq_iterator and performs several checks to extract valid ITP sequences.
     Also computes various statistics on the dataset.
 
     Parameters
@@ -393,7 +415,9 @@ def export_data(
 
     import re
 
-    base_fname = outdir / re.sub(r'(\.assembled)?\.f(ast)?q$', '', fname.name)
+    base_fname = outdir / re.sub(
+        r'(\.assembled)?\.f(ast)?q(\.(gz|bz2|zip|xz|lzma))?$', '', fname.name
+    )
     f_log = base_fname.with_suffix(f'.{ITP_FILE_SUFFIX}.log')
     f_json = base_fname.with_suffix(f'.{ITP_FILE_SUFFIX}.json')
     # f_extra = base_fname.with_suffix(f'.{ITP_FILE_SUFFIX}.extra')

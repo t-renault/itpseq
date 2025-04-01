@@ -35,11 +35,19 @@ class TestParse:
     def test_cli_parse(self, data_dir, tmp_outdir):
         """Extra test due to an issue to correctly report test coverage with multiprocessing"""
         path = data_dir / 'tcx_small_test'
-        itpseq.parsing.parse(path / 'nnn15_noa1.assembled.fastq')
+        for ext in ['', '.gz', '.bz2', '.xz', '.lzma']:
+            itpseq.parsing.parse(
+                path / f'nnn15_noa1.assembled.fastq{ext}', outdir=tmp_outdir
+            )
+            assert filecmp.cmp(
+                path / 'nnn15_noa1.nuc.itp.txt',
+                tmp_outdir / 'nnn15_noa1.nuc.itp.txt',
+                shallow=True,
+            )
 
     def test_format_sequences(self, data_dir, tmp_outdir):
         path = data_dir / 'tcx_small_test'
-        out = Path(tmp_outdir) / 'out.txt'
+        out = tmp_outdir / 'out.txt'
         itpseq.parsing.format_sequences(
             path / 'nnn15_noa1.nuc.itp.txt',
             codons=True,

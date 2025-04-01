@@ -20,7 +20,7 @@ def tmp_outdir():
     Automatically cleans up after tests are done.
     """
     temp_dir = tempfile.mkdtemp()
-    yield temp_dir
+    yield Path(temp_dir)
     shutil.rmtree(temp_dir)
 
 

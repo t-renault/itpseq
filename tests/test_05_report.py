@@ -14,4 +14,4 @@ class TestReport:
 
     def test_report_html(self, tmp_outdir):
         self.tcx_data._clear_cache(force=True)
-        self.tcx_data.report(output=Path(tmp_outdir) / 'report.html')
+        self.tcx_data.report(output=tmp_outdir / 'report.html')
