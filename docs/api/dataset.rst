@@ -18,6 +18,7 @@ Methods
    :toctree: generated/
 
    DataSet.reorder_samples
+   DataSet.set_references
    DataSet.infos
    DataSet.DE
    DataSet.itp_len_plot
