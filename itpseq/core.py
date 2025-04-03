@@ -708,6 +708,76 @@ class Sample:
             # normalize
 
     @lru_cache
+    def get_counts_ratio_pos(self, pos=None, how='aax', **kwargs):
+        """
+        Computes a DataFrame with the enrichment ratios for each ribosome position.
+
+        This method calculates the enrichment for amino acids at the specified positions
+        on the ribosome and organizes the results into a DataFrame. Each row of the DataFrame
+        corresponds to a ribosome position.
+
+        Parameters
+        ----------
+        pos : iterable, optional
+            An iterable of ribosome positions for which to compute enrichment ratios (e.g., ('-2', 'E', 'P', 'A')).
+            If not provided, defaults to ('-2', 'E', 'P', 'A').
+        how : str, optional
+            If 'aax' is provided, sequences with stop codons in the peptide are excluded.
+        **kwargs : dict, optional
+            Additional parameters to filter the data or customize the ratio computations.
+
+        Returns
+        -------
+        pandas.DataFrame
+            A DataFrame where rows correspond to ribosome positions and columns correspond to amino acids
+            (ordered by a predefined amino acid sequence). The values in the DataFrame represent
+            the enrichment ratios for each position and amino acid.
+
+        Examples
+        --------
+
+        Calculate the enrichement relative to the reference for the default -2/E/P/A positions.
+         >>> sample.get_counts_ratio_pos()
+         amino-acid         H         R         K  ...         W         *         m
+         site                                      ...
+         -2          1.062831  1.066174  1.012982  ...  1.046303       NaN  0.907140
+         E           1.037079  1.018643  0.941939  ...  1.041217       NaN  0.933880
+         P           1.093492  1.100380  1.045145  ...  1.107238       NaN  0.793043
+         A           0.831129  1.005783  0.967491  ...  0.995833  1.143702  0.757118
+         [4 rows x 22 columns]
+
+        Calculate the enrichement relative to the reference for custom positions.
+         >>> sample.get_counts_ratio_pos(('-3', '-2', 'E', 'P', 'A'))
+         amino-acid         H         R         K  ...         W         *         m
+         site                                      ...
+         -3          1.032528  1.014771  0.987577  ...  1.045751       NaN  0.903142
+         -2          1.062861  1.064912  1.013528  ...  1.048815       NaN  0.907531
+         E           1.036543  1.018309  0.940488  ...  1.043321       NaN  0.934014
+         P           1.092992  1.101174  1.045651  ...  1.106943       NaN  0.792341
+         A           0.830804  1.005100  0.968136  ...  0.993697  1.143881  0.753449
+         [5 rows x 22 columns]
+        """
+
+        if not pos:
+            if how == 'nuc':
+                pos = tuple(range(-12, 0))
+            else:
+                pos = ('-2', 'E', 'P', 'A')
+
+        if isinstance(pos, str):
+            pos = ranges(pos)
+
+        return (
+            pd.concat(
+                {p: self.get_counts_ratio(p, how=how, **kwargs)['ratio'] for p in pos},
+                axis=1,
+            )
+            .pipe(lambda x: x.reindex(aa_order) if how.startswith('aa') else x)
+            .rename_axis(index='amino-acid', columns='site')
+            .T
+        )
+
+    @lru_cache
     def DE(
         self,
         pos=None,
@@ -1102,76 +1172,6 @@ class Sample:
                     **kwargs,
                 )
         return f
-
-    @lru_cache
-    def get_counts_ratio_pos(self, pos=None, how='aax', **kwargs):
-        """
-        Computes a DataFrame with the enrichment ratios for each ribosome position.
-
-        This method calculates the enrichment for amino acids at the specified positions
-        on the ribosome and organizes the results into a DataFrame. Each row of the DataFrame
-        corresponds to a ribosome position.
-
-        Parameters
-        ----------
-        pos : iterable, optional
-            An iterable of ribosome positions for which to compute enrichment ratios (e.g., ('-2', 'E', 'P', 'A')).
-            If not provided, defaults to ('-2', 'E', 'P', 'A').
-        how : str, optional
-            If 'aax' is provided, sequences with stop codons in the peptide are excluded.
-        **kwargs : dict, optional
-            Additional parameters to filter the data or customize the ratio computations.
-
-        Returns
-        -------
-        pandas.DataFrame
-            A DataFrame where rows correspond to ribosome positions and columns correspond to amino acids
-            (ordered by a predefined amino acid sequence). The values in the DataFrame represent
-            the enrichment ratios for each position and amino acid.
-
-        Examples
-        --------
-
-        Calculate the enrichement relative to the reference for the default -2/E/P/A positions.
-         >>> sample.get_counts_ratio_pos()
-         amino-acid         H         R         K  ...         W         *         m
-         site                                      ...
-         -2          1.062831  1.066174  1.012982  ...  1.046303       NaN  0.907140
-         E           1.037079  1.018643  0.941939  ...  1.041217       NaN  0.933880
-         P           1.093492  1.100380  1.045145  ...  1.107238       NaN  0.793043
-         A           0.831129  1.005783  0.967491  ...  0.995833  1.143702  0.757118
-         [4 rows x 22 columns]
-
-        Calculate the enrichement relative to the reference for custom positions.
-         >>> sample.get_counts_ratio_pos(('-3', '-2', 'E', 'P', 'A'))
-         amino-acid         H         R         K  ...         W         *         m
-         site                                      ...
-         -3          1.032528  1.014771  0.987577  ...  1.045751       NaN  0.903142
-         -2          1.062861  1.064912  1.013528  ...  1.048815       NaN  0.907531
-         E           1.036543  1.018309  0.940488  ...  1.043321       NaN  0.934014
-         P           1.092992  1.101174  1.045651  ...  1.106943       NaN  0.792341
-         A           0.830804  1.005100  0.968136  ...  0.993697  1.143881  0.753449
-         [5 rows x 22 columns]
-        """
-
-        if not pos:
-            if how == 'nuc':
-                pos = tuple(range(-12, 0))
-            else:
-                pos = ('-2', 'E', 'P', 'A')
-
-        if isinstance(pos, str):
-            pos = ranges(pos)
-
-        return (
-            pd.concat(
-                {p: self.get_counts_ratio(p, how=how, **kwargs)['ratio'] for p in pos},
-                axis=1,
-            )
-            .pipe(lambda x: x.reindex(aa_order) if how.startswith('aa') else x)
-            .rename_axis(index='amino-acid', columns='site')
-            .T
-        )
 
     def hmap_pos(
         self,
