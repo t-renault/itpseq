@@ -130,7 +130,7 @@ class TestSample:
         # needs to be updated if the dataset changes
         assert df.sum().sum() == 84917
 
-    def test_get_counts_EP(self):
+    def test_get_counts_ratio_EP(self):
         self.tcx_data._clear_cache(force=True)
         df = self.tcx_data['nnn15.tcx'].get_counts_ratio('E:P')
         assert df.shape == (421, 9)
@@ -145,6 +145,41 @@ class TestSample:
             'nnn15.tcx',
             'ratio',
         }
+
+    def test_get_counts_ratio_nuc(self):
+        self.tcx_data._clear_cache(force=True)
+        d = (
+            self.tcx_data['nnn15.tcx']
+            .get_counts_ratio(pos='-3:2', how='nuc')
+            .sum()
+            .astype(int)
+            .to_dict()
+        )
+        assert d == {
+            'nnn15.noa.1': 40805,
+            'nnn15.noa.2': 34527,
+            'nnn15.noa.3': 38217,
+            'nnn15.tcx.1': 37999,
+            'nnn15.tcx.2': 27134,
+            'nnn15.tcx.3': 33692,
+            'nnn15.noa': 1009599,
+            'nnn15.tcx': 1013385,
+            'ratio': 4876,
+        }
+
+    def test_get_counts_ratio_pos(self):
+        self.tcx_data._clear_cache(force=True)
+        df = self.tcx_data['nnn15.tcx'].get_counts_ratio_pos()
+        assert set(df.index) == {'-2', 'E', 'P', 'A'}
+        assert set(df.columns) == set('*ACDEFGHIKLMNPQRSTVWYm')
+        assert df.notna().values.sum() == 85
+
+    def test_get_counts_ratio_pos_nuc(self):
+        self.tcx_data._clear_cache(force=True)
+        df = self.tcx_data['nnn15.tcx'].get_counts_ratio_pos(how='nuc')
+        assert set(df.index) == set(range(-12, 0))
+        assert set(df.columns) == set('ACGT')
+        assert df.notna().values.sum() == 48
 
     def test_get_DE_EP(self):
         self.tcx_data._clear_cache(force=True)

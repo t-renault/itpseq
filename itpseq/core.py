@@ -225,7 +225,7 @@ class Replicate:
         )
 
     @lru_cache
-    def get_counts(self, pos=None, **kwargs):
+    def get_counts(self, pos=None, how='aax', **kwargs):
         """
         Counts the number of reads for each motif or combination of amino-acid/position.
 
@@ -234,6 +234,8 @@ class Replicate:
         pos : str, optional
             Position to consider when counting the reads.
             If None is passed, then this returns a DataFrame with the counts of each amino-acid per position.
+        how : str, optional
+            Type of inverse toeprints to analyze (see :meth:`Replicate.load_data`).
 
         kwargs : optional
             Optional parameters to pass to :meth:`Replicate.load_data` (min_peptide, max_peptide, how, limit, sample)
@@ -266,8 +268,9 @@ class Replicate:
             else ''
         )
         return compute_counts(
-            self.load_data(**kwargs),
+            self.load_data(**kwargs, how=how),
             pos=pos,
+            how=how,
             _cache_dir=self._cache_dir,
             _cache_prefix=self.name + prefix,
         )
@@ -580,7 +583,7 @@ class Sample:
         return out
 
     @lru_cache
-    def get_counts(self, pos=None, **kwargs):
+    def get_counts(self, pos=None, how='aax', **kwargs):
         """
         Counts the number of reads for each motif or combination of amino-acid/position for each replicate in the sample.
 
@@ -589,7 +592,8 @@ class Sample:
         pos : str, optional
             Position to consider when counting the reads.
             If None is passed, then this returns a DataFrame with the counts of each amino-acid per position.
-
+        how : str, optional
+            Type of inverse toeprints to analyze (see :meth:`Replicate.load_data`).
         kwargs : optional
             Optional parameters to pass to :meth:`Replicate.load_data` (min_peptide, max_peptide, how, limit, sample).
 
@@ -627,13 +631,13 @@ class Sample:
         """
         # print(locals())
         return pd.concat(
-            {str(r): r.get_counts(pos, **kwargs) for r in self.replicates},
+            {str(r): r.get_counts(pos, how=how, **kwargs) for r in self.replicates},
             axis=1,
         )
 
     # @lru_cache
     def get_counts_ratio(
-        self, pos=None, factor=1_000_000, exclude_empty=True, **kwargs
+        self, pos=None, factor=1_000_000, exclude_empty=True, how='aax', **kwargs
     ):
         """
         Outputs the result of `get_counts` for the sample and its reference and add extra columns:
@@ -651,8 +655,10 @@ class Sample:
             The number of reads used to normalize the counts.
         exclude_empty : bool, optional
             Exclude the rows with incomplete peptides.
+        how : str, optional
+            Type of inverse toeprints to analyze (see :meth:`Replicate.load_data`).
         kwargs : optional
-            Optional parameters to pass to :meth:`Replicate.load_data` (min_peptide, max_peptide, how, limit, sample).
+            Optional parameters to pass to :meth:`Replicate.load_data` (min_peptide, max_peptide, limit, sample).
 
         Returns
         -------
@@ -672,7 +678,7 @@ class Sample:
          MWW       NaN       NaN       2.0       NaN       4.0       2.0      0.748862      1.261906  1.685098
          [8842 rows x 9 columns]
         """
-        counts = self.get_counts(pos=pos, **kwargs)  # compute position counts
+        counts = self.get_counts(pos=pos, how=how, **kwargs)  # compute position counts
         if exclude_empty:
             counts = counts[~counts.index.str.fullmatch(' *')]
         norm = counts.div(counts.sum()).mul(factor)  # normalize
@@ -681,7 +687,7 @@ class Sample:
         if self.reference:
             ref = (
                 self.reference.get_counts_ratio(
-                    pos=pos, factor=factor, **kwargs
+                    pos=pos, how=how, factor=factor, **kwargs
                 ).filter(like=self.reference.name)
                 # .drop(columns='ratio', errors='ignore')
             )
@@ -705,6 +711,7 @@ class Sample:
     def DE(
         self,
         pos=None,
+        how='aax',
         join=False,
         quiet=True,
         filter_size=True,
@@ -721,6 +728,8 @@ class Sample:
         ----------
         pos : str
             Ribosome positions to consider to compute the differential expression.
+        how : str, optional
+            Type of inverse toeprints to analyze (see :meth:`Replicate.load_data`).
         join : bool, optional
             If True, joins the DE results back to the original `df`. Defaults to False.
         quiet : bool, optional
@@ -778,10 +787,10 @@ class Sample:
         cond = self.name
         ref = self.reference.name
 
-        # df = self.reference.get_counts(pos=pos, **kwargs).join(
-        #    self.get_counts(pos=pos, **kwargs)
+        # df = self.reference.get_counts(pos=pos, how=how, **kwargs).join(
+        #    self.get_counts(pos=pos, how=how, **kwargs)
         # )
-        df = self.get_counts_ratio(pos, **kwargs)
+        df = self.get_counts_ratio(pos, how=how, **kwargs)
 
         if filter_size:
             df = df[~df.index.str.startswith(' ')]
@@ -1095,7 +1104,7 @@ class Sample:
         return f
 
     @lru_cache
-    def get_counts_ratio_pos(self, pos=None, **kwargs):
+    def get_counts_ratio_pos(self, pos=None, how='aax', **kwargs):
         """
         Computes a DataFrame with the enrichment ratios for each ribosome position.
 
@@ -1146,14 +1155,20 @@ class Sample:
         """
 
         if not pos:
-            pos = ('-2', 'E', 'P', 'A')
+            if how == 'nuc':
+                pos = tuple(range(-12, 0))
+            else:
+                pos = ('-2', 'E', 'P', 'A')
+
+        if isinstance(pos, str):
+            pos = ranges(pos)
 
         return (
             pd.concat(
-                {p: self.get_counts_ratio(p, **kwargs)['ratio'] for p in pos},
+                {p: self.get_counts_ratio(p, how=how, **kwargs)['ratio'] for p in pos},
                 axis=1,
             )
-            .reindex(aa_order)
+            .pipe(lambda x: x.reindex(aa_order) if how.startswith('aa') else x)
             .rename_axis(index='amino-acid', columns='site')
             .T
         )

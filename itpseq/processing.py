@@ -11,6 +11,7 @@ import pandas as pd
 from pandas import DataFrame
 
 from .utils import fcache
+from .config import MAX_UNTRANSLATED_OVERHANG
 
 __all__ = [
     'read_itp_file_as_series',
@@ -139,7 +140,7 @@ def read_log_json(path: Union[str, Path]):
     #        )
 
 
-def code2pos(code):
+def code2pos(code, how='aax'):
     """
     Converts a ribosome site or code to the python on the peptide relative to the end (A-site = -1).
 
@@ -147,27 +148,37 @@ def code2pos(code):
     ----------
     code : str or int
         Ribosome site (E, P, A) or position relative to the P-site.
+    how : str, optional
+        Type of inverse toeprints to analyze (see :meth:`Replicate.load_data`).
 
     Returns
     -------
     int
         Matching position relative to the end of the peptide (A-site = -1, P-site = -2)
     """
-    d = {'E': -1, 'P': 0, 'A': +1}
-    code = d.get(code, code)
-    try:
-        return (
-            int(code) - 2
-        )  # A-site position is +1, python relative to end = -1
-    except ValueError:
-        raise ValueError(f'{code} is an invalid code')
+    if how.startswith('aa'):
+        d = {'E': -1, 'P': 0, 'A': +1}
+        code = d.get(code, code)
+        try:
+            return (
+                int(code) - 2
+            )  # A-site position is +1, python relative to end = -1
+        except ValueError:
+            raise ValueError(f'{code} is an invalid code')
+    elif how == 'nuc':
+        try:
+            return int(code) - 6 - MAX_UNTRANSLATED_OVERHANG
+        except ValueError:
+            raise ValueError(f'''{code} is an invalid code for "how='nuc'".''')
+    else:
+        raise NotImplementedError(f'"{how=}" is not implemented.')
 
 
-def ranges(s=''):
+def ranges(s='', how='aax'):
     """transforms 'x-y' into slice(x, y, None)"""
     return [
         slice(y[0], y[1] + 1 if y[1] != -1 else None)
-        if len(y := list(map(code2pos, x.split(':')))) > 1
+        if len(y := [code2pos(c, how=how) for c in x.split(':')]) > 1
         else y[0]
         for x in s.split(',')
     ]
@@ -225,7 +236,7 @@ def get_ribosome_site(pos, short=False):
 
 
 @fcache
-def compute_counts(seqs_series, pos):
+def compute_counts(seqs_series, pos, how='aax'):
     """Computes the counts of each character per position in the input Series"""
     if not pos:
         return (
@@ -237,7 +248,13 @@ def compute_counts(seqs_series, pos):
 
     from functools import reduce
 
-    slices = ranges(pos)
+    if isinstance(pos, str):
+        slices = ranges(pos, how=how)
+    elif isinstance(pos, int):
+        slices = [pos]
+    else:
+        slices = pos
+
     return reduce(
         lambda x, y: x + y, map(lambda x: seqs_series.str[x], slices)
     ).value_counts()
