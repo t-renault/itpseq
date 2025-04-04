@@ -11,7 +11,7 @@ from pathlib import Path
 
 from .config import *
 
-__all__ = ['parse']
+__all__ = ['parse', 'format_sequences']
 
 DEFAULTS = dict(
     a1='GTATAAGGAGGAAAAAAT',
@@ -614,7 +614,7 @@ def format_sequences(
 
             if i == 0:
                 header = '\n' + s2
-            elif repeat_header and not i % repeat_header:
+            elif repeat_header and i < limit and not i % repeat_header:
                 f_out.write(header)
 
             if limit and i >= limit:
