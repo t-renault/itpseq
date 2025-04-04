@@ -631,13 +631,21 @@ class Sample:
         """
         # print(locals())
         return pd.concat(
-            {str(r): r.get_counts(pos, how=how, **kwargs) for r in self.replicates},
+            {
+                str(r): r.get_counts(pos, how=how, **kwargs)
+                for r in self.replicates
+            },
             axis=1,
         )
 
     # @lru_cache
     def get_counts_ratio(
-        self, pos=None, factor=1_000_000, exclude_empty=True, how='aax', **kwargs
+        self,
+        pos=None,
+        factor=1_000_000,
+        exclude_empty=True,
+        how='aax',
+        **kwargs,
     ):
         """
         Outputs the result of `get_counts` for the sample and its reference and add extra columns:
@@ -678,7 +686,9 @@ class Sample:
          MWW       NaN       NaN       2.0       NaN       4.0       2.0      0.748862      1.261906  1.685098
          [8842 rows x 9 columns]
         """
-        counts = self.get_counts(pos=pos, how=how, **kwargs)  # compute position counts
+        counts = self.get_counts(
+            pos=pos, how=how, **kwargs
+        )  # compute position counts
         if exclude_empty:
             counts = counts[~counts.index.str.fullmatch(' *')]
         norm = counts.div(counts.sum()).mul(factor)  # normalize
@@ -760,20 +770,27 @@ class Sample:
 
         if not pos:
             if how == 'nuc':
-                pos = tuple(range(-12, 0))
+                pos = tuple(range(-6, 6))   # -2/E/P/A
             else:
                 pos = ('-2', 'E', 'P', 'A')
 
         if isinstance(pos, str):
             pos = ranges(pos)
 
+        aa_mode = how.startswith('aa')
+
         return (
             pd.concat(
-                {p: self.get_counts_ratio(p, how=how, **kwargs)['ratio'] for p in pos},
+                {
+                    p: self.get_counts_ratio(p, how=how, **kwargs)['ratio']
+                    for p in pos
+                },
                 axis=1,
             )
-            .pipe(lambda x: x.reindex(aa_order) if how.startswith('aa') else x)
-            .rename_axis(index='amino-acid', columns='site')
+            .pipe(lambda x: x.reindex(aa_order) if aa_mode else x)
+            .rename_axis(
+                index='amino-acid' if aa_mode else 'nucleotide', columns='site'
+            )
             .T
         )
 
@@ -1587,7 +1604,15 @@ class Sample:
             r.logo(logo_kwargs=logo_kwargs, ax=ax, **kwargs)
             ax.set_title(r)
 
-    def logo(self, pos=None, logo_kwargs=None, ax=None, **kwargs):
+    def logo(
+        self,
+        pos=None,
+        logo_kwargs=None,
+        ax=None,
+        vs_ref=True,
+        how='aax',
+        **kwargs,
+    ):
         """
         Creates a logo for the selected positions.
 
@@ -1613,13 +1638,20 @@ class Sample:
 
         .. image:: /_static/sample_logo.png
         """
-        df = np.log2(self.get_counts_ratio_pos(pos=pos, **kwargs)).fillna(0)
+        if vs_ref:
+            df = np.log2(
+                self.get_counts_ratio_pos(pos=pos, how=how, **kwargs)
+            ).fillna(0)
+        else:
+            raise NotImplementedError('vs_ref=False is not implemented yet')
 
         import logomaker
 
         if logo_kwargs is None:
             logo_kwargs = {
-                'color_scheme': 'NajafabadiEtAl2017',
+                'color_scheme': 'NajafabadiEtAl2017'
+                if how.startswith('aa')
+                else 'classic',
                 'flip_below': False,
             }
 

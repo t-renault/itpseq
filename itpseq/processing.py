@@ -169,7 +169,7 @@ def code2pos(code, how='aax'):
         try:
             return int(code) - 6 - MAX_UNTRANSLATED_OVERHANG
         except ValueError:
-            raise ValueError(f'''{code} is an invalid code for "how='nuc'".''')
+            raise ValueError(f"""{code} is an invalid code for "how='nuc'".""")
     else:
         raise NotImplementedError(f'"{how=}" is not implemented.')
 
@@ -248,12 +248,15 @@ def compute_counts(seqs_series, pos, how='aax'):
 
     from functools import reduce
 
+    # difference between ribosome position and python end-numbering
+    delta = 2 if how.startswith('aa') else (6 + MAX_UNTRANSLATED_OVERHANG)
+
     if isinstance(pos, str):
         slices = ranges(pos, how=how)
     elif isinstance(pos, int):
-        slices = [pos]
+        slices = [pos - delta]
     else:
-        slices = pos
+        slices = tuple(p - delta for p in pos)
 
     return reduce(
         lambda x, y: x + y, map(lambda x: seqs_series.str[x], slices)

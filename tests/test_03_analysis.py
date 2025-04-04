@@ -177,7 +177,7 @@ class TestSample:
     def test_get_counts_ratio_pos_nuc(self):
         self.tcx_data._clear_cache(force=True)
         df = self.tcx_data['nnn15.tcx'].get_counts_ratio_pos(how='nuc')
-        assert set(df.index) == set(range(-12, 0))
+        assert set(df.index) == set(range(-6, 6))
         assert set(df.columns) == set('ACGT')
         assert df.notna().values.sum() == 48
 
