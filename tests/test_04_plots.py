@@ -52,6 +52,9 @@ class TestSamplePlots:
     def test_volcano_density(self):
         self.tcx.volcano('E:P', density_thresh=3)
 
+    def test_volcano_nuc(self):
+        self.tcx.volcano('-3:2', how='nuc')
+
     def test_itoeprint(self):
         self.tcx.itoeprint(show_range=True)
 
@@ -71,6 +74,9 @@ class TestSamplePlots:
 
     def test_logo(self):
         self.tcx.logo()
+
+    def test_logo(self):
+        self.tcx.logo(how='nuc')
 
     def test_all_logos(self):
         self.tcx.all_logos()
