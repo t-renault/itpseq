@@ -10,8 +10,8 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame
 
-from .utils import fcache
 from .config import MAX_UNTRANSLATED_OVERHANG
+from .utils import fcache
 
 __all__ = [
     'read_itp_file_as_series',
