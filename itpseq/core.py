@@ -1509,11 +1509,12 @@ class Sample:
         self,
         pos,
         *,
+        how='aax',
         query='',
         motif=None,
         logo_type='extra_counts_bits',
         ax=None,
-        logo_kwargs={'color_scheme': aa_colors},
+        logo_kwargs=None,
         return_matrix=False,
         **kwargs,
     ):
@@ -1529,6 +1530,8 @@ class Sample:
 
         pos: str
             Ribosome positions to consider to compute the differential expression. Passed to :meth:`DE`.
+        how: str, optional
+            Type of inverse toeprints to analyze (see :meth:`Replicate.load_data`).
         query: str, optional
             Query used to select rows in the :meth:`DE` output.
         motif: regex, optional
@@ -1561,7 +1564,14 @@ class Sample:
         .. image:: /_static/sample_subset_logo.png
         """
 
-        df = self.DE(pos, join=True, **kwargs)
+        if logo_kwargs is None:
+            logo_kwargs = {
+                'color_scheme': aa_colors
+                if how.startswith('aa')
+                else 'classic'
+            }
+
+        df = self.DE(pos, how=how, join=True, **kwargs)
 
         if motif is not None:
             df = df[df.index.str.match(motif)]
