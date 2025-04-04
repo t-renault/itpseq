@@ -279,11 +279,17 @@ def itp_schematic(
     Produce a default example with a dummy sequence:
      >>> itp_schematic()
 
+    .. image:: /_static/itp_schematic.png
+
     Produce a schematic with only 2 codons:
      >>> itp_schematic(codons=2)
 
+    .. image:: /_static/itp_schematic_2codons.png
+
     Produce a schematic with a specific sequence:
      >>> itp_schematic(sequence='ATGGCACCTCTAGAG')
+
+     .. image:: /_static/itp_schematic_custom.png
     """
     import numpy as np
     from dna_features_viewer import GraphicFeature, GraphicRecord

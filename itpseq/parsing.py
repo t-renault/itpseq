@@ -549,6 +549,52 @@ def format_sequences(
 
     Examples
     --------
+    Display the first 5 inverse toeprints of the "nnn15_noa1.nuc.itp.txt" file:
+
+     >>> format_sequences('nnn15_noa1.nuc.itp.txt', limit=5)
+     #                    [E][P][A]
+                          ATGGGACGC cccgcagtatct
+           ATGAGTTACAAAGGCAACTCGGAA caggtagcatatc
+                          ATGGAAGAG gcccatgccattcc
+                             ATGAAT cgaaacatgttt
+     ATGACTATGTTTCTTGGACACACATAAGGG aactagttaggg
+
+    Display the first 10 inverse toeprints of the "nnn15_noa1.nuc.itp.txt" file,
+    group the coding sequence by codons and display the translation.
+    Repeat the header every 5 reads.:
+
+    .. code-block:: python
+
+         >>> format_sequences('nnn15_noa1.nuc.itp.txt', limit=5,
+         ...                  codons=True, aa=True,
+         ...                  repeat_header=5)
+         #                           [E] [P] [A]
+                                     ATG GGA CGC cccgcagtatct
+                                      M   G   R  3
+                 ATG AGT TAC AAA GGC AAC TCG GAA caggtagcatatc
+                  M   S   Y   K   G   N   S   E  8
+                                     ATG GAA GAG gcccatgccattcc
+                                      M   E   E  3
+                                         ATG AAT cgaaacatgttt
+                                          M   N  2
+         ATG ACT ATG TTT CTT GGA CAC ACA TAA GGG aactagttaggg
+          M   T   M   F   L   G   H   T   *   G  10
+
+         #                           [E] [P] [A]
+                                     ATG CTA TAA taggtcaagcacca
+                                      M   L   *  3
+                             ATG ACC AAT CCG TAG gactaacgccacat
+                              M   T   N   P   *  5
+                     ATG TAG CCG GGC AAG GAG ATC cgcacctcgcgc
+                      M   *   P   G   K   E   I  7
+                                         ATG TAA ctatacgacgtcg
+                                          M   *  2
+                                         ATG TAA acacgccttgtcgt
+                                          M   *  2
+
+    Export the output to a file
+
+    >>> format_sequences('nnn15_noa1.nuc.itp.txt', out)
     """
 
     SUFFIX = f'.nuc.{ITP_FILE_SUFFIX}.txt'

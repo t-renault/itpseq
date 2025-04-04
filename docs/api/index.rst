@@ -7,6 +7,7 @@ API reference
 .. toctree::
    :maxdepth: 3
 
+   funcs
    dataset
    sample
    replicate
