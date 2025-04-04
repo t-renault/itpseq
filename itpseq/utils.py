@@ -23,6 +23,7 @@ __all__ = [
     'table_to_html',
     'dict_to_tuple',
     'dedup_names',
+    'itp_schematic',
 ]
 
 logging.basicConfig(
@@ -248,3 +249,127 @@ def table_to_html(df):
         )
         .to_html()
     )
+
+
+def itp_schematic(
+    *, codons=9, coding_sequence=None, min_overhang=12, width_factor=1
+):
+    """
+    Creates a schematic of an iTP-Seq read with annotations and positions.
+
+    Parameters
+    ----------
+    codons : int
+        Number of codons to use for the translated sequence.
+        This is ignored if an explicit coding sequence is provided.
+    coding_sequence : str
+        Explicit coding sequence to use.
+    min_overhang : int
+        Minimum length of the overhang (up to two extra nucleotides can be present).
+    width_factor : float
+        Factor to change the schematic width.
+
+    Returns
+    -------
+    matplotlib.Axes
+
+    Examples
+    --------
+
+    Produce a default example with a dummy sequence:
+     >>> itp_schematic()
+
+    Produce a schematic with only 2 codons:
+     >>> itp_schematic(codons=2)
+
+    Produce a schematic with a specific sequence:
+     >>> itp_schematic(sequence='ATGGCACCTCTAGAG')
+    """
+    import numpy as np
+    from dna_features_viewer import GraphicFeature, GraphicRecord
+    from matplotlib.ticker import FuncFormatter
+
+    extra = 2  # number of possible extra nucleotides
+    width_factor *= 0.3
+
+    if coding_sequence:
+        assert (
+            len(coding_sequence) % 3 == 0
+        ), f'coding_sequence should have a multiple of 3 nucleotides, got {len(coding_sequence)}'
+
+        sequence = coding_sequence + 'n' * min_overhang + '-' * extra
+        codons = len(coding_sequence) // 3
+        translation = None
+    else:
+        sequence = 'N' * 3 * codons + 'n' * min_overhang + '-' * extra
+        translation = 'm' * (codons > 0) + 'X' * (codons - 1)
+
+    from_P = 6 + min_overhang + extra  # number of nt after from P-site (0)
+    offset = len(sequence) - from_P
+
+    labels = ['E', 'P', 'A']
+
+    record = GraphicRecord(
+        sequence=sequence,
+        features=[
+            GraphicFeature(
+                start=(codons - len(labels) + i) * 3,
+                end=(codons - len(labels) + 1 + i) * 3,
+                fontdict={'weight': 'bold'},
+                label=labels[i],
+                strand=0,
+                color='#ffcccc',
+            )
+            for i in range(len(labels))
+        ]
+        + [
+            GraphicFeature(
+                start=len(sequence) - min_overhang - extra,
+                end=len(sequence),
+                strand=0,
+                color='w',
+                label='protected overhang',
+            )
+        ],
+        labels_spacing=0,
+    )
+
+    # +9 is an offset to account for the extra space on the side of the figure
+    ax, _ = record.plot(
+        figure_width=width_factor * (len(sequence) / 3 + 9), figure_height=1.5
+    )
+    record.plot_sequence(ax)
+    record.plot_translation(
+        ax,
+        (0, codons * 3),
+        y_offset=-1,
+        translation=translation,
+        long_form_translation=False,
+    )
+
+    xticks = (
+        np.array(
+            [
+                *range(-(codons - 2) * 3, -6, 3),
+                *range(-3 if codons < 4 else -6, 6),
+                *range(3, from_P, 3),
+            ]
+        )
+        + offset
+    )
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: x - offset))
+    ax.set_xticks(xticks)
+    ax.set_ylim(-1, 1)
+
+    ax2 = ax.secondary_xaxis('top')
+    ax2.set_xticks(range(-8, codons * 3, 3))
+    ax2.xaxis.set_major_formatter(
+        FuncFormatter(lambda x, pos: (x + 2) // 3 - codons + 1)
+    )
+    ax2.tick_params(length=0, colors='grey')
+    ax2.spines[['top']].set_visible(False)
+
+    if codons < 3:
+        ax.set_xlim(left=ax.get_xlim()[0] - 0.8)
+
+    return ax
