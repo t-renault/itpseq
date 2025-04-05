@@ -62,10 +62,6 @@ class TestCLI:
         ok, nok, err = filecmp.cmpfiles(
             res_path, tmp_outdir, files, shallow=False
         )
-        if nok:
-            print(f'Files are not equal: {nok}')
-        if err:
-            print(f'Files could not be read: {err}')
         assert nok == [] and err == []
 
     def test_cli_report(self, data_dir, tmp_outdir):

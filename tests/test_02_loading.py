@@ -133,3 +133,9 @@ class TestDataSet:
             'noa.custom_name',
             'noa.rep3',
         }
+
+
+class TestReplicate:
+    def test_replicate_gt(self):
+        assert Replicate(replicate=1) < Replicate(replicate=2)
+        assert Replicate(replicate='A') < Replicate(replicate='Z')

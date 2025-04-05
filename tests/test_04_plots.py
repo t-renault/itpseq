@@ -75,7 +75,7 @@ class TestSamplePlots:
     def test_logo(self):
         self.tcx.logo()
 
-    def test_logo(self):
+    def test_logo_nuc(self):
         self.tcx.logo(how='nuc')
 
     def test_all_logos(self):

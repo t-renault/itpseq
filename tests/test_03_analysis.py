@@ -2,7 +2,109 @@ import os
 from pathlib import Path
 
 import pytest
-from itpseq import DataSet, Replicate, Sample
+from itpseq import DataSet, Replicate, Sample, processing
+
+
+class TestFunctions:
+    def test_read_itp_file_as_series_nuc(self, data_dir):
+        ser = processing.read_itp_file_as_series(
+            data_dir / 'tcx_small_test' / 'nnn15_noa1.nuc.itp.txt',
+            how='aax',
+        )
+        assert ser.head(10).tolist() == [
+            '      ATGAGTTACAAAGGCAACTCGGAACAGGTAGCATATC ',
+            '                     ATGGAAGAGGCCCATGCCATTCC',
+            '                     ATGCTATAATAGGTCAAGCACCA',
+            '               ATGACCAATCCGTAGGACTAACGCCACAT',
+            '                        ATGTAACTATACGACGTCG ',
+            '                        ATGTAAACACGCCTTGTCGT',
+            '                        ATGACACCTACAGGGCCCAT',
+            '                  ATGACAAAATAGCAGCGCAACGGGA ',
+            '                     ATGAACCGGTAACAAGTCCACCT',
+            '                        ATGTCGGGATCGATGCAGA ',
+        ]
+
+    def test_read_itp_file_as_series_aax(self, data_dir):
+        ser = processing.read_itp_file_as_series(
+            data_dir / 'tcx_small_test' / 'nnn15_noa1.aa.itp.txt',
+            how='aax',
+        )
+        assert ser.head(10).tolist() == [
+            '       mGR',
+            '  mSYKGNSE',
+            '       mEE',
+            '        mN',
+            '       mL*',
+            '     mTNP*',
+            '        m*',
+            '        m*',
+            '        mT',
+            '     mIRD*',
+        ]
+
+    def test_read_itp_file_as_series_aa(self, data_dir):
+        ser = processing.read_itp_file_as_series(
+            data_dir / 'tcx_small_test' / 'nnn15_noa1.aa.itp.txt',
+            how='aa',
+        )
+        assert ser.head(10).tolist() == [
+            '       mGR',
+            '  mSYKGNSE',
+            '       mEE',
+            '        mN',
+            'mTMFLGHT*G',
+            '       mL*',
+            '     mTNP*',
+            '   m*PGKEI',
+            '        m*',
+            '        m*',
+        ]
+
+    def test_read_itp_file_as_series_limit(self, data_dir):
+        ser = processing.read_itp_file_as_series(
+            data_dir / 'tcx_small_test' / 'nnn15_noa1.aa.itp.txt',
+            limit=3,
+        )
+        assert ser.head(10).tolist() == [
+            '       mGR',
+            '  mSYKGNSE',
+            '       mEE',
+        ]
+
+    def test_read_itp_file_as_series_sample(self, data_dir):
+        ser = processing.read_itp_file_as_series(
+            data_dir / 'tcx_small_test' / 'nnn15_noa1.aa.itp.txt',
+            sample=3,
+        )
+        assert len(ser) == 3
+
+    def test_code2pos(self):
+        tests = [
+            # input, params, output
+            ('-2', {}, -4),
+            ('E', {}, -3),
+            ('P', {}, -2),
+            (0, {}, -2),
+            ('A', {}, -1),
+            (0, {'how': 'nuc'}, -20),
+        ]
+        for inpt, params, out in tests:
+            assert processing.code2pos(inpt, **params) == out
+
+    def test_ranges(self):
+        tests = [
+            # input, params, output
+            ('P', {}, [-2]),
+            ('E,A', {}, [-3, -1]),
+            ('-3,E:A', {}, [-5, slice(-3, None, None)]),
+            ('E:P', {}, [slice(-3, -1, None)]),
+            ('E:A', {}, [slice(-3, None, None)]),
+            ('-1:1', {}, [slice(-3, None, None)]),
+            ('-2:2', {'how': 'nuc'}, [slice(-22, -17, None)]),
+            ('-2,0', {'how': 'nuc'}, [-22, -20]),
+        ]
+        for inpt, params, out in tests:
+            assert processing.ranges(inpt, **params) == out
 
 
 class TestDataSet:
@@ -52,7 +154,6 @@ class TestDataSet:
         assert df.sum().sum() == 551145
 
 
-# noinspection PyComparisonWithNone
 class TestSample:
     @pytest.fixture(scope='class', autouse=True)
     def setup_class(self, request, data_dir):
@@ -186,6 +287,27 @@ class TestSample:
         df = self.tcx_data['nnn15.tcx'].DE('E:P')
         assert df.shape == (420, 8)
         assert list(df.columns) == [
+            'baseMean',
+            'log2FoldChange',
+            'lfcSE',
+            'stat',
+            'pvalue',
+            'padj',
+            'log10pvalue',
+            'log10padj',
+        ]
+
+        df = self.tcx_data['nnn15.tcx'].DE('E:P', join=True)
+        assert list(df.columns) == [
+            'nnn15.noa.1',
+            'nnn15.noa.2',
+            'nnn15.noa.3',
+            'nnn15.tcx.1',
+            'nnn15.tcx.2',
+            'nnn15.tcx.3',
+            'nnn15.noa',
+            'nnn15.tcx',
+            'ratio',
             'baseMean',
             'log2FoldChange',
             'lfcSE',
