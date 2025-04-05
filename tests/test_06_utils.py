@@ -3,33 +3,31 @@ from itpseq import utils
 
 
 class TestUtils:
-    def test_itp_schematic(self):
-        params = [
-            {},
-            {'codons': 2},
-            {'coding_sequence': 'ATTACTCCGAGCGAGCAA'},
+    @pytest.mark.parametrize(
+        'params, expected',
+        [
+            ({}, 'NNNNNNNNNNNNNNNNNNNNNNNNNNNnnnnnnnnnnnn--mXXXXXXXX'),
+            ({'codons': 2}, 'NNNNNNnnnnnnnnnnnn--mX'),
+            (
+                {'coding_sequence': 'ATTACTCCGAGCGAGCAA'},
+                'ATTACTCCGAGCGAGCAAnnnnnnnnnnnn--ITPSEQ',
+            ),
+        ],
+    )
+    def test_itp_schematic(self, params, expected):
+        ax = utils.itp_schematic(**params)
+        # check that E P A overhang patches are drawn
+        assert len(ax.patches) == 4
+        # checks the texts (patches, nucleotides, amino-acids)
+        texts = [
+            c.get_text() for c in ax.get_children() if hasattr(c, 'get_text')
         ]
-        checks = [
-            'NNNNNNNNNNNNNNNNNNNNNNNNNNNnnnnnnnnnnnn--mXXXXXXXX',
-            'NNNNNNnnnnnnnnnnnn--mX',
-            'ATTACTCCGAGCGAGCAAnnnnnnnnnnnn--ITPSEQ',
-        ]
-        for p, c in zip(params, checks):
-            ax = utils.itp_schematic(**p)
-            # check that E P A overhang patches are drawn
-            assert len(ax.patches) == 4
-            # checks the texts (patches, nucleotides, amino-acids)
-            texts = [
-                c.get_text()
-                for c in ax.get_children()
-                if hasattr(c, 'get_text')
-            ]
-            assert texts[:4] == ['protected overhang', 'E', 'P', 'A']
-            assert ''.join(texts[4:]) == c
+        assert texts[:4] == ['protected overhang', 'E', 'P', 'A']
+        assert ''.join(texts[4:]) == expected
 
-    def test_dict_to_tuple(self):
-        tests = [
-            # inpt, params, out
+    @pytest.mark.parametrize(
+        'inpt, params, expected',
+        [
             ({}, {}, ()),
             ({'A': 'a'}, {}, (('A', 'a'),)),
             (
@@ -43,17 +41,19 @@ class TestUtils:
                 {'keep': ['B', 'C']},
                 (('B', 'b'), ('C', 'c')),
             ),
-        ]
-        for inpt, params, out in tests:
-            assert utils.dict_to_tuple(inpt, **params) == out
+        ],
+    )
+    def test_dict_to_tuple(self, inpt, params, expected):
+        assert utils.dict_to_tuple(inpt, **params) == expected
 
-    def test_dedup_names(self):
-        tests = [
-            # inpt, params, out
+    @pytest.mark.parametrize(
+        'inpt, params, expected',
+        [
             ([], {}, []),
             (['x', 'y', 'x', 'x'], {}, ['x', 'y', 'x.1', 'x.2']),
             (['x', 'y', 'x', 'x'], {'sep': '-'}, ['x', 'y', 'x-1', 'x-2']),
             (['x', 'y', 'x.1', 'x'], {}, ['x', 'y', 'x.1', 'x.1.1']),
-        ]
-        for inpt, params, out in tests:
-            assert utils.dedup_names(inpt, **params) == out
+        ],
+    )
+    def test_dedup_names(self, inpt, params, expected):
+        assert utils.dedup_names(inpt, **params) == expected

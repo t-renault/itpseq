@@ -32,18 +32,39 @@ class TestParse:
         ok, nok, err = filecmp.cmpfiles(path, tmp_outdir, files, shallow=False)
         assert nok == [] and err == []
 
-    def test_cli_parse(self, data_dir, tmp_outdir):
+    @pytest.mark.parametrize(
+        'ext', ['', '.gz', '.bz2', '.xz', '.lzma', '.zip']
+    )
+    def test_cli_parse(self, ext, data_dir, tmp_outdir):
         """Extra test due to an issue to correctly report test coverage with multiprocessing"""
         path = data_dir / 'tcx_small_test'
-        for ext in ['', '.gz', '.bz2', '.xz', '.lzma']:
-            itpseq.parsing.parse(
-                path / f'nnn15_noa1.assembled.fastq{ext}', outdir=tmp_outdir
-            )
-            assert filecmp.cmp(
-                path / 'nnn15_noa1.nuc.itp.txt',
-                tmp_outdir / 'nnn15_noa1.nuc.itp.txt',
-                shallow=True,
-            )
+        itpseq.parsing.parse(
+            path / f'nnn15_noa1.assembled.fastq{ext}', outdir=tmp_outdir
+        )
+        assert filecmp.cmp(
+            path / 'nnn15_noa1.nuc.itp.txt',
+            tmp_outdir / 'nnn15_noa1.nuc.itp.txt',
+            shallow=True,
+        )
+
+    def test_parse_limit_max_seq_len(self, data_dir, tmp_outdir):
+        path = data_dir / 'tcx_small_test'
+        itpseq.parsing.parse(
+            path / f'nnn15_noa1.assembled.fastq',
+            outdir=tmp_outdir,
+            limit=20,
+            max_seq_len=40,
+        )
+        with open(tmp_outdir / 'nnn15_noa1.nuc.itp.txt') as f:
+            assert f.readlines() == [
+                '#                             [E][P][A]              \n',
+                '                              ATGGGACGCCCCGCAGTATCT  \n',
+                '               ATGAGTTACAAAGGCAACTCGGAACAGGTAGCATATC \n',
+                '                              ATGGAAGAGGCCCATGCCATTCC\n',
+                'ATGTCTGCGAGATGATCACGGATGATCGTAGACGAACTACACCCGACTGCG  \n',
+                '                                 ATGAATCGAAACATGTTT  \n',
+                '         ATGACTATGTTTCTTGGACACACATAAGGGAACTAGTTAGGG  \n',
+            ]
 
     def test_format_sequences(self, data_dir, tmp_outdir):
         path = data_dir / 'tcx_small_test'

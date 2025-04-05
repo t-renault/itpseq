@@ -78,22 +78,34 @@ class TestFunctions:
         )
         assert len(ser) == 3
 
-    def test_code2pos(self):
-        tests = [
-            # input, params, output
+    @pytest.mark.parametrize(
+        'inpt, params, expected',
+        [
             ('-2', {}, -4),
             ('E', {}, -3),
             ('P', {}, -2),
             (0, {}, -2),
             ('A', {}, -1),
             (0, {'how': 'nuc'}, -20),
-        ]
-        for inpt, params, out in tests:
-            assert processing.code2pos(inpt, **params) == out
+        ],
+    )
+    def test_code2pos(self, inpt, params, expected):
+        assert processing.code2pos(inpt, **params) == expected
 
-    def test_ranges(self):
-        tests = [
-            # input, params, output
+    @pytest.mark.parametrize(
+        'inpt, params',
+        [
+            ('X', {}),
+            ('X', {'how': 'nuc'}),
+        ],
+    )
+    def test_code2pos_err(self, inpt, params):
+        with pytest.raises(ValueError):
+            processing.code2pos(inpt, **params)
+
+    @pytest.mark.parametrize(
+        'inpt, params, expected',
+        [
             ('P', {}, [-2]),
             ('E,A', {}, [-3, -1]),
             ('-3,E:A', {}, [-5, slice(-3, None, None)]),
@@ -102,9 +114,10 @@ class TestFunctions:
             ('-1:1', {}, [slice(-3, None, None)]),
             ('-2:2', {'how': 'nuc'}, [slice(-22, -17, None)]),
             ('-2,0', {'how': 'nuc'}, [-22, -20]),
-        ]
-        for inpt, params, out in tests:
-            assert processing.ranges(inpt, **params) == out
+        ],
+    )
+    def test_ranges(self, inpt, params, expected):
+        assert processing.ranges(inpt, **params) == expected
 
 
 class TestDataSet:

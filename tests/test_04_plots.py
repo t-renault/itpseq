@@ -61,16 +61,18 @@ class TestSamplePlots:
     def test_itoeprint_shades(self):
         self.tcx.itoeprint('shades', show_range=True)
 
-    def test_subset_logo(self):
-        for logo_type in ['raw_freq', 'extra_counts', 'sum_log2FC']:
-            self.tcx.subset_logo(
-                'E:P', logo_type=logo_type, query='log2FoldChange > 0'
-            )
-            self.tcx.subset_logo(
-                'E:P',
-                logo_type=f'{logo_type}_bits',
-                query='log2FoldChange > 0',
-            )
+    @pytest.mark.parametrize(
+        'logo_type', ['raw_freq', 'extra_counts', 'sum_log2FC']
+    )
+    def test_subset_logo(self, logo_type):
+        self.tcx.subset_logo(
+            'E:P', logo_type=logo_type, query='log2FoldChange > 0'
+        )
+        self.tcx.subset_logo(
+            'E:P',
+            logo_type=f'{logo_type}_bits',
+            query='log2FoldChange > 0',
+        )
 
     def test_logo(self):
         self.tcx.logo()
