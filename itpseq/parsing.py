@@ -4,12 +4,12 @@ import bz2
 import gzip
 import lzma
 import sys
-import zipfile
 from contextlib import nullcontext
 from functools import partial, wraps
 from pathlib import Path
 
 from .config import *
+from .utils import zip_open
 
 __all__ = ['parse', 'format_sequences']
 
@@ -68,9 +68,7 @@ def fastq_iterator(filename):
 
         opener = bz2.open
     elif fn.endswith('.zip'):
-        import zipfile
-
-        opener = zipfile.ZipFile
+        opener = zip_open
     elif fn.endswith('.xz') or fn.endswith('.lzma'):
         import lzma
 

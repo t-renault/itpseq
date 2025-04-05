@@ -3,6 +3,7 @@
 import io
 import logging
 import tempfile
+import zipfile
 from collections import defaultdict
 from functools import wraps
 from pathlib import Path
@@ -34,6 +35,27 @@ logging.basicConfig(
 )
 logger = logging.getLogger('itpseq')
 logger.addHandler(logging.StreamHandler())
+
+
+def zip_open(filename, mode='r', encoding=None):
+    zip_ref = zipfile.ZipFile(filename, mode.replace('t', ''))
+
+    if len(zip_ref.namelist()) != 1:
+        raise ValueError('ZIP file must contain exactly one file')
+
+    internal_filename = zip_ref.namelist()[0]
+    file_obj = zip_ref.open(internal_filename)
+
+    # If text mode is requested, wrap with TextIOWrapper
+    if 't' in mode or encoding is not None:
+        file_obj = io.TextIOWrapper(file_obj, encoding=encoding or 'utf-8')
+
+    # This will close the zip_ref when the file_obj is closed
+    file_obj._zip_ref = (
+        zip_ref  # Keep a reference to prevent garbage collection
+    )
+
+    return file_obj
 
 
 def dict_to_tuple(d, *, ignore=None, keep=None):
