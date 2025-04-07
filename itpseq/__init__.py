@@ -8,6 +8,7 @@ __version__ = '0.0.1a18'
 _LAZY_MODULES = {
     '.core': ['DataSet', 'Sample', 'Replicate'],
     '.parsing': ['parse', 'parse_all'],
+    '.utils': ['itp_schematic'],
 }
 
 _ORIGINS = {}

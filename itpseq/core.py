@@ -16,10 +16,7 @@ import pandas as pd
 import seaborn as sns
 from pandas.api.extensions import no_default
 
-from .config import *
-from .plotting import *
-from .processing import *
-from .utils import *
+from . import config, plotting, processing, utils
 
 IPYTHON = False
 try:
@@ -32,7 +29,11 @@ try:
 except ImportError:
     pass
 
-__all__ = ['DataSet', 'Sample', 'Replicate']
+__all__ = [
+    'DataSet',
+    'Sample',
+    'Replicate',
+]
 
 
 @total_ordering
@@ -111,17 +112,17 @@ class Replicate:
     @property
     def filename(self):
         """File name for the nucleotide inverse toeprints for the replicate"""
-        return self.file_prefix + f'.nuc.{ITP_FILE_SUFFIX}.txt'
+        return self.file_prefix + f'.nuc.{config.ITP_FILE_SUFFIX}.txt'
 
     @property
     def aa_filename(self):
         """File name for the amino-acid inverse toeprints for the replicate"""
-        return self.file_prefix + f'.aa.{ITP_FILE_SUFFIX}.txt'
+        return self.file_prefix + f'.aa.{config.ITP_FILE_SUFFIX}.txt'
 
     @property
     def json_filename(self):
         """File name for the JSON metadata for the replicate"""
-        return self.file_prefix + f'.{ITP_FILE_SUFFIX}.json'
+        return self.file_prefix + f'.{config.ITP_FILE_SUFFIX}.json'
 
     @property
     def sample_name(self):
@@ -196,9 +197,9 @@ class Replicate:
 
     def infos(self):
         """Returns the Replicate metadata from the JSON file"""
-        return read_log_json(self.json_filename)
+        return processing.read_log_json(self.json_filename)
 
-    @wraps(read_itp_file_as_series)
+    @wraps(processing.read_itp_file_as_series)
     def load_data(self, how='aax', **kwargs):
         """
         Reads the inverse toeprint sequences from the appropriate file
@@ -216,7 +217,7 @@ class Replicate:
                 f"how should be among ['aa', 'aax', 'nuc'], received: {how}"
             )
 
-        return read_itp_file_as_series(
+        return processing.read_itp_file_as_series(
             filename,
             how=how,
             _cache_dir=self._cache_dir,
@@ -267,7 +268,7 @@ class Replicate:
             if kwargs
             else ''
         )
-        return compute_counts(
+        return processing.compute_counts(
             self.load_data(**kwargs, how=how),
             pos=pos,
             how=how,
@@ -346,7 +347,7 @@ class Replicate:
         logo = logomaker.Logo(df, ax=ax, **logo_kwargs)
         logo.ax.set_xticks(
             range(df.shape[0]),
-            (df.index - df.shape[0] + 2).map(get_ribosome_site),
+            (df.index - df.shape[0] + 2).map(processing.get_ribosome_site),
         )
         return logo
 
@@ -410,7 +411,7 @@ class Sample:
                 else f'rep{i}'
                 for i, x in enumerate(replicates, start=1)
             ]
-            replicates = dict(zip(dedup_names(names), replicates))
+            replicates = dict(zip(utils.dedup_names(names), replicates))
 
         self.replicates = [
             Replicate(**{**data, 'replicate': k}, sample=self)
@@ -579,7 +580,7 @@ class Sample:
             .select_dtypes('number')
         )
         if html:
-            return table_to_html(out)
+            return utils.table_to_html(out)
         return out
 
     @lru_cache
@@ -775,7 +776,7 @@ class Sample:
                 pos = ('-2', 'E', 'P', 'A')
 
         if isinstance(pos, str):
-            pos = ranges(pos)
+            pos = processing.ranges(pos)
 
         aa_mode = how.startswith('aa')
 
@@ -787,7 +788,7 @@ class Sample:
                 },
                 axis=1,
             )
-            .pipe(lambda x: x.reindex(aa_order) if aa_mode else x)
+            .pipe(lambda x: x.reindex(utils.aa_order) if aa_mode else x)
             .rename_axis(
                 index='amino-acid' if aa_mode else 'nucleotide', columns='site'
             )
@@ -898,7 +899,7 @@ class Sample:
         if kwargs:
             _cache_prefix += f'_{"_".join([f"{key}={value}" for key, value in kwargs.items()])}'
 
-        res = DE(
+        res = processing.DE(
             df,
             sample_df,
             cond=cond,
@@ -995,8 +996,8 @@ class Sample:
         how = kwargs.get('how', 'aax')
         if how in ('aa', 'aax'):
             names = r, c
-            colors = aa_colors
-            order = aa_order
+            colors = utils.aa_colors
+            order = utils.aa_order
         else:
             colors = {
                 'A': '#008000',
@@ -1011,7 +1012,7 @@ class Sample:
         # keep only motifs without gap
         table = table.loc[~table.index.str.contains(' ')]
 
-        names = list(map(get_ribosome_site, names))
+        names = list(map(processing.get_ribosome_site, names))
 
         table.index = pd.MultiIndex.from_tuples(
             [tuple(x) for x in table.index], names=names
@@ -1281,7 +1282,7 @@ class Sample:
                     boxstyle='square',
                     pad=0.15,
                     ec='none',
-                    fc=aa_colors[aa],
+                    fc=utils.aa_colors[aa],
                     alpha=0.5,
                 )
                 t.set_bbox(bbox)
@@ -1417,7 +1418,9 @@ class Sample:
 
         elif m := re.search(r'density:\s*(\d+)', query):
             df = df.assign(
-                keep=flag_low_density(df[x], df[y], 50, int(m.group(1)))
+                keep=processing.flag_low_density(
+                    df[x], df[y], 50, int(m.group(1))
+                )
             )
             query = 'keep'
 
@@ -1462,7 +1465,7 @@ class Sample:
             for d, c in zip(dfs, colors):
                 if density_thresh:
                     d = d[
-                        flag_low_density(
+                        processing.flag_low_density(
                             d[x], d[y], bins=30, thresh=density_thresh
                         )
                     ]
@@ -1566,7 +1569,7 @@ class Sample:
 
         if logo_kwargs is None:
             logo_kwargs = {
-                'color_scheme': aa_colors
+                'color_scheme': utils.aa_colors
                 if how.startswith('aa')
                 else 'classic'
             }
@@ -1579,7 +1582,7 @@ class Sample:
         if query:
             df = df.query(query)
 
-        return motif_logo(
+        return plotting.motif_logo(
             df,
             ref_spl=[self.reference.name, self.name],
             ax=ax,
@@ -1806,7 +1809,9 @@ class Sample:
             hue='replicate',
             ax=ax,
         )
-        itp_len_add_positions(ax, min_codon=min_codon, max_codon=max_codon)
+        processing.itp_len_add_positions(
+            ax, min_codon=min_codon, max_codon=max_codon
+        )
 
         return ax
 
@@ -1890,7 +1895,7 @@ class Sample:
             from ipywidgets import fixed, interact
 
             interact(
-                itoeprint_plot,
+                plotting.itoeprint_plot,
                 dataset=fixed(self),
                 plot=widgets.Dropdown(options=['bands', 'shades'], value=plot),
                 norm=widgets.Dropdown(
@@ -1909,7 +1914,7 @@ class Sample:
             )
             return None
         else:
-            return itoeprint_plot(
+            return plotting.itoeprint_plot(
                 self,
                 plot=plot,
                 norm=norm,
@@ -1927,7 +1932,7 @@ class DataSet:
     Loads an iTP-Seq dataset and provides methods for analyzing and visualizing the data.
 
     A DataSet object is constructed to handle iTP-Seq Samples with their respective Replicates.
-    By default, it infers the files to uses in the provided directory by looking for "\*.{ITP_FILE_SUFFIX}.json" files produced
+    By default, it infers the files to uses in the provided directory by looking for "\*.{config.ITP_FILE_SUFFIX}.json" files produced
     during the initial step of pre-processing and filtering the fastq files.
     It uses the pattern of the file names to group the Replicates into a Sample, and to define which condition
     is the reference in the DataSet (the Sample with name "noa" by default).
@@ -1950,7 +1955,7 @@ class DataSet:
     file_pattern: str
         Regex pattern used to identify the sample files in the data_path directory.
         If None, defaults to `r'(?P<lib_type>[^_]+)_(?P<sample>[^_\d]+)(?P<replicate>\d+)'`
-        which matches files like nnn15_noa1.{ITP_FILE_SUFFIX}.json, nnn15_tcx2.{ITP_FILE_SUFFIX}.json, etc.
+        which matches files like nnn15_noa1.{config.ITP_FILE_SUFFIX}.json, nnn15_tcx2.{config.ITP_FILE_SUFFIX}.json, etc.
     allow_partial_keys: bool
         If no exact match of the keys if found, try to map a reference using partial keys.
     ref_mapping: dict or None
@@ -2035,9 +2040,9 @@ class DataSet:
         if not self.cache_path.exists():
             self.cache_path.mkdir(parents=True)
         # self.file_pattern = r'nnn15_(?P<sample>[^_]+)(?P<replicate>\d+)'
-        self.file_pattern = file_pattern or FILE_PATTERN
+        self.file_pattern = file_pattern or config.FILE_PATTERN
         # self.aafile_pattern = (
-        #     aafile_pattern or f'{lib_type}_{sample}{replicate}.aa.{ITP_FILE_SUFFIX}.txt'
+        #     aafile_pattern or f'{lib_type}_{sample}{replicate}.aa.{config.ITP_FILE_SUFFIX}.txt'
         # )
         # if no keys are provided, use all the named capturing groups of file_pattern, excepted "replicate"
         self.keys = (
@@ -2060,7 +2065,7 @@ class DataSet:
         if isinstance(ref_labels, str):
             self.ref_labels = (('sample', ref_labels),)
         elif isinstance(ref_labels, dict):
-            self.ref_labels = dict_to_tuple(ref_labels)
+            self.ref_labels = utils.dict_to_tuple(ref_labels)
         elif isinstance(ref_labels, tuple):
             self.ref_labels = ref_labels
             assert (
@@ -2171,14 +2176,15 @@ class DataSet:
             self.data_path.iterdir()
         ):  ## TODO: wrap with SampleGrouper
             if m := re.search(
-                self.file_pattern + rf'(?=\.{ITP_FILE_SUFFIX}\.json$)', f.name
+                self.file_pattern + rf'(?=\.{config.ITP_FILE_SUFFIX}\.json$)',
+                f.name,
             ):
                 labels = m.groupdict()
                 # if set(labels) >= {'sample', 'replicate'}:
                 if set(labels) > {'replicate'}:
                     rep = labels['replicate']
                     # keys = tuple(sorted(t for t in labels.items() if t[0] in self.keys))
-                    keys = dict_to_tuple(labels, keep=self.keys)
+                    keys = utils.dict_to_tuple(labels, keep=self.keys)
                     inferred_samples[keys].append(
                         {
                             #'file_prefix': str(self.data_path / self.aafile_pattern.format(**labels)),
@@ -2201,7 +2207,7 @@ class DataSet:
             ref_keys = set(dict(self.ref_labels))
             ref_items = dict(self.ref_labels).items()
             ref_samples = {
-                dict_to_tuple(s.labels, ignore=ref_keys): s
+                utils.dict_to_tuple(s.labels, ignore=ref_keys): s
                 for k, s in list(samples.items())[::-1]
                 if ref_items <= s.labels.items()
             }
@@ -2233,8 +2239,8 @@ class DataSet:
             for k, s in samples.items():
                 if k in ref_ids:  # if this is a reference sample, continue
                     continue
-                # items = dict(dict_to_tuple(s.labels, ignore=ref_keys)).items()
-                sample_labels = dict_to_tuple(s.labels, ignore=ref_keys)
+                # items = dict(utils.dict_to_tuple(s.labels, ignore=ref_keys)).items()
+                sample_labels = utils.dict_to_tuple(s.labels, ignore=ref_keys)
 
                 # exact match
                 if sample_labels in ref_samples:
@@ -2343,7 +2349,7 @@ class DataSet:
             .select_dtypes('number')
         )
         if html:
-            return table_to_html(out)
+            return utils.table_to_html(out)
         return out
 
     def DE(self, pos='E:A', **kwargs):
@@ -2477,7 +2483,7 @@ class DataSet:
                 **plt_kwargs,
             )
             for ax_ in g.axes.flat:
-                itp_len_add_positions(
+                processing.itp_len_add_positions(
                     ax_, min_codon=min_codon, max_codon=max_codon
                 )
             return g
@@ -2492,7 +2498,9 @@ class DataSet:
             hue='sample' if hue == 'auto' else hue,
             ax=ax,
         )
-        itp_len_add_positions(ax, min_codon=min_codon, max_codon=max_codon)
+        processing.itp_len_add_positions(
+            ax, min_codon=min_codon, max_codon=max_codon
+        )
 
         return ax
 
@@ -2563,7 +2571,7 @@ class DataSet:
                     css_file = static_dir / 'report-html.css'
                 html = html_template.render(
                     dataset=self,
-                    plot_to_html=plot_to_html,
+                    plot_to_html=utils.plot_to_html,
                     css_file=css_file,
                     output='html',
                     **render_kwargs,
@@ -2578,7 +2586,7 @@ class DataSet:
                     css_file = static_dir / 'report-pdf.css'
                 html = html_template.render(
                     dataset=self,
-                    plot_to_html=plot_to_html,
+                    plot_to_html=utils.plot_to_html,
                     output='pdf',
                     **render_kwargs,
                 )
@@ -2589,7 +2597,7 @@ class DataSet:
         else:
             html = html_template.render(
                 dataset=self,
-                plot_to_html=plot_to_html,
+                plot_to_html=utils.plot_to_html,
                 output='other',
                 **render_kwargs,
             )

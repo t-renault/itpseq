@@ -8,7 +8,7 @@ from contextlib import nullcontext
 from functools import partial, wraps
 from pathlib import Path
 
-from .config import *
+from . import config
 from .utils import zip_open
 
 __all__ = ['parse', 'format_sequences']
@@ -390,10 +390,10 @@ def export_data(
     Exports the itpseq output files from the parsed data
     
     This creates the following files:
-    - ``<file_prefix>.nuc.{ITP_FILE_SUFFIX}.txt``: inverse toeprints as nucleotides
-    - ``<file_prefix>.aa.{ITP_FILE_SUFFIX}.txt``: inverse toeprints as amino acids
-    - ``<file_prefix>.{ITP_FILE_SUFFIX}.json``: metadata as JSON
-    - ``<file_prefix>.{ITP_FILE_SUFFIX}.log``: log file
+    - ``<file_prefix>.nuc.{config.ITP_FILE_SUFFIX}.txt``: inverse toeprints as nucleotides
+    - ``<file_prefix>.aa.{config.ITP_FILE_SUFFIX}.txt``: inverse toeprints as amino acids
+    - ``<file_prefix>.{config.ITP_FILE_SUFFIX}.json``: metadata as JSON
+    - ``<file_prefix>.{config.ITP_FILE_SUFFIX}.log``: log file
     """
 
     print(f'exporting data from: {filename}')
@@ -416,11 +416,11 @@ def export_data(
     base_fname = outdir / re.sub(
         r'(\.assembled)?\.f(ast)?q(\.(gz|bz2|zip|xz|lzma))?$', '', fname.name
     )
-    f_log = base_fname.with_suffix(f'.{ITP_FILE_SUFFIX}.log')
-    f_json = base_fname.with_suffix(f'.{ITP_FILE_SUFFIX}.json')
-    # f_extra = base_fname.with_suffix(f'.{ITP_FILE_SUFFIX}.extra')
-    f_seq_nuc = base_fname.with_suffix(f'.nuc.{ITP_FILE_SUFFIX}.txt')
-    f_seq_aa = base_fname.with_suffix(f'.aa.{ITP_FILE_SUFFIX}.txt')
+    f_log = base_fname.with_suffix(f'.{config.ITP_FILE_SUFFIX}.log')
+    f_json = base_fname.with_suffix(f'.{config.ITP_FILE_SUFFIX}.json')
+    # f_extra = base_fname.with_suffix(f'.{config.ITP_FILE_SUFFIX}.extra')
+    f_seq_nuc = base_fname.with_suffix(f'.nuc.{config.ITP_FILE_SUFFIX}.txt')
+    f_seq_aa = base_fname.with_suffix(f'.aa.{config.ITP_FILE_SUFFIX}.txt')
 
     max_untranslated_overhang = untranslated_overhang + 2
 
@@ -595,7 +595,7 @@ def format_sequences(
     >>> format_sequences('nnn15_noa1.nuc.itp.txt', out)
     """
 
-    SUFFIX = f'.nuc.{ITP_FILE_SUFFIX}.txt'
+    SUFFIX = f'.nuc.{config.ITP_FILE_SUFFIX}.txt'
 
     if out is not None:
         out = Path(out)

@@ -9,7 +9,6 @@ from pathlib import Path
 import click
 
 from . import __version__
-from .config import *
 
 
 class NaturalOrderGroup(click.Group):
