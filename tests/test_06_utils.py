@@ -12,18 +12,30 @@ class TestUtils:
                 {'coding_sequence': 'ATTACTCCGAGCGAGCAA'},
                 'ATTACTCCGAGCGAGCAAnnnnnnnnnnnn--ITPSEQ',
             ),
+            (
+                {'coding_sequence': 'ATG', 'overhang_sequence': 'test-'},
+                'ATGtest-M',
+            ),
+            (
+                {'coding_sequence': '', 'overhang_sequence': ''},
+                '',
+            ),
         ],
     )
     def test_itp_schematic(self, params, expected):
         ax = utils.itp_schematic(**params)
         # check that E P A overhang patches are drawn
-        assert len(ax.patches) == 4
+        N = 3 if params.get('overhang_sequence', None) == '' else 4
+        assert len(ax.patches) == N
         # checks the texts (patches, nucleotides, amino-acids)
         texts = [
             c.get_text() for c in ax.get_children() if hasattr(c, 'get_text')
         ]
-        assert texts[:4] == ['protected overhang', 'E', 'P', 'A']
-        assert ''.join(texts[4:]) == expected
+        if N == 4:
+            assert texts[:N] == ['protected overhang', 'E', 'P', 'A']
+        else:
+            assert texts[:N] == ['E', 'P', 'A']
+        assert ''.join(texts[N:]) == expected
 
     @pytest.mark.parametrize(
         'inpt, params, expected',

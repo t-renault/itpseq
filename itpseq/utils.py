@@ -274,7 +274,12 @@ def table_to_html(df):
 
 
 def itp_schematic(
-    *, codons=9, coding_sequence=None, min_overhang=12, width_factor=1
+    *,
+    codons=9,
+    coding_sequence=None,
+    min_overhang=12,
+    width_factor=1,
+    overhang_sequence=None,
 ):
     """
     Creates a schematic of an iTP-Seq read with annotations and positions.
@@ -318,21 +323,26 @@ def itp_schematic(
     from matplotlib.ticker import FuncFormatter
 
     extra = 2  # number of possible extra nucleotides
+    if overhang_sequence is None:
+        overhang_sequence = 'n' * min_overhang + '-' * extra
+        max_overhang = min_overhang + extra
+    else:
+        max_overhang = len(overhang_sequence)
     width_factor *= 0.3
 
-    if coding_sequence:
+    if coding_sequence is None:
+        sequence = 'N' * 3 * codons + overhang_sequence
+        translation = 'm' * (codons > 0) + 'X' * (codons - 1)
+    else:
         assert (
             len(coding_sequence) % 3 == 0
         ), f'coding_sequence should have a multiple of 3 nucleotides, got {len(coding_sequence)}'
 
-        sequence = coding_sequence + 'n' * min_overhang + '-' * extra
+        sequence = coding_sequence + overhang_sequence
         codons = len(coding_sequence) // 3
         translation = None
-    else:
-        sequence = 'N' * 3 * codons + 'n' * min_overhang + '-' * extra
-        translation = 'm' * (codons > 0) + 'X' * (codons - 1)
 
-    from_P = 6 + min_overhang + extra  # number of nt after from P-site (0)
+    from_P = 6 + max_overhang  # number of nt after from P-site (0)
     offset = len(sequence) - from_P
 
     labels = ['E', 'P', 'A']
@@ -350,15 +360,19 @@ def itp_schematic(
             )
             for i in range(len(labels))
         ]
-        + [
-            GraphicFeature(
-                start=len(sequence) - min_overhang - extra,
-                end=len(sequence),
-                strand=0,
-                color='w',
-                label='protected overhang',
-            )
-        ],
+        + (
+            [
+                GraphicFeature(
+                    start=len(sequence) - max_overhang,
+                    end=len(sequence),
+                    strand=0,
+                    color='w',
+                    label='protected overhang',
+                )
+            ]
+            if max_overhang
+            else []
+        ),
         labels_spacing=0,
     )
 
