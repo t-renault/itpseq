@@ -982,10 +982,7 @@ class Sample:
         kwargs : dict, optional
             Parameters passed to :meth:`DE`.
         """
-        from matplotlib.collections import (
-            FillBetweenPolyCollection,
-            LineCollection,
-        )
+        from matplotlib.collections import LineCollection, PolyCollection
 
         if kwargs and 'how' in kwargs:
             kwargs.pop('how')
@@ -1030,7 +1027,7 @@ class Sample:
         )
 
         for c in ax.collections:
-            if isinstance(c, FillBetweenPolyCollection):
+            if isinstance(c, PolyCollection):
                 c.set_edgecolor('None')
             elif isinstance(c, LineCollection):
                 c.set_color(line_color)
