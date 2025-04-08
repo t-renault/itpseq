@@ -82,3 +82,6 @@ class TestSamplePlots:
 
     def test_all_logos(self):
         self.tcx.all_logos()
+
+    def test_codon_violin(self):
+        self.tcx.codon_violin('-6:2', motif='.QK')

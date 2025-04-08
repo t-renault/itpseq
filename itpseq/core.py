@@ -17,6 +17,7 @@ import seaborn as sns
 from pandas.api.extensions import no_default
 
 from . import config, plotting, processing, utils
+from .parsing import codon_table
 
 IPYTHON = False
 try:
@@ -803,6 +804,7 @@ class Sample:
         join=False,
         quiet=True,
         filter_size=True,
+        translate=False,
         multi=True,
         n_cpus=None,
         raw=False,
@@ -822,6 +824,9 @@ class Sample:
             If True, joins the DE results back to the original `df`. Defaults to False.
         quiet : bool, optional
             If True, suppresses the console output of the `pydeseq2` library. Defaults to True.
+        translate : bool, optional
+            If True, translates the nucleotide motif into amino-acids. Defaults to False.
+            This doesn't check that the nucleotide motif is in frame or composed of consecutive positions.
         multi : bool, optional
             Whether to compute DE with a specific contrast (`cond` vs. `ref`). Defaults to True.
         n_cpus : int, optional
@@ -912,9 +917,114 @@ class Sample:
             _cache_dir=self._cache_dir,
             _cache_prefix=_cache_prefix,
         )
+        if translate and how == 'nuc':
+            # if the input if consecutive nucleotides, translate the sequence
+            # note that this doesn't check that the motif is in frame or composed of consecutive nucleotides.
+            res['aa'] = res.index.str.replace(
+                r'.{1,3}', lambda x: codon_table.get(x.group()), regex=True
+            )
         if join:
             return df.join(res, how='right')
         return res
+
+    def codon_violin(
+        self,
+        pos,
+        *,
+        motif=None,
+        query=None,
+        col='log2FoldChange',
+        sort_by='median',
+        line_color='k',
+        line_width=0.625,
+        ax=None,
+        violin_kwargs=None,
+        **kwargs,
+    ):
+        """
+        Plots violin plots for each amino acid motif, with one line per combination of codons.
+
+        Parameters
+        ----------
+        motif : str
+            Regex used to filter the data by protein motif.
+            This parameter is strongly recommended for motifs of more than one amino-acid.
+        query : str or callable, optional
+            Query string or callable used to filter the rows of the input.
+            If a callable, should return a boolean Series/array to filter the rows.
+        col : str, optional
+            Column from the output of :meth:`DE` to use as the Y-axis.
+        sort_by : str, optional
+            Method to use to sort the violin plots. Defaults to 'median'.
+        line_color : str, optional
+            Color of the inner lines in the violin plot.
+        line_width : float, optional
+            Width of the inner lines in the violin plot.
+        ax : matplotlib.Axes, optional
+            If passed, will plot on this Axes.
+        violin_kwargs : dict, optional
+            Parameters passed to `violinplot`.
+        kwargs : dict, optional
+            Parameters passed to :meth:`DE`.
+        """
+        from matplotlib.collections import (
+            FillBetweenPolyCollection,
+            LineCollection,
+        )
+
+        if kwargs and 'how' in kwargs:
+            kwargs.pop('how')
+            print(
+                """Ignoring "how" passed as keyword argument: how='nuc' by default."""
+            )
+
+        df = self.DE(pos, how='nuc', translate=True, **kwargs)
+        if query is not None:
+            if isinstance(query, str):
+                df = df.query(query)
+            elif callable(query):
+                df = df[query(df)]
+            else:
+                ValueError('query must be a string or callable')
+
+        if motif is not None:
+            df = df[df['aa'].str.match(motif)]
+
+        if violin_kwargs is None:
+            violin_kwargs = {
+                'cut': 0.9,
+                'color': '#E6E6E6E6',
+                'width': 1,
+                'inner': 'stick',
+            }
+
+        order = (
+            df.groupby('aa')[col]
+            .agg(sort_by)
+            .sort_values(ascending=False)
+            .index.tolist()
+        )
+
+        ax = sns.violinplot(
+            data=df,
+            x=col,
+            y='aa',
+            order=None if sort_by is None else order,
+            ax=ax,
+            **violin_kwargs,
+        )
+
+        for c in ax.collections:
+            if isinstance(c, FillBetweenPolyCollection):
+                c.set_edgecolor('None')
+            elif isinstance(c, LineCollection):
+                c.set_color(line_color)
+                if line_width:
+                    c.set_lw(line_width)
+
+        ax.axvline(0, color='k', ls=':')
+
+        return ax
 
     def hmap(
         self,
