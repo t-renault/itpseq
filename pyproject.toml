@@ -25,6 +25,7 @@ keywords = ['ribosome', 'inverse toeprinting', 'iTP-Seq']
 license = 'GPL-3.0-only'
 dependencies = [
     'regex',
+    'natsort',
     'numpy',
     'pandas',
     'pydeseq2',

@@ -135,7 +135,46 @@ class TestDataSet:
         }
 
 
+class TestSample:
+    def test_sample_empty(self):
+        s = Sample()
+        assert len(s.name) == 36       # check UUID
+        assert s.name.count('-') == 4  #
+        assert s.replicates == []
+
+    def test_sample_from_list_of_dicts(self):
+        noa = Sample(
+            [
+                {'file_prefix': 'nnn15_noa1'},
+                {'file_prefix': 'nnn15_noa2'},
+                {'file_prefix': 'nnn15_noa3'},
+            ],
+            name='noa',
+        )
+        tcx = Sample(
+            [
+                {'file_prefix': 'nnn15_tcx1'},
+                {'file_prefix': 'nnn15_tcx2'},
+                {'file_prefix': 'nnn15_tcx3'},
+            ],
+            name='tcx',
+            reference=noa,
+        )
+        assert repr(tcx) == 'Sample(tcx:[rep1, rep2, rep3], ref: noa)'
+        assert (
+            repr(noa.replicates)
+            == '[Replicate(noa.rep1), Replicate(noa.rep2), Replicate(noa.rep3)]'
+        )
+        assert tcx > noa
+        assert tcx.copy(name='abc', reference=noa) > noa
+        assert tcx.copy(name='abc') < noa
+        assert tcx.copy(name='xyz') > noa
+
+
 class TestReplicate:
     def test_replicate_gt(self):
         assert Replicate(replicate=1) < Replicate(replicate=2)
+        assert Replicate(replicate=2) > Replicate(replicate=1)
+        assert Replicate(replicate='2') < Replicate(replicate='10')
+        assert Replicate(replicate=2) < Replicate(replicate='10')
         assert Replicate(replicate='A') < Replicate(replicate='Z')

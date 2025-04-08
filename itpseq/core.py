@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from natsort import natsort_key
 from pandas.api.extensions import no_default
 
 from . import config, plotting, processing, utils
@@ -95,19 +96,31 @@ class Replicate:
             return NotImplemented
         if not self.sample and other.sample:
             try:
-                return self.replicate > other.replicate
-            except TypeError:
-                return str(self.replicate) > str(other.replicate)
-        else:
-            try:
-                return (self.sample, self.replicate) > (
-                    other.sample,
-                    other.replicate,
+                return natsort_key(self.replicate) > natsort_key(
+                    other.replicate
                 )
             except TypeError:
-                return (self.sample, str(self.replicate)) > (
-                    other.sample,
-                    str(other.replicate),
+                return natsort_key(str(self.replicate)) > natsort_key(
+                    str(other.replicate)
+                )
+        else:
+            try:
+                return natsort_key(
+                    (self.sample, self.replicate)
+                ) > natsort_key(
+                    (
+                        other.sample,
+                        other.replicate,
+                    )
+                )
+            except TypeError:
+                return natsort_key(
+                    (self.sample, str(self.replicate))
+                ) > natsort_key(
+                    (
+                        other.sample,
+                        str(other.replicate),
+                    )
                 )
 
     @property
@@ -446,7 +459,9 @@ class Sample:
             return True
         if other.reference == self:
             return False
-        return (self.dataset, self.name) > (other.dataset, other.name)
+        return natsort_key((self.dataset, self.name)) > natsort_key(
+            (other.dataset, other.name)
+        )
 
     @property
     def name_vs_ref(self):
