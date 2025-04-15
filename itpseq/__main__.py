@@ -11,6 +11,33 @@ import click
 from . import __version__
 
 
+def arg_range(ctx, param, value):
+    try:
+        if '-' in value:
+            start, end = value.split('-')
+            start = int(start) if start else 0
+            end = int(end) if end else 0
+        else:
+            start = end = int(value)
+        return (start, end)
+    except ValueError:
+        raise click.BadParameter(
+            'Range must be in format "min-max" (1-10), "min-" (1-), "-max" (-10), or "value" (10).'
+        )
+
+
+# disable verbose output of IntRange
+class CustomIntRange(click.IntRange):
+    def get_metavar(self, param):
+        return f'{self.min}-{self.max}'
+
+    def _describe_range(self):
+        return ''
+
+    def __repr__(self):
+        return f'<{self.min}-{self.max}>'
+
+
 class NaturalOrderGroup(click.Group):
     """
     Class to keep the commands in the order defined in the source code
@@ -69,21 +96,86 @@ def help():
 
 
 @cli.command(
-    context_settings={'ignore_unknown_options': True}, add_help_option=False
+    context_settings={'show_default': True},
+    # context_settings={'ignore_unknown_options': True}, add_help_option=False
 )
-@click.argument('args', nargs=-1)
-def parse(args):
+@click.argument(
+    'files', nargs=-1, type=click.Path(exists=True, dir_okay=False)
+)
+@click.option(
+    '--outdir',
+    '-o',
+    type=click.Path(dir_okay=True, file_okay=False, writable=True),
+    default='.',
+    help='Directory for the output files.',
+)
+@click.option(
+    '-a1',
+    '--left-adaptor',
+    'a1',  # use a1 as variable name
+    type=click.STRING,
+    default='GTATAAGGAGGAAAAAAT',
+    help='Sequence (5ʹ→3ʹ) of the left adaptor',
+)
+@click.option(
+    '-a2',
+    '--right-adaptor',
+    'a2',  # use a2 as variable name
+    type=click.STRING,
+    default='GGTATCTCGGTGTGACTG',
+    help='Sequence (5ʹ→3ʹ) of the right adaptor',
+)
+@click.option(
+    '-s',
+    '--peptide-size',
+    type=click.UNPROCESSED,
+    callback=arg_range,
+    default='1-10',
+    help='Allowed length range of peptide considered ("min-max" or "min-" or "-max" or "exact")',
+)
+@click.option(
+    '-q',
+    '--quality',
+    type=CustomIntRange(min=0, max=60),
+    default=30,
+    help='Threshold for the PHRED quality cutoff',
+)
+@click.option(
+    '-l',
+    '--limit',
+    type=click.INT,
+    default=None,
+    help='Max number of sequences to process (useful for quick tests)',
+)
+def parse(
+    **kwargs,
+):  # left_adaptor, right_adaptor, peptide_size, quality, limit):
     """
     Parse and filter the assembled iTP-Seq FASTQ files to produce files needed for the analysis.
     """
-    from . import parsing
+    import datetime
 
-    # Pass arguments directly to parsing.cli()
-    sys.argv = ['parse'] + list(args)  # Simulate sys.argv for argparse
-    parsing.main()
+    from pprint import pprint
+
+    from .parsing import parse_all
+
+    min_seq_len, max_seq_len = kwargs.pop('peptide_size')
+    # convert codon to nucleotide positions
+    kwargs['min_seq_len'] = min_seq_len * 3
+    kwargs['max_seq_len'] = max_seq_len * 3 or None
+
+    # display parameters passed to parse_all
+    pprint(kwargs)
+
+    click.echo(datetime.datetime.now().strftime('Start time: %Y-%m-%d %H:%M'))
+    parse_all(
+        **kwargs,
+        save=True,
+    )
+    click.echo(datetime.datetime.now().strftime('End time: %Y-%m-%d %H:%M'))
 
 
-@cli.command()
+@cli.command(context_settings={'show_default': True})
 @click.argument(
     'directory', type=click.Path(exists=True, file_okay=False, dir_okay=True)
 )
