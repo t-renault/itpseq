@@ -1317,9 +1317,9 @@ class Sample:
         self,
         pos=None,
         *,
-        # how='aax',
+        how='aax',
         # col='auto',
-        # transform=np.log2,
+        transform=np.log2,
         cmap='vlag',
         vmax=None,
         center=0,
@@ -1327,19 +1327,17 @@ class Sample:
         **kwargs,
     ):
         """
-        Generates a heatmap of enrichment ratios for amino acid positions across ribosome sites.
+        Generates a heatmap of enrichment ratios per positions across ribosome sites.
 
         This method visualizes the enrichment ratios as a heatmap, where the rows correspond
-        to different ribosome positions and the columns represent amino acids.
+        to different ribosome positions and the columns represent amino acids / nucleotides.
 
         Parameters
         ----------
         pos : tuple, optional
             Ribosome positions for which to compute and visualize enrichment ratios (e.g., `('-2', 'E', 'P', 'A')`).
-        how : str, optional
-            If 'aax' is provided, sequences with stop codons in the peptide are excluded. Default is 'aax'.
-        col : str, optional
-            The DataFrame column to utilize for enrichment visualization. Defaults to 'auto'.
+        how: str, optional
+            Type of inverse toeprints to analyze (see :meth:`Replicate.load_data`).
         cmap : str or matplotlib.colors.Colormap, optional
             The colormap to use for the heatmap visualization. Defaults to 'vlag'.
         vmax : float, optional
@@ -1350,7 +1348,7 @@ class Sample:
         ax : matplotlib.axes.Axes, optional
             Pre-existing axes for the plot. A new figure and axes are created if not provided.
         **kwargs : dict, optional
-            Additional parameters to customize the enrichment computation or filtering.
+            Additional parameters passed to :meth:`get_counts_ratio_pos` to customize the enrichment computation or filtering.
 
         Returns
         -------
@@ -1359,12 +1357,14 @@ class Sample:
 
         Notes
         -----
-        - The rows of the heatmap correspond to ribosome positions, while the columns represent amino acids.
-        - Tick labels are styled using the `aa_colors` dictionary to match the biochemical categories of amino acids.
-        - Enrichment ratios are automatically log2-transformed by default.
+        - For amino-acids, the labels are colored to group them by biochemical properties.
+        - Enrichment ratios are log2-transformed by default.
         """
 
-        df_single = self.get_counts_ratio_pos(pos=pos, **kwargs)
+        df_single = self.get_counts_ratio_pos(pos=pos, how=how, **kwargs)
+
+        if transform is not None:
+            df_single = transform(df_single)
 
         if not vmax:
             vmax = np.nanmax(df_single.abs())
@@ -1397,18 +1397,19 @@ class Sample:
         for s in ax.spines.values():
             s.set_visible(True)
 
-        for a in [ax.xaxis]:
-            for t in a.get_ticklabels():
-                aa = t.get_text()
-                bbox = dict(
-                    boxstyle='square',
-                    pad=0.15,
-                    ec='none',
-                    fc=utils.aa_colors[aa],
-                    alpha=0.5,
-                )
-                t.set_bbox(bbox)
-                t.get_bbox_patch().set_width(5)
+        if how.startswith('aa'):
+            for a in [ax.xaxis]:
+                for t in a.get_ticklabels():
+                    aa = t.get_text()
+                    bbox = dict(
+                        boxstyle='square',
+                        pad=0.15,
+                        ec='none',
+                        fc=utils.aa_colors[aa],
+                        alpha=0.5,
+                    )
+                    t.set_bbox(bbox)
+                    t.get_bbox_patch().set_width(5)
 
         ax.set_yticklabels(
             ax.get_yticklabels(),
@@ -1423,9 +1424,7 @@ class Sample:
             fontdict={'fontfamily': 'monospace'},
         )
         fig.canvas.draw()
-        [t.get_bbox_patch().set_width(5) for t in ax.get_xticklabels()]
 
-        # fig.tight_layout()
         return ax
 
     def volcano(
