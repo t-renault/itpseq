@@ -163,10 +163,18 @@ def _files_or_dir(ctx, param, value):
     callback=_files_or_dir,
 )
 @click.option(
-    '-c', '--codons', is_flag=True, help='Group the nucleotides by codon'
+    '--codons/--no-codons',
+    '-c/-C',
+    default=False,
+    help='Group the nucleotides by codon',
+    show_default=True,
 )
 @click.option(
-    '-a', '--aa', is_flag=True, help='Display the translated peptide'
+    '--aa/--no-aa',
+    '-a/-A',
+    default=False,
+    help='Display the translated peptide',
+    show_default=True,
 )
 @click.option(
     '-r',

@@ -7,7 +7,7 @@ __version__ = '0.0.1a19'
 
 _LAZY_MODULES = {
     '.core': ['DataSet', 'Sample', 'Replicate'],
-    '.parsing': ['parse', 'parse_all'],
+    '.parsing': ['parse', 'parse_all', 'format_sequences'],
     '.utils': ['itp_schematic'],
 }
 

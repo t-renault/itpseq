@@ -18,7 +18,7 @@ from natsort import natsort_key
 from pandas.api.extensions import no_default
 
 from . import config, plotting, processing, utils
-from .parsing import codon_table
+from .parsing import codon_table, format_sequences
 
 IPYTHON = False
 try:
@@ -237,6 +237,42 @@ class Replicate:
             _cache_dir=self._cache_dir,
             _cache_prefix=self.name,
             **kwargs,
+        )
+
+    def format_sequences(
+        self, codons=True, aa=True, repeat_header=False, out=None, limit=10
+    ):
+        """
+        Formats a nucleotide inverse toeprint file in a custom human-readable format
+
+        This uses :func:`parsing.format_sequences`.
+
+        Parameters
+        ----------
+
+        codons : bool
+            If True, splits the coding sequence into codons
+        aa: bool
+            If True, interleave the codons below each nucleotide sequence
+            Adds the length of the peptide after the amino-acids.
+        repeat_header : bool or int:
+            If given an integer, repeats the header every <repeat_sequence> reads.
+        out : str or Path
+            If defined, write the output to this file. If None, write to stdout.
+        limit: int or None
+            Limit the number of reads to process
+
+        See Also
+        --------
+        parsing.format_sequences
+        """
+        return format_sequences(
+            self.filename,
+            codons=codons,
+            aa=aa,
+            repeat_header=repeat_header,
+            out=out,
+            limit=limit,
         )
 
     @lru_cache
@@ -557,6 +593,18 @@ class Sample:
         """
         for replicate in self.replicates:
             replicate.load_data(how=how)
+
+    def format_sequences(self, **kwargs):
+        """
+        Display formatted inverse-toeprints for all replicates
+
+        See meth:`Replicate.format_sequences` for more information.
+        """
+        if 'out' in kwargs:
+            raise ValueError('Cannot specify "out"')
+        for replicate in self.replicates:
+            print(f'# {replicate.name}')
+            replicate.format_sequences(**kwargs)
 
     def infos(self, html=False):
         """

@@ -215,6 +215,43 @@ class TestSample:
             'MAX_LEN',
         ]
 
+    def test_format_sequences(self, capsys):
+        self.tcx_data._clear_cache(force=True)
+        self.tcx_data['nnn15.tcx'].format_sequences(limit=1)
+        captured = capsys.readouterr()
+        assert captured.out.splitlines() == [
+            '# nnn15.tcx.1',
+            '#                           [E] [P] [A]               ',
+            '                                ATG TCA cgtcaaacccaagt',
+            '                                 M   S  2',
+            '# nnn15.tcx.2',
+            '#                           [E] [P] [A]               ',
+            '                    ATG CAC ATA ACC TAA tgaatcctaactc ',
+            '                     M   H   I   T   *  5',
+            '# nnn15.tcx.3',
+            '#                           [E] [P] [A]               ',
+            '                            ATG AAT ACG tattgtcaaccct ',
+            '                             M   N   T  3',
+        ]
+        self.tcx_data['nnn15.tcx'].format_sequences(
+            codons=False, aa=False, limit=2
+        )
+        captured = capsys.readouterr()
+        assert captured.out.splitlines() == [
+            '# nnn15.tcx.1',
+            '#                    [E][P][A]               ',
+            '                        ATGTCA cgtcaaacccaagt',
+            '   ATGTTTATCGTGAGAGGATGGCAAGTA ccaaaatatatcta',
+            '# nnn15.tcx.2',
+            '#                    [E][P][A]               ',
+            '               ATGCACATAACCTAA tgaatcctaactc ',
+            '                  ATGAACTTGTCT aacgtgaacagca ',
+            '# nnn15.tcx.3',
+            '#                    [E][P][A]               ',
+            '                     ATGAATACG tattgtcaaccct ',
+            '                        ATGGAC caagagctaacgta',
+        ]
+
     def test_itp_len(self):
         self.tcx_data._clear_cache(force=True)
         df = self.tcx_data['nnn15.tcx'].itp_len
