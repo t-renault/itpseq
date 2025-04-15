@@ -29,13 +29,13 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -e .  # use current repo
-        pip install pytest pytest-cov
+        pip install pytest pytest-cov pytest-xdist
     
     - name: Run tests
       id: parallel_unit_test
       continue-on-error: true
       run: |
-        pytest --cov --cov-branch --cov-report=xml --cov-report=term
+        pytest -n auto --dist=loadgroup --cov --cov-branch --cov-report=xml --cov-report=term
 
     - name: Run tests without parallel execution (fallback)
       if: ${{ steps.parallel_test.outcome == 'failure' }}

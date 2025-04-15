@@ -182,6 +182,7 @@ class TestDataSet:
         assert df.sum().sum() == 551145
 
 
+@pytest.mark.xdist_group(name='sample_analysis')
 class TestSample:
     @pytest.fixture(scope='class', autouse=True)
     def setup_class(self, request, data_dir):
