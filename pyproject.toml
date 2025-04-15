@@ -34,7 +34,8 @@ dependencies = [
     'logomaker',
     'Jinja2',
     'weasyprint',
-    'click',
+    'rich-click',
+    'rich',
     'dna_features_viewer',
 ]
 dynamic = ['version']

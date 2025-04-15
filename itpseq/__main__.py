@@ -6,9 +6,13 @@ import sys
 import webbrowser
 from pathlib import Path
 
-import click
+import rich
+import rich_click as click
+from rich.console import Console
 
 from . import __version__
+
+click.rich_click.MAX_WIDTH = 80
 
 
 def arg_range(ctx, param, value):
@@ -38,7 +42,7 @@ class CustomIntRange(click.IntRange):
         return f'<{self.min}-{self.max}>'
 
 
-class NaturalOrderGroup(click.Group):
+class NaturalOrderGroup(click.RichGroup):
     """
     Class to keep the commands in the order defined in the source code
 
@@ -79,7 +83,7 @@ def cli(ctx):
         click.echo(ctx.get_help())
 
 
-@cli.command()
+@cli.command(cls=click.RichCommand)
 def help():
     """Open the HTML documentation in the default web browser."""
 
@@ -96,6 +100,7 @@ def help():
 
 
 @cli.command(
+    cls=click.RichCommand,
     context_settings={'show_default': True},
     # context_settings={'ignore_unknown_options': True}, add_help_option=False
 )
@@ -155,7 +160,7 @@ def parse(
     """
     import datetime
 
-    from pprint import pprint
+    import rich.pretty
 
     from .parsing import parse_all
 
@@ -165,7 +170,7 @@ def parse(
     kwargs['max_seq_len'] = max_seq_len * 3 or None
 
     # display parameters passed to parse_all
-    pprint(kwargs)
+    rich.pretty.pprint(kwargs)
 
     click.echo(datetime.datetime.now().strftime('Start time: %Y-%m-%d %H:%M'))
     parse_all(
@@ -175,7 +180,7 @@ def parse(
     click.echo(datetime.datetime.now().strftime('End time: %Y-%m-%d %H:%M'))
 
 
-@cli.command(context_settings={'show_default': True})
+@cli.command(cls=click.RichCommand, context_settings={'show_default': True})
 @click.argument(
     'directory', type=click.Path(exists=True, file_okay=False, dir_okay=True)
 )
@@ -247,7 +252,7 @@ def _files_or_dir(ctx, param, value):
     )
 
 
-@cli.command()
+@cli.command(cls=click.RichCommand)
 @click.argument(
     'files_or_dir',
     nargs=-1,
