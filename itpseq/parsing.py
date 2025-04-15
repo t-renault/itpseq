@@ -592,7 +592,7 @@ def format_sequences(
 
     Export the output to a file
 
-    >>> format_sequences('nnn15_noa1.nuc.itp.txt', out)
+    >>> format_sequences('nnn15_noa1.nuc.itp.txt', out='nnn15_noa1_formatted.txt')
     """
 
     SUFFIX = f'.nuc.{config.ITP_FILE_SUFFIX}.txt'

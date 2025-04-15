@@ -987,7 +987,14 @@ class Sample:
         Notes
         -----
         This method should be used with a filter to avoid producing extremely large graphs.
-        For example, for 3 codon positions,
+
+        Examples
+        --------
+        Create violin plots for -2:P positions with Q/K fixed in the E/P sites.
+
+         >>> sample.codon_violin(pos='-2:P', motif='.QK')
+
+        .. image:: /_static/sample_codon_violin.png
         """
         from matplotlib.collections import LineCollection, PolyCollection
 
@@ -1368,6 +1375,20 @@ class Sample:
         -----
         - For amino-acids, the labels are colored to group them by biochemical properties.
         - Enrichment ratios are log2-transformed by default.
+
+        Examples
+        --------
+        Create the default heatmap per position for -2/E/P/A:
+
+         >>> sample.hmap_pos()
+
+        .. image:: /_static/sample_hmap_pos.png
+
+        Create the default nucleotide heatmap per position for -6:5 (equivalent to -2/E/P/A amino-acids):
+
+         >>> sample.hmap_pos(how='nuc')
+
+        .. image:: /_static/sample_hmap_pos_nuc.png
         """
 
         df_single = self.get_counts_ratio_pos(pos=pos, how=how, **kwargs)

@@ -24,8 +24,10 @@ Methods
    Sample.get_counts_ratio
    Sample.get_counts_ratio_pos
    Sample.DE
+   Sample.codon_violin
    Sample.hmap
    Sample.hmap_grid
+   Sample.hmap_pos
    Sample.volcano
    Sample.subset_logo
    Sample.logo
