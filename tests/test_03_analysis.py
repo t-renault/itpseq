@@ -119,6 +119,21 @@ class TestFunctions:
     def test_ranges(self, inpt, params, expected):
         assert processing.ranges(inpt, **params) == expected
 
+    @pytest.mark.parametrize(
+        'inpt, expected',
+        [
+            (-2, '-6:-4'),
+            ('-2', '-6:-4'),
+            ('E', '-3:-1'),
+            ('P', '0:2'),
+            ('A', '3:5'),
+            ('-2:P', '-6:2'),
+            ('-2:E,A', '-6:-1,3:5'),
+        ],
+    )
+    def test_aa2nuc_pos(self, inpt, expected):
+        assert processing.aa2nuc_pos(inpt) == expected
+
 
 class TestDataSet:
     @pytest.fixture(scope='class', autouse=True)

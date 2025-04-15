@@ -184,6 +184,29 @@ def ranges(s='', how='aax'):
     ]
 
 
+def aa2nuc_pos(pos):
+    """
+    Converts an amino-acid position to nucleotide position.
+
+    Example: '-2:P' -> '-6:2'
+    """
+    starts = {'E': -1, 'P': 0, 'A': 1}
+    if isinstance(pos, int):
+        return f'{pos*3}:{pos*3+2}'
+    else:
+        out = []
+        for s in pos.split(','):
+            if ':' in s:
+                a, b = s.split(':')
+                a = int(starts.get(a, a)) * 3
+                b = int(starts.get(b, b)) * 3 + 2
+            else:
+                a = int(starts.get(s, s)) * 3
+                b = a + 2
+            out.append(f'{a}:{b}')
+        return ','.join(out)
+
+
 def get_ribosome_site(pos, short=False):
     """
     Maps a position relative to the ribosome to its corresponding ribosomal site.

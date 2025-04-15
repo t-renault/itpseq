@@ -961,6 +961,8 @@ class Sample:
 
         Parameters
         ----------
+        pos: str
+            Position to use to compute the :meth:`DE` (in amino-acid positions).
         motif : str
             Regex used to filter the data by protein motif.
             This parameter is strongly recommended for motifs of more than one amino-acid.
@@ -981,6 +983,11 @@ class Sample:
             Parameters passed to `violinplot`.
         kwargs : dict, optional
             Parameters passed to :meth:`DE`.
+
+        Notes
+        -----
+        This method should be used with a filter to avoid producing extremely large graphs.
+        For example, for 3 codon positions,
         """
         from matplotlib.collections import LineCollection, PolyCollection
 
@@ -990,7 +997,9 @@ class Sample:
                 """Ignoring "how" passed as keyword argument: how='nuc' by default."""
             )
 
-        df = self.DE(pos, how='nuc', translate=True, **kwargs)
+        df = self.DE(
+            processing.aa2nuc_pos(pos), how='nuc', translate=True, **kwargs
+        )
         if query is not None:
             if isinstance(query, str):
                 df = df.query(query)
