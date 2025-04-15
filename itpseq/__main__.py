@@ -91,7 +91,7 @@ def parse(args):
     '--ref-labels',
     type=str,
     default='noa',
-    help='Reference labels. Default is "noa".',
+    help='Reference labels.',
 )
 @click.option(
     '--file-pattern',
@@ -111,7 +111,7 @@ def parse(args):
     '--output',
     type=click.Path(),
     default='itpseq_report.pdf',
-    help='Output file for the report. Defaults to "itpseq_report.pdf".',
+    help='Output file for the report.',
 )
 def report(directory, keys, ref_labels, file_pattern, output):
     """
