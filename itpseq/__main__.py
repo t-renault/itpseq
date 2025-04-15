@@ -54,16 +54,23 @@ class NaturalOrderGroup(click.RichGroup):
 
 
 def _print_logo():
-    click.echo(
+    VERSION = f'version: {__version__}'.center(54)
+    console = Console(style='')
+    console.print(
         f"""
-          ▄ ▗▄▄▄▖▗▄▄▖    ▗▄▄▖▗▞▀▚▖ ▄▄▄▄             ▄▄▄▄
-          ▄   █  ▐▌ ▐▌  ▐▌   ▐▛▀▀▘█   █            ▀█████▄
-        ▄ █   █  ▐▛▀▘ ▄▄ ▝▀▚▖▝▚▄▄▖▀▄▄▄█ ▄▀▀▄    ▄▀▀ ▄█████
-    ▀▄▄▀  █   █  ▐▌     ▗▄▄▞▘         █     ▀▄▄▀   ▀████▀
-                                      ▀
-                 Thank you for using itpseq!
-                   version: {__version__}
-    """
+           ▄ ▗▄▄▄▖▗▄▄▖    ▗▄▄▖▗▞▀▚▖ ▄▄▄▄            ^▄▄▄▄$
+           ▄   █  ▐▌ ▐▌  ▐▌   ▐▛▀▀▘█   █           ^▀█████▄$
+    £    ▄$█   █  ▐▛▀▘£▄▄$▝▀▚▖▝▚▄▄▖▀▄▄▄█£▄▀▀▄    ▄▀▀^▄█████$
+    £▀▄▄▀ $█   █  ▐▌     ▗▄▄▞▘         █£    ▀▄▄▀  ^▀████▀$
+                                       ▀
+                  Thank you for using itpseq!
+                 https://itpseq.readthedocs.io
+     {                   VERSION                           }
+    """.replace(
+            '^', ' [grey70]'
+        )
+        .replace('£', ' [grey50]')
+        .replace('$', ' [default]')
     )
 
 
