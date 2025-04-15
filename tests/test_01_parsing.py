@@ -1,6 +1,6 @@
 import filecmp
+from collections import Counter
 from itertools import product
-from pathlib import Path
 
 import itpseq.parsing
 import pytest
@@ -116,3 +116,32 @@ class TestParse:
             '#                    [E][P][A]               ',
             '                     ATGAATACG tattgtcaaccct ',
         ]
+
+    @pytest.mark.parametrize(
+        'inpt, params, expected',
+        [
+            (Counter(), {}, ''),
+            (
+                Counter({0: 100, 10: 50, 20: 200}),
+                {},
+                '▄_________▂_________█\n╹         ╹\n0        10',
+            ),
+            (
+                Counter({0: 100, 10: 50, 20: 200}),
+                {'ticks': 5},
+                '▄_________▂_________█\n╹    ╹    ╹    ╹\n0    5   10   15',
+            ),
+            (
+                Counter({0: 100, 10: 50, 20: 200}),
+                {'wrap': 10, 'ticks': 5},
+                '▄_________\n╹    ╹\n0    5\n▂_________\n╹    ╹\n10   15',
+            ),
+            (
+                Counter({0: 100, 10: 50, 20: 200}),
+                {'vmax': 100},
+                '█_________▄_________▒\n╹         ╹\n0        10',
+            ),
+        ],
+    )
+    def test_simple_graph(self, inpt, params, expected):
+        assert itpseq.parsing.simple_graph(inpt, **params) == expected

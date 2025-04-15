@@ -299,9 +299,11 @@ def simple_graph(
     """Generate an ASCII bar graph from a Counter"""
     import math
 
+    if not counter:
+        return ''
     bars = ' _▁▂▃▄▅▆▇█'[1:]
     max_x = max(counter)
-    y_values = np.array([counter[i] for i in range(max_x)])
+    y_values = np.array([counter[i] for i in range(max_x + 1)])
     max_y = y_values.max()
 
     # floating vmin/vmax = relative to max_y
