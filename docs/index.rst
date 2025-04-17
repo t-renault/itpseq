@@ -21,7 +21,7 @@ Quickstart:
  - :ref:`whatis_itpseq`
  - :ref:`Install<Installation>` from PyPi with ``pip install -U itpseq``
  - :ref:`Command line<command_line>` help: ``itpseq --help``
- - As a Python module: ``import itpseq``
+ - As a :ref:`Python module<api>`: ``import itpseq``
 
 .. grid:: 1 2 2 3
     :gutter: 4
@@ -64,6 +64,23 @@ Quickstart:
 
             To the reference guide
 
+    .. grid-item-card::  Published studies
+        :img-top: _static/icon_case_studies.svg
+        :class-card: intro-card
+        :shadow: md
+
+        Detailed examples of iTP-Seq use from published studies.
+
+        +++
+
+        .. button-ref:: case_studies
+            :ref-type: ref
+            :click-parent:
+            :color: secondary
+            :expand:
+
+            To the case studies
+
 
 .. toctree::
     :maxdepth: 2
@@ -72,4 +89,5 @@ Quickstart:
 
     user_guide/index
     api/index
+    case_studies/index
 
