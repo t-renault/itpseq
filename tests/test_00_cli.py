@@ -8,6 +8,18 @@ from click.testing import CliRunner
 
 
 class TestCLI:
+    @pytest.mark.parametrize(
+        'inpt, expected',
+        [
+            ('1', (1, 1)),
+            ('1-', (1, 0)),
+            ('-10', (0, 10)),
+            ('1-10', (1, 10)),
+        ],
+    )
+    def test_cli_arg_range(self, inpt, expected):
+        assert cli.arg_range(None, None, inpt) == expected
+
     def test_cli_parse(self, data_dir, tmp_outdir):
         path = data_dir / 'tcx_small_test'
         test_files = list(path.glob('*.fastq'))
@@ -63,6 +75,22 @@ class TestCLI:
             res_path, tmp_outdir, files, shallow=False
         )
         assert nok == [] and err == []
+
+    def test_cli_format(self, data_dir):
+        path = data_dir / 'tcx_small_test'
+        runner = CliRunner()
+        result = runner.invoke(
+            cli.format, ['--limit', '3', str(path / 'nnn15_noa1.nuc.itp.txt')]
+        )
+        assert (
+            result.exit_code == 0
+        ), f'"format" failed with error: {result.output}'
+        assert result.stdout.splitlines() == [
+            '#                    [E][P][A]               ',
+            '                     ATGGGACGC cccgcagtatct  ',
+            '      ATGAGTTACAAAGGCAACTCGGAA caggtagcatatc ',
+            '                     ATGGAAGAG gcccatgccattcc',
+        ]
 
     def test_cli_report(self, data_dir, tmp_outdir):
         path = data_dir / 'tcx_small_test'

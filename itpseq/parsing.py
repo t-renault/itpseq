@@ -617,7 +617,7 @@ def format_sequences(
             else:
                 out.mkdir(parents=True)
         for f in filename:
-            if out is None:
+            if out is None and len(filename) > 1:
                 # if no output dir, display the input file name before each output
                 print(f'{f}')
             format_sequences(
