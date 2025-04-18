@@ -68,8 +68,8 @@ than "sample"):
   data.samples
   data.replicates
 
-This detection is due to the default regular expression ``file_pattern``:
-``(?P<lib_type>[^_]+)_(?P<sample>[^_\\d]+)(?P<replicate>\\d+)``.
+This detection is due to the default `regular expression <https://en.wikipedia.org/wiki/Regular_expression>`_ ``file_pattern``:
+``(?P<lib_type>[^_]+)_(?P<sample>[^_\d]+)(?P<replicate>\d+)``.
 
 The ``lib_type`` and ``sample`` keys are automatically used to group the
 Replicates into a Sample and to create the Sample name.
@@ -102,13 +102,21 @@ a few different concentrations for the drugs (10, 20, 30µM):
    drugA2_30µM.itp.json  drugB2_10µM.itp.json  noa2.itp.json
    drugA3_10µM.itp.json  drugB2_20µM.itp.json  noa3.itp.json
 
-The different parts of the filename can be defined through ``file_pattern``:
+As explained above, the different parts of the filename can be defined by passing a `regular expression <https://en.wikipedia.org/wiki/Regular_expression>`_ to ``file_pattern``.
 
-``(?P<sample>[^_]+)(?P<replicate>\\d+)(_(?P<concentration>\\d+µM))?``
+Each ``(?P<name>...)`` group associates the captured value to the associated name, which can later be used to group the samples.
+Here we want to capture the drug name, the replicate number, and the concentration (if any).
+ 
+We can therefore define ``file_pattern`` as:
 
-* ``(?P<sample>[^_]+)``: match the sample name (anything but ``_``)
-* ``(?P<replicate>\d+)``: match digits defining the replicate number
-* ``(_(?P<concentration>\d+µM))?``: optionally match ``_`` followed by a concentration
+``(?P<sample>[^_\d]+)(?P<replicate>\d+)(_(?P<concentration>\d+µM))?``
+
+* ``(?P<sample>[^_\d]+)``: matches the sample name (anything but ``_`` or digits)
+* ``(?P<replicate>\d+)``: matches digits defining the replicate number
+* ``(_(?P<concentration>\d+µM))?``: optionally matches ``_`` followed by a concentration
+
+More information on the syntax of regular expressions can be found in the
+`Python documentation <https://docs.python.org/3/library/re.html#regular-expression-syntax>`_.
 
 .. ipython:: python
    :suppress:
@@ -118,9 +126,16 @@ The different parts of the filename can be defined through ``file_pattern``:
 .. ipython:: python
 
   from itpseq import DataSet
-  data = DataSet('.', file_pattern=r'(?P<sample>[^_]+)(?P<replicate>\d+)(_(?P<concentration>\d+µM))?')
+  data = DataSet('.', file_pattern=r'(?P<sample>[^_\d]+)(?P<replicate>\d+)(_(?P<concentration>\d+µM))?')
   data
   data.samples
+
+Labels are automatically assigned to each sample:
+
+.. ipython:: python
+
+  data['drugA.10µM'].labels
+  data['noa'].labels
 
 It is also possible to define the keys that will be used to assign the
 replicate. For instance, using ``ref_labels={'sample': 'drugA'}`` would define
