@@ -1,6 +1,7 @@
 import filecmp
 from itertools import product
 from pathlib import Path
+from unittest.mock import Mock
 
 import itpseq.__main__ as cli
 import pytest
@@ -100,16 +101,19 @@ class TestCLI:
             result.exit_code == 0
         ), f'"parse" failed with error: {result.output}'
 
-    def test_cli_help(self):
+    def test_cli_help(self, monkeypatch):
         runner = CliRunner()
         result = runner.invoke(cli.help, ['--help'])
         assert (
             result.exit_code == 0
         ), f'"help --help" failed with error: {result.output}'
+        mock_open = Mock()
+        monkeypatch.setattr('webbrowser.open', mock_open)
         result = runner.invoke(cli.help)
         assert (
             result.exit_code == 0
         ), f'"help" failed with error: {result.output}'
+        mock_open.assert_called_once()
 
     def test_cli_completion(self):
         runner = CliRunner()
