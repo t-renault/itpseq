@@ -9,7 +9,6 @@ on:
 
 jobs:
   test:
-    continue-on-error: true
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -34,14 +33,16 @@ jobs:
     - name: Run tests
       id: parallel_unit_test
       continue-on-error: true
+      timeout-minutes: 10
       run: |
         pytest -n auto --dist=loadgroup --cov --cov-branch --cov-report=xml --cov-report=term
 
     - name: Run tests without parallel execution (fallback)
-      if: ${{ steps.parallel_test.outcome == 'failure' }}
+      if: ${{ steps.parallel_unit_test.outcome == 'failure' }}
+      timeout-minutes: 20
       run: |
         echo "Parallel test execution failed, trying without parallelism..."
-        pytest -xvs --cov --cov-branch --cov-report=xml --cov-report=term
+        pytest -xv --cov --cov-branch --cov-report=xml --cov-report=term
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5
