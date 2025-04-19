@@ -1,6 +1,8 @@
 import filecmp
+import sys
 from collections import Counter
 from itertools import product
+from unittest.mock import patch
 
 import itpseq.parsing
 import pytest
@@ -46,6 +48,38 @@ class TestParse:
             tmp_outdir / 'nnn15_noa1.nuc.itp.txt',
             shallow=True,
         )
+
+    @pytest.mark.parametrize(
+        'file_prefix, params',
+        [
+            ('nnn15_noa1', ()),
+            ('nnn15_noa2', ('-s', '1-10')),
+        ],
+    )
+    def test_legacy_parse_cli(self, data_dir, tmp_outdir, file_prefix, params):
+        path = data_dir / 'tcx_small_test'
+        input_file = str(path / f'{file_prefix}.assembled.fastq')
+        expected_file_patterns = [
+            f'{file_prefix}{suffix}'
+            for suffix in (
+                '.aa.itp.txt',
+                '.nuc.itp.txt',
+                '.itp.log',
+                '.itp.json',
+            )
+        ]
+        test_args = ['itpseq', input_file, '-o', str(tmp_outdir), *params]
+        with patch.object(sys, 'argv', test_args):
+            result = itpseq.parsing.main(out=True)
+
+        ok, nok, err = filecmp.cmpfiles(
+            path, tmp_outdir, expected_file_patterns, shallow=False
+        )
+
+        assert (
+            nok == [] and err == []
+        ), f"Files don't match: nok={nok}, err={err}"
+        assert result is not None
 
     def test_parse_limit_max_seq_len(self, data_dir, tmp_outdir):
         path = data_dir / 'tcx_small_test'

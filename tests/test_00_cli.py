@@ -21,6 +21,11 @@ class TestCLI:
     def test_cli_arg_range(self, inpt, expected):
         assert cli.arg_range(None, None, inpt) == expected
 
+    def test_print_logo(self, capsys):
+        cli._print_logo()
+        captured = capsys.readouterr()
+        assert 'version:' in captured.out
+
     def test_cli_parse(self, data_dir, tmp_outdir):
         path = data_dir / 'tcx_small_test'
         test_files = list(path.glob('*.fastq'))
