@@ -1959,12 +1959,22 @@ class Sample:
         )
 
     def itp_len_plot(
-        self, ax=None, min_codon=0, max_codon=10, limit=100, norm=False
+        self,
+        ax=None,
+        min_codon=0,
+        max_codon=10,
+        limit=100,
+        norm=True,
+        kind='line',
+        row=None,
+        col=None,
+        plt_kwargs=dict(height=2, aspect=3),
+        **kwargs,
     ):
         """
-        Generates a line plot of inverse-toeprint (ITP) counts per length.
+        Generates a plot of inverse-toeprint (ITP) counts per length.
 
-        This method uses the output of `itp_len` to create a line plot showing the counts of
+        This method uses the output of `itp_len` to create a plot showing the counts of
         inverse-toeprints across lengths for each replicate. Optionally, counts can be normalized
         (per million reads), and the plotted lengths can be limited.
 
@@ -1979,12 +1989,21 @@ class Sample:
         limit : int, optional
             The maximum length to include in the plot. Defaults to 100.
         norm : bool, optional
-            Whether to normalize counts to reads per million. Defaults to False.
+            Whether to normalize counts to reads per million. Defaults to True.
+        kind : str
+            Type of plot to use. Defaults to 'line'.
+        row: str, optional
+            attribute to use as rows in the FacetGrid
+        col: str, optional
+            attribute to use as columns in the FacetGrid
+        plt_kwargs:
+            parameters used in the FacetGrid if col/row is used.
+        kwargs: optional
+            Additional parameters to pass to the seaborn plotting function.
 
         Returns
         -------
-        matplotlib.axes.Axes
-            The axes object containing the plotted lineplot.
+        matplotlib.axes.Axes or seaborn.axisgrid.FacetGrid
 
         See Also
         --------
@@ -1998,9 +2017,17 @@ class Sample:
 
         Examples
         --------
-         >>> sample.itp_len_plot()
+        Create a line plot with all replicates:
+
+         >>> sample.itp_len_plot(norm=False)
 
         .. image:: /_static/sample_itp_len_plot.png
+
+        Create a bar plot per replicate:
+
+         >>> sample.itp_len_plot(kind='bar', row='replicate')
+
+        .. image:: /_static/sample_itp_len_plot_bar.png
         """
 
         df_len = self.itp_len.copy()
@@ -2024,15 +2051,49 @@ class Sample:
                 .div(1_000_000)
             )
 
+        is_cat = kind not in {'line', 'scatter'}
+
+        if is_cat:
+            hue = names['length']
+            extra_kwargs = dict(
+                native_scale=True, palette=['#e41a1c', '#377eb8', '#4daf4a']
+            )
+        else:
+            hue = 'replicate'
+            extra_kwargs = {}
+
+        if row or col:
+            g = (sns.catplot if is_cat else sns.relplot)(
+                data=df_len.rename(columns=names),
+                x=names['length'],
+                y=names['count'],
+                hue=hue,
+                row=row,
+                col=col,
+                kind=kind,
+                **(extra_kwargs | plt_kwargs),
+            )
+            for ax_ in g.axes.flat:
+                processing.itp_len_add_positions(
+                    ax_, min_codon=min_codon, max_codon=max_codon
+                )
+            return g
+
         if not ax:
             _, ax = plt.subplots()
 
-        sns.lineplot(
+        try:
+            plotter = getattr(sns, f'{kind}plot')
+        except AttributeError:
+            ValueError(f'{kind} is not a valid plotting method.')
+
+        plotter(
             data=df_len.rename(columns=names),
             x=names['length'],
             y=names['count'],
-            hue='replicate',
+            hue=hue,
             ax=ax,
+            **(extra_kwargs | kwargs),
         )
         processing.itp_len_add_positions(
             ax, min_codon=min_codon, max_codon=max_codon
@@ -2615,7 +2676,8 @@ class DataSet:
         limit=100,
         norm=True,
         hue='auto',
-        plt_kwargs=dict(kind='line', height=2, aspect=3),
+        kind='line',
+        plt_kwargs=dict(height=2, aspect=3),
     ):
         """
         Generates a line plot of inverse-toeprint (ITP) counts per length.
@@ -2639,9 +2701,12 @@ class DataSet:
         limit : int, optional
             The maximum length to include in the plot. Defaults to 100.
         norm : bool, optional
-            Whether to normalize counts to reads per million. Defaults to False.
+            Whether to normalize counts to reads per million. Defaults to True.
         hue: str, optional
             Parameter to use a hue in the FacetGrid (by default 'replicate').
+            This parameter is only considered if kind is 'line' or 'scatter'.
+        kind: str
+            Type of representation for the plot. Defaults to 'line'.
         plt_kwargs: dict, optional
             parameters used in the FacetGrid if col/row is used.
 
@@ -2672,6 +2737,13 @@ class DataSet:
          >>> dataset.itp_len_plot(row='sample')
 
         .. image:: /_static/dataset_itp_len_plot_row.png
+
+        Create bar plots with sample as columns and replicates as rows:
+
+         >>> dataset.itp_len_plot(kind='bar', col='sample', row='replicate',
+         ...                      norm=False, limit=80)
+
+        .. image:: /_static/dataset_itp_len_plot_bar_row_col.png
         """
 
         df_len = pd.concat(
@@ -2697,15 +2769,35 @@ class DataSet:
                 .div(1_000_000)
             )
 
+        is_relplot = kind in {'line', 'scatter'}
+
+        if is_relplot:
+            if hue == 'auto':
+                if col or row:
+                    hue = 'replicate'
+                else:
+                    hue = 'sample'
+        else:
+            hue = names['length']
+
+        extra_kwargs = (
+            {}
+            if is_relplot
+            else dict(
+                native_scale=True, palette=['#e41a1c', '#377eb8', '#4daf4a']
+            )
+        )
+
         if col or row:
-            g = sns.relplot(
+            g = (sns.relplot if is_relplot else sns.catplot)(
                 data=df_len.rename(columns=names),
                 col=col,
                 row=row,
                 x=names['length'],
                 y=names['count'],
-                hue='replicate' if hue == 'auto' else hue,
-                **plt_kwargs,
+                hue=hue,
+                kind=kind,
+                **(extra_kwargs | plt_kwargs),
             )
             for ax_ in g.axes.flat:
                 processing.itp_len_add_positions(
@@ -2716,12 +2808,24 @@ class DataSet:
         if not ax:
             _, ax = plt.subplots()
 
-        sns.lineplot(
+        try:
+            plotter = getattr(sns, f'{kind}plot')
+        except AttributeError:
+            ValueError(f'{kind} is not a valid plotting method.')
+
+        # Warn user that categorical plots will aggregate the samples
+        if not is_relplot:
+            warnings.warn(
+                f"""Plotting a {kind}plot without col/row, all samples will be aggregated. Consider using row='sample'."""
+            )
+
+        plotter(
             data=df_len.rename(columns=names),
             x=names['length'],
             y=names['count'],
-            hue='sample' if hue == 'auto' else hue,
+            hue=hue,
             ax=ax,
+            **extra_kwargs,
         )
         processing.itp_len_add_positions(
             ax, min_codon=min_codon, max_codon=max_codon

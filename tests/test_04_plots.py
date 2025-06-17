@@ -19,6 +19,14 @@ class TestDataSetPlots:
     def test_itp_len_plot_row_sample(self):
         self.tcx_data.itp_len_plot(row='sample')
 
+    def test_itp_len_plot_bar_row_sample(self):
+        self.tcx_data.itp_len_plot(kind='bar', row='sample')
+
+    def test_itp_len_plot_bar_row_sample(self):
+        self.tcx_data.itp_len_plot(
+            kind='bar', row='sample', col='sample', limit=61, norm=False
+        )
+
 
 class TestSamplePlots:
     @pytest.fixture(scope='class', autouse=True)
@@ -30,6 +38,12 @@ class TestSamplePlots:
 
     def test_itp_len_plot(self):
         self.tcx.itp_len_plot()
+
+    def test_itp_len_plot_bar(self):
+        self.tcx.itp_len_plot(kind='bar')
+
+    def test_itp_len_plot_bar_row_replicate(self):
+        self.tcx.itp_len_plot(kind='bar', row='replicate')
 
     def test_hmap_EP(self):
         self.tcx.hmap('E', 'P')
