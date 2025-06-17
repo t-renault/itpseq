@@ -289,7 +289,7 @@ def compute_counts(seqs_series, pos, how='aax'):
 def itp_len_add_positions(ax, min_codon=0, max_codon=10):
     """Decorates the ax with grey bands for each codon between min_codon and max_codon"""
     greys = ['#808080', '#CACACA']
-    start = 18
+    start = 18 - 0.5
     ax.axvline(start + 3 * min_codon, color='k', alpha=0.1, zorder=-1)
     for i in range(min_codon, max_codon):
         ax.axvspan(
