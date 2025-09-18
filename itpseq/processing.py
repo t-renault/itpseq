@@ -261,7 +261,7 @@ def get_ribosome_site(pos, short=False):
 @fcache
 def compute_counts(seqs_series, pos, how='aax'):
     """Computes the counts of each character per position in the input Series"""
-    if not pos:
+    if pos is None:
         return (
             seqs_series.str.split('(?<=.)(?=.)', expand=True)
             .apply(lambda x: x.value_counts())
